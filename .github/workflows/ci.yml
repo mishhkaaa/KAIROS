@@ -1,0 +1,41 @@
+name: ci
+on:
+  push: {branches: [main]}
+  pull_request:
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    services:
+      postgres:                       # P2's knowledge/memory contract suites need pgvector
+        image: pgvector/pgvector:pg16
+        env: {POSTGRES_USER: kairos, POSTGRES_PASSWORD: kairos, POSTGRES_DB: kairos}
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U kairos" --health-interval 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --all-packages
+      - run: uvx ruff check .
+      - name: build images used by live Docker tests (browser image is skipped in CI; its test skips)
+        run: |
+          docker build -t kairos/sandbox-base:latest execution/images/sandbox-base
+          docker build -t kairos/mock-jira:latest -f infra/compose/mock-jira.Dockerfile .
+      # contracts + every split's contract tests (skip until implemented) + e2e (skips until the kernel exists)
+      - run: uv run pytest -rs
+      - name: generated contract artifacts are up to date
+        run: |
+          uv run kairos-export-contracts
+          git diff --exit-code -- shared/schemas shared/fixtures/json shared/api shared/ts/src/constants.ts \
+            || (echo "::error::Run 'uv run kairos-export-contracts' and commit the result" && exit 1)
+
+  typescript-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - run: npm --prefix shared/ts install
+      - run: npm --prefix shared/ts run generate
+      - run: git diff --exit-code -- shared/ts/src/kairos.d.ts || (echo "::error::Regenerate shared/ts types" && exit 1)

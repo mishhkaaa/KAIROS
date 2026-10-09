@@ -1,0 +1,43 @@
+# P1 @kamalllx · P2 @mishhkaaa · P3 @mayeraasingh · P4 @manjunath3155. Ownership: AGENTS.md
+#   P1 Kernel & Execution (Claude Code)      P2 Knowledge, Memory & Console (Claude Code)
+#   P3 Agents & Models                       P4 Platform, Data & Demo
+# Contract changes need the provider AND consumers (see shared/README.md). Later rules override earlier ones.
+
+*                                         @kamalllx @mishhkaaa @mayeraasingh @manjunath3155
+
+/shared/                                  @kamalllx @mishhkaaa @mayeraasingh @manjunath3155
+/docs/                                    @kamalllx @mishhkaaa @mayeraasingh @manjunath3155
+/AGENTS.md                                @kamalllx @mishhkaaa @mayeraasingh @manjunath3155
+/CLAUDE.md                                @kamalllx @mishhkaaa @mayeraasingh @manjunath3155
+/tests/integration/                       @kamalllx @mishhkaaa @mayeraasingh @manjunath3155
+
+# P1 — Kernel & Execution
+/kernel/                                  @kamalllx
+/kairosd/                                 @kamalllx
+/policies/                                @kamalllx
+/execution/                               @kamalllx
+
+# P2 — Knowledge, Memory & Console
+/knowledge/                               @mishhkaaa
+/apps/                                    @mishhkaaa
+/agents/kairos_agents/adapters/           @mishhkaaa
+
+# P3 — Agents & Models
+/agents/                                  @mayeraasingh
+/agents/kairos_agents/adapters/           @mishhkaaa
+/models/                                  @mayeraasingh
+
+# P4 — Platform, Data & Demo
+/infra/                                   @manjunath3155
+/data/                                    @manjunath3155
+/scripts/                                 @manjunath3155
+/knowledge/kairos_knowledge/ingestion/    @manjunath3155
+/knowledge/tests/test_ingestion_contract.py @manjunath3155
+/knowledge/tests/samples/                 @manjunath3155
+/execution/kairos_execution/browser/      @manjunath3155
+/execution/images/sandbox-browser/        @manjunath3155
+/execution/tests/test_browser_contract.py @manjunath3155
+/models/kairos_models/gpu/                @manjunath3155
+/models/tests/test_probe_contract.py      @manjunath3155
+/apps/mobile/                             @manjunath3155
+/docs/DEMO_SCRIPT.md                      @manjunath3155

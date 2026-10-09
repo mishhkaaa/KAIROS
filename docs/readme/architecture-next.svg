@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1060" role="img" aria-labelledby="t d">
   <title id="t">KAIROS architecture</title>
-  <desc id="d">Clients reach one gateway. Inside the kernel, the planner hands each goal to a JEPA router that scores every agent and spawns only the likely ones; repeated plans become n8n workflows run on a cron. Every action passes the kernel core: policy, approval, sandbox, verify, commit, audit. Below sit knowledge and memory, execution and tools, and local models through Ollama: Qwen 2.5, Gemma 4 and nomic-embed-text.</desc>
+  <desc id="d">Clients reach one gateway. Inside the kernel, the planner hands each goal to the Jev router, run locally, that scores every agent and spawns only the likely ones; repeated plans become n8n workflows run on a cron. Every action passes the kernel core: policy, approval, sandbox, verify, commit, audit. Below sit knowledge and memory, execution and tools, and local models through Ollama: Qwen 2.5, Gemma 4 and nomic-embed-text.</desc>
   <defs>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&amp;family=Hanken+Grotesk:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@500&amp;display=swap');
@@ -93,8 +93,8 @@
 
   <g transform="translate(288 420)">
     <rect width="290" height="136" rx="12" fill="#1C2236" stroke="#E2B04A" stroke-width="2"/>
-    <text x="16" y="28" class="d" font-size="17" font-weight="700" fill="#F3D48A">JEPA agent router</text>
-    <text x="16" y="47" class="b" font-size="12" fill="#A9B2C3">predicts the team in embedding space;</text>
+    <text x="16" y="28" class="d" font-size="17" font-weight="700" fill="#F3D48A">Jev agent router (local)</text>
+    <text x="16" y="47" class="b" font-size="12" fill="#A9B2C3">typed questions in, calibrated odds out;</text>
     <text x="16" y="62" class="b" font-size="12" fill="#A9B2C3">a spawn probability for every agent</text>
     <g class="m" font-size="11" fill="#C9D0DC">
       <text x="16" y="80">finance</text><rect x="104" y="72" width="140" height="8" rx="4" fill="#25304A"/><rect x="104" y="72" width="127" height="8" rx="4" fill="#49D3B4"/><text x="252" y="80">.91</text>
@@ -115,7 +115,7 @@
       <circle cx="22" cy="90" r="4" fill="#49D3B4"/><text x="34" y="94">engineering agent</text>
       <circle cx="22" cy="110" r="4" fill="#49D3B4"/><text x="34" y="114">research agent</text>
     </g>
-    <text x="16" y="130" class="b" font-size="11" fill="#8792A6">low confidence: ask the LLM planner</text>
+    <text x="16" y="130" class="b" font-size="11" fill="#8792A6">unsure: the planner's rules decide</text>
   </g>
 
   <!-- n8n -->
@@ -199,7 +199,7 @@
       <text x="22" y="34" class="d" font-size="19" font-weight="700" fill="#EDE8DA">Local models through Ollama</text>
       <g transform="translate(22 50)"><rect width="206" height="44" rx="9" fill="#1A2338" stroke="#33405C"/><text x="14" y="20" font-size="14" font-weight="600" fill="#EDE8DA">Qwen 2.5 7B</text><text x="14" y="36" font-size="11" fill="#8792A6">planning and tool use</text></g>
       <g transform="translate(240 50)"><rect width="218" height="44" rx="9" fill="#1C2236" stroke="#E2B04A" stroke-width="2"/><text x="14" y="20" font-size="14" font-weight="600" fill="#F3D48A">Gemma 4</text><text x="14" y="36" font-size="11" fill="#A9B2C3">reasoning, vision, long context</text></g>
-      <g transform="translate(22 104)"><rect width="206" height="44" rx="9" fill="#1A2338" stroke="#33405C"/><text x="14" y="20" font-size="14" font-weight="600" fill="#EDE8DA">nomic-embed-text</text><text x="14" y="36" font-size="11" fill="#8792A6">embeddings for search and JEPA</text></g>
+      <g transform="translate(22 104)"><rect width="206" height="44" rx="9" fill="#1A2338" stroke="#33405C"/><text x="14" y="20" font-size="14" font-weight="600" fill="#EDE8DA">nomic-embed-text</text><text x="14" y="36" font-size="11" fill="#8792A6">embeddings for search and memory</text></g>
       <g transform="translate(240 104)"><rect width="218" height="44" rx="9" fill="#1A2338" stroke="#33405C"/><text x="14" y="20" font-size="14" font-weight="600" fill="#EDE8DA">Model router</text><text x="14" y="36" font-size="11" fill="#8792A6">restricted data stays local</text></g>
       <text x="22" y="164" class="m" font-size="11" fill="#8792A6">open weights, on the machine's own GPU</text>
     </g>
@@ -210,5 +210,5 @@
   <text x="84" y="967" class="d" font-size="17" font-weight="700" fill="#EDE8DA">Persistent storage</text>
   <text x="270" y="967" class="b" font-size="14" fill="#A9B2C3">OKF Markdown bundle, Postgres and pgvector, process checkpoints, the audit journal, workflow definitions, artifacts. Survives reboot.</text>
 
-  <text x="60" y="1030" class="b" font-size="13" fill="#6E7891">A goal flows top to bottom: client, gateway, planner, JEPA scores, spawned agents, syscalls through policy, approval, sandbox, verify, commit, audit.</text>
+  <text x="60" y="1030" class="b" font-size="13" fill="#6E7891">A goal flows top to bottom: client, gateway, planner, Jev scores, spawned agents, syscalls through policy, approval, sandbox, verify, commit, audit.</text>
 </svg>

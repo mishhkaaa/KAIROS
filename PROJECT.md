@@ -4,6 +4,10 @@
 > processes. Every action an agent takes in the real world is a system call that policy can stop, a person can
 > approve, a sandbox can contain and a tamper-evident journal records. People sign in with roles and use it from a
 > desktop in the browser, from their phone, or from a Linux shell. All of it runs on one machine, on local models.
+>
+> **The right agent, at the right moment.** *Kairos* is the Greek word for the opportune moment. Before anything runs,
+> a local Jev decision model reads the goal and scores every agent in one pass, so only the agents a goal needs are
+> created; Gemma 4 does the reasoning on the machine's own GPU.
 
 This document explains the whole project: the concept, every feature and what is new about it, how it is built, the
 technology behind it, how well it works, and its limits. It is written for anyone who needs to explain or evaluate
@@ -12,9 +16,11 @@ KAIROS end to end.
 | | |
 |---|---|
 | Repository | https://github.com/mishhkaaa/KAIROS |
+| Website | https://kairos-site-brown.vercel.app |
+| Python package | https://pypi.org/project/kairos-os/ (`pip install kairos-os`) |
 | Team | Mishka Tiwari, Kamal Karteek U, Manjunath Patil, Mayeraa Singh |
 | Status | Beta: feature-complete for the demo scenarios, verified end to end on real models, single node |
-| Headline results | 4 scored scenarios at 8/8 · 535 tests (442 Python, 93 web) · 85% Python coverage · 16 of 16 components real · 100% local on an 8 GB laptop GPU |
+| Headline results | 4 scored scenarios at 8/8 · 564 tests (469 Python, 95 web) · 85% Python coverage · 16 of 16 components real · 100% local on an 8 GB laptop GPU, agent router included |
 
 ---
 
@@ -23,7 +29,7 @@ KAIROS end to end.
 1. [The problem](#1-the-problem)
 2. [The concept: why an operating system](#2-the-concept-why-an-operating-system)
 3. [The flagship demo, step by step](#3-the-flagship-demo-step-by-step)
-4. [Every feature, explained](#4-every-feature-explained)
+4. [Every feature, explained](#4-every-feature-explained) (including [the Jev router](#44a-the-jev-agent-router-run-locally) and [Gemma 4](#410-models-and-routing-gemma-4))
 5. [The three ways in: desktop, phone, shell](#5-the-three-ways-in-desktop-phone-shell)
 6. [What is novel](#6-what-is-novel)
 7. [Architecture](#7-architecture)
@@ -40,9 +46,10 @@ KAIROS end to end.
 
 ## 1. The problem
 
-Organizations want AI that does more than answer questions. They want AI that **acts** on their private knowledge:
-update the project tracker, file the report, chase the vendor, reconcile the invoices. Today that forces a choice
-between three bad options.
+Organizations of every kind want AI that does more than answer questions. They want AI that **acts** on their private
+knowledge: answer an HR or policy question with sources, pull numbers from the company database, update the project
+tracker, file the report, chase the vendor, research something on the web. Today that forces a choice between three
+bad options.
 
 | Problem | What goes wrong today |
 |---|---|
@@ -68,6 +75,7 @@ people using it what an OS gives its users: accounts, a desktop, a shell, and a 
 |---|---|
 | Program / process | An **AI agent** is a process: a PID, a parent, a state machine, quotas (tokens, tool calls, wall time), capabilities, pause, kill, checkpoint and resume |
 | `fork` / `exec` | The planner **creates agents for the job** from role templates, each bounded by the role, the request, the person and policy |
+| Scheduler's dispatch decision | The **Jev agent router**: one forward pass of a local decision model scores the goal type and every agent, so only the needed agents are created |
 | Filesystem | **Company knowledge** as `/org/...` paths: Markdown documents with frontmatter (owner, type, trust, privacy, links) |
 | System call | Every action that changes the world (write Jira, write a file, open a browser, write the database) is a **governed syscall** |
 | Kernel mediation | **Policy, then approval by a person, then sandboxed execution, then verify, then commit or roll back** |
@@ -91,8 +99,8 @@ hold: an agent physically cannot change anything except by asking the kernel, an
 approval and audit.
 
 **Design principles that run through everything**
-1. **Local first.** Models run on the machine's own GPU through Ollama. Data marked `restricted` is never sent to a
-   remote model.
+1. **Local first.** Models (Gemma 4) run on the machine's own GPU through Ollama, and the agent router runs on its
+   CPU. Data marked `restricted` is never sent to a remote model; no feature needs a cloud account.
 2. **Agents hold no power of their own.** They act only through a context object (`ctx`); every world-changing action
    is `ctx.syscall()`.
 3. **Retrieved text is data, never instructions.**
@@ -111,16 +119,17 @@ tracker, and prepare a recovery plan."*
 | Step | What happens | What it shows |
 |---|---|---|
 | 1. Submit | Alice presses Alt+Space on the desktop and types the goal (or uses the phone, or `kairos ask` in the shell). | One kernel, three surfaces |
-| 2. Understand | The task docks on the left. The planner emits `task.understood`: the intent, the entities (Apollo, budget, schedule) and the capabilities needed. | A transparent thought process |
-| 3. Plan and create | The planner emits `agent.planned` for each specialist and why, then the kernel creates `finance-agent@T-…`, `engineering-agent@T-…`, `research-agent@T-…`, later `action-agent@T-…`. Each is a process with a PID, generated from a role template and bounded by Alice's role and policy. | Agents made for the job; agents as processes |
-| 4. Retrieve | Agents run hybrid search over `/org`. Every document read appears on the desktop under "Referred to", and its tile on the wallpaper lights up. | Knowledge as a filesystem; observability |
-| 5. Catch the attack | One vendor email contains hidden instructions addressed to the AI, disguised as a system note. The context firewall flags it **UNTRUSTED** (shown in red). Agents read it as quoted data and never act on it. | Context firewall against prompt injection |
-| 6. Research safely | The research agent opens the vendor's status page in a **browser sandbox with no internet access** (only the allowlisted internal site) and brings back a screenshot as evidence: the PayCo SDK v5 release slipped. | Sandboxed tools |
-| 7. Request an action | The action agent issues the syscall `jira.write` on APOLLO-12 with a justification and evidence. | Every action is a syscall |
-| 8. Stop for a person | Policy says `jira.write` requires approval. The kernel pauses the process and raises an approval with the exact payload, the policy that triggered it and the evidence. A notification appears on the desktop and on the phone. | Human in the loop |
-| 9. Approve and commit | Alice (or Priya, the approver, from her phone) approves. The kernel executes, verifies the write took effect, commits the transaction and appends to the audit chain. | Transactions, verification, audit |
-| 10. Answer | Apollo is **31% (6.2 lakh) over budget**. Three root causes, each cited to its documents: dual-running cloud costs, a failed data backfill (duplicate reconciliation IDs), and the PayCo certification delay with an emergency contract. Plus a recovery plan file and `chain_verified: true`. | Cited, grounded answers |
-| 11. Memory notices change | Edit `finance/cloud-bill-2026-09.md`. In about **0.1 s** the finance memories derived from it go stale (engineering's stay fresh); in about **3.5 s** the local model re-derives them from the new text. | Memory with provenance |
+| 2. Route | The Jev router (local) answers eleven typed questions about the goal in one pass: an investigation (0.98), asks for a change (0.66), and a probability for each agent. The story shows a bar per agent with the 0.5 line. | The right agents, chosen in one pass |
+| 3. Understand | The task docks on the left. The planner emits `task.understood`: the intent, the entities (Apollo, budget, schedule), the capabilities needed and the routing scores. | A transparent thought process |
+| 4. Plan and create | The planner emits `agent.planned` for each specialist and why, then the kernel creates `finance-agent@T-…`, `engineering-agent@T-…`, `research-agent@T-…`, later `action-agent@T-…`. Each is a process with a PID, generated from a role template and bounded by Alice's role and policy. | Agents made for the job; agents as processes |
+| 5. Retrieve | Agents run hybrid search over `/org`. Every document read appears on the desktop under "Referred to", and its tile on the wallpaper lights up. | Knowledge as a filesystem; observability |
+| 6. Catch the attack | One vendor email contains hidden instructions addressed to the AI, disguised as a system note. The context firewall flags it **UNTRUSTED** (shown in red). Agents read it as quoted data and never act on it. | Context firewall against prompt injection |
+| 7. Research safely | The research agent opens the vendor's status page in a **browser sandbox with no internet access** (only the allowlisted internal site) and brings back a screenshot, which **Gemma 4 reads with its vision**: the PayCo SDK v5 release slipped. | Sandboxed tools, multimodal evidence |
+| 8. Request an action | The action agent issues the syscall `jira.write` on APOLLO-12 with a justification and evidence. | Every action is a syscall |
+| 9. Stop for a person | Policy says `jira.write` requires approval. The kernel pauses the process and raises an approval with the exact payload, the policy that triggered it and the evidence. A notification appears on the desktop and on the phone. | Human in the loop |
+| 10. Approve and commit | Alice (or Priya, the approver, from her phone) approves. The kernel executes, verifies the write took effect, commits the transaction and appends to the audit chain. | Transactions, verification, audit |
+| 11. Answer | Gemma 4 thinks before it synthesizes. Apollo is **31% (6.2 lakh) over budget**. Three root causes, each cited to its documents: dual-running cloud costs, a failed data backfill (duplicate reconciliation IDs), and the PayCo certification delay with an emergency contract. Plus a recovery plan file and `chain_verified: true`. | Cited, grounded answers |
+| 12. Memory notices change | Edit `finance/cloud-bill-2026-09.md`. In about **0.1 s** the finance memories derived from it go stale (engineering's stay fresh); in about **3.5 s** the local model re-derives them from the new text. | Memory with provenance |
 
 The run is scored automatically by `scripts/demo_run.py` out of 8 checks (task completed, three cited causes, the
 injection flagged and not obeyed, the browser screenshot, the approval honoured, the write committed, the audit chain
@@ -133,6 +142,15 @@ verified, and the story of the run complete).
   runs) and a **writer** that files the note after approval. Result: CloudCo overpaid by 1.44 lakh, PayCo by 0.42,
   TalentX by 0.11.
 - **Multitool:** SQL, the browser, knowledge search and an approved write in one task.
+
+**Generic goals, the same machinery.** Nothing in the router or the planner is specific to Apollo:
+- *"Summarize the decisions our teams made this week, with the documents behind each one."* Jev routes it as a
+  question: no specialists, an answer from whole documents with sources.
+- *"What does our security policy say about sharing customer data with vendors?"* The same path for any policy,
+  person or system in `/org`.
+- *"What is the latest stable Python release? Search the web."* Jev scores the web researcher high; it searches and
+  reads public pages with Playwright through governed `browser.open` syscalls, in a sandbox that can reach only the
+  public internet. Verified live: "Python 3.14.8, released on September 30, 2026", with the URLs it read.
 
 ---
 
@@ -202,6 +220,33 @@ data scope   = template mounts ∩ requested scope ∩ the person's data scopes
 What a person may ask of KAIROS is in `policies/rbac/roles.yaml`; what their task's agents may do is in
 `policies/rbac/role-capabilities.yaml`.
 
+### 4.4a The Jev agent router, run locally
+
+Asking a language model "which agents should handle this?" on every goal is slow and inconsistent: the answer is
+generated text that has to be parsed, and it changes with the wording. KAIROS asks a **decision model** instead.
+
+- **The interface is Jev's.** TypeSafe's Jev is a "System One" model: it takes a *state* plus *typed questions*
+  (`choice` among named options, `score` along a rubric, `noul` for yes or no) and returns calibrated probabilities,
+  never text. The planner (`agents/kairos_agents/routing.py`) asks eleven such questions per goal: what kind of goal it
+  is (question, data, investigation), whether each of eight roles is needed, whether the goal asks for a change, and
+  whether it needs the public internet.
+- **It runs on this machine.** Jev itself is a hosted API, so the answers come from **Laya**
+  (`convaiinnovations/laya`, Apache 2.0), the open, Jev-compatible decision model trained the same way (reinforcement
+  learning for calibrated decisions). It runs on the CPU with PyTorch, leaving the GPU to Gemma: no API key, and the
+  goal never leaves the machine. One call takes about 3.5 s on a laptop CPU; kairosd loads it at boot.
+- **It is a guide inside guard rails.** Agents at or above **0.5** are created. An answer under 0.55 confidence leaves
+  the goal type to the planner's rules. An investigation needs a project of the organization to record findings on
+  (otherwise it is answered as a question with sources); a database question named outright stays one; the router can
+  add a write the goal implies but never remove one the goal asked for. If the router is not installed or
+  `KAIROS_JEV=off`, the rules decide and the story says so.
+- **It is visible.** `task.understood` carries `router`, `goal_type`, `route_scores` and `route_ms`; each
+  `agent.planned` carries its `score` (contract 0.14.0). The desktop draws a bar per agent with the 0.5 line, and
+  Settings shows "agent router: Jev, local".
+
+Measured zero-shot on our goals: the Apollo investigation at 0.98 with a change requested at 0.66; "search the web"
+at 0.65 for the web researcher; "draft a note" at 0.76 for the writer. Uncertain calls (0.45) fall back to the rules,
+which is why the guard rails exist; fine-tuning on logged routing decisions is the next step.
+
 ### 4.5 The visible thought process
 
 Agents narrate what they are doing through `ctx.narrate()`, and the kernel reports what actually happened. Six event
@@ -209,8 +254,8 @@ types make a run readable:
 
 | Event | Meaning |
 |---|---|
-| `task.understood` | the intent, entities and capabilities the planner extracted |
-| `agent.planned` | which role is needed, with what scope, and why |
+| `task.understood` | the intent, entities and capabilities the planner extracted, and the routing decision with every agent's score |
+| `agent.planned` | which role is needed, with what scope, why, and the router's probability for it |
 | `agent.created` | the generated manifest of a new agent |
 | `agent.thought` | a short visible step ("Read 8 documents, 2 flagged") |
 | `tool.query` | the query a tool ran (for example the SQL text and the row count) |
@@ -266,13 +311,23 @@ Then **re-derivation** asks the local model to reconsider the memory against the
 replaces the old record. This is cache coherence for AI memory: the system knows which of its beliefs depend on which
 facts.
 
-### 4.10 Models and routing
+### 4.10 Models and routing: Gemma 4
 
 The **model router** (`models/`) picks a model per kind of task and privacy level from a YAML file
-(`models/models.yaml`, or `models.7b-only.yaml` for an 8 GB GPU). The demo runs **Qwen 2.5 7B Instruct** for reasoning
-and **nomic-embed-text** for embeddings, both through **Ollama** on the laptop GPU (about 57 tokens/s, fully in VRAM).
-A GPU probe reports utilisation and VRAM; `preflight.py` refuses to start a demo below 25 tokens/s. Restricted data is
-never routed to a remote model.
+(`models/models.yaml`, or `models.7b-only.yaml` for an 8 GB GPU). The default is **Gemma 4 E4B**
+(`gemma4:e4b-it-qat`, quantization-aware, about 6 GB) with **nomic-embed-text** for embeddings, both through
+**Ollama** on the laptop GPU. KAIROS uses Gemma 4's capabilities where they help:
+
+| Capability | Where | How |
+|---|---|---|
+| Reasoning, planning, extraction | every agent's model calls | the default for every task class on the 8 GB profile, so one model stays resident |
+| **Thinking mode** | the investigation's synthesis of root causes and a recovery plan | `ModelRequest.think`; the Ollama provider sends `think` only to models that have it, with extra token budget |
+| **Vision** | the research agent reads the sandbox's screenshot of a vendor's status page | `ChatMessage.images` (base64); `sdk.look()` asks the vision task class |
+| Long context (128K) | reading whole documents for questions | the planner passes whole documents, not snippets |
+
+**Fallback.** A model that is not pulled is skipped; one that errors or times out is retried on the `fallback` list
+(Qwen 2.5 7B Instruct, then Llama 3.2 3B), and the kairosd log names every fallback. A GPU probe reports utilisation
+and VRAM; `preflight.py` refuses to start a demo below 25 tokens/s. Restricted data is never routed to a remote model.
 
 ### 4.11 Tools and connectors
 
@@ -281,7 +336,7 @@ never routed to a remote model.
 | **Jira** (real or in-process mock) | `jira.read`, `jira.write` | writes need approval; verified after execution |
 | **Files** | `fs.read`, `fs.write` | the task's own workspace only |
 | **SQL database** | `db.query`, `db.write` | the kernel checks every statement before it runs: one statement, SELECT only for queries, no DDL, LIMIT at most 200, UPDATE and DELETE need WHERE; the backend adds a read-only transaction and a 5 s timeout; writes need approval |
-| **Browser** | `browser.open` | Playwright in a Docker sandbox with no internet, only allowlisted internal origins; screenshots become evidence |
+| **Browser** | `browser.open` | Playwright in a Docker sandbox with no internet, only allowlisted internal origins; screenshots become evidence that Gemma 4 can read. The web researcher's policy allows `*`, which means public hosts only: DNS is resolved and private or loopback addresses are refused, on a separate `kairos_web` network |
 | **MCP servers** | `mcp.*` | any Model Context Protocol server can be exposed as governed tools; the Playwright MCP browser can replace the built-in driver (off by default) |
 | **GitHub** | `github.*` | reads allowed, writes (issues, comments) need approval; demo data until a token is given |
 | **Google Calendar** | `calendar.*` | reads allowed, creating events needs approval |
@@ -364,7 +419,8 @@ There is also the `ai-*` CLI on the host: `ai run`, `ai-ps`, `ai-tree`, `ai-top`
 ### 5.4 The Python package (`sdk/python`, `pip install kairos-os`)
 
 A dependency-free Python client library and the same `kairos` command for any machine that can reach a gateway,
-including a teammate's laptop over a public URL. It covers tasks with a live story, approvals, search, reading `/org`,
+including a teammate's laptop over a public URL. It is published on PyPI as
+[`kairos-os`](https://pypi.org/project/kairos-os/). It covers tasks with a live story, approvals, search, reading `/org`,
 uploads, mounts, memory, the process table and the audit chain, with `--json` on every command for scripting. Its
 documentation is `sdk/python/README.md`.
 
@@ -375,6 +431,7 @@ documentation is `sdk/python/README.md`.
 | Novelty | Why it matters | Typical agent frameworks |
 |---|---|---|
 | **Agents as OS processes** with PIDs, quotas, capabilities, pause, kill, checkpoint and resume | Agents become manageable, limitable and recoverable like programs | an agent is a loop in your script |
+| **A decision model routes the agents** (Jev's typed questions, answered locally by a calibrated model, inside guard rails) | The right agents in one pass, with probabilities a person can see; no planning prompt to parse | an LLM prompt decides, or a hard-coded graph |
 | **One mediated path for every action** (policy, approval, sandbox, verify, commit or roll back) | No action can bypass governance; failures roll back | tools are called directly |
 | **Hash-chained audit with a kernel verdict** | You can prove what happened and detect tampering | logs, if any |
 | **Agents generated per task, bounded by a four-way intersection** (template, request, person, policy) | Least privilege by construction; a viewer's task can never write | fixed agents with fixed tools |
@@ -384,7 +441,7 @@ documentation is `sdk/python/README.md`.
 | **Knowledge as a filesystem**, including a real FUSE mount and watched folders | Familiar, scriptable, auditable data access with privacy and trust per document | an opaque vector store |
 | **SQL checked by the kernel before it runs** | Agents can use databases without arbitrary writes or DDL | raw SQL access |
 | **Three surfaces on one kernel**: a desktop OS, a phone app and a Linux shell | Approve from your pocket; script from a shell; watch on a desktop | a chat window |
-| **Fully local on an 8 GB laptop GPU** | Private data never leaves the machine | cloud APIs |
+| **Fully local on an 8 GB laptop GPU**, with Gemma 4's thinking and vision and an automatic fallback | Private data never leaves the machine; screenshots become evidence | cloud APIs |
 | **Fake and real implementation of every component behind one typed contract** | Four people built it in parallel; UIs work with no GPU | tightly coupled code |
 
 ---
@@ -399,15 +456,16 @@ documentation is `sdk/python/README.md`.
   │ identity   orgs, members, roles, sessions, Google sign-in, sign-in codes, vault                        │
   │ kernel     process table, scheduler, quotas, syscalls, policy, approvals, transactions, audit chain,   │
   │            dynamic agents, event bus, lifecycle (resume after a crash)                                 │
-  │ agents     runtime, role templates and library agents, narration, IPC, registry, NOOA adapter          │
+  │ agents     Jev router (local decision model), runtime, role templates and library agents, narration,   │
+  │            IPC, registry, NOOA adapter                                                                 │
   │ knowledge  ingestion and converters, indexing, hybrid retrieval, context firewall, memory, coherence,   │
   │            uploads and mounts                                                                          │
-  │ models     router, Ollama provider, GPU probe                                                          │
+  │ models     router with fallback, Ollama provider (thinking, images), GPU probe                         │
   │ execution  sandbox manager, tools (Jira, files, SQL, browser, GitHub, Calendar), MCP backend            │
   └──────────┬───────────────────┬──────────────────┬──────────────────────┬──────────────────────────────┘
              ▼                   ▼                  ▼                      ▼
-     Postgres + pgvector    Redis (events)     Ollama (GPU)      Docker: sandbox-base, sandbox-browser,
-     (knowledge, memory,                                          vendor-docs, internal sandbox network
+     Postgres + pgvector    Redis (events)     Ollama (GPU):     Docker: sandbox-base, sandbox-browser,
+     (knowledge, memory,                       Gemma 4, Qwen      vendor-docs, internal sandbox network
       audit, demo data)
 ```
 
@@ -425,7 +483,7 @@ documentation is `sdk/python/README.md`.
 | `data/okf/` | the demo organization's knowledge bundle |
 
 **The contract and fake/real wiring.** Everything that crosses a package boundary is defined once in
-`shared/python/kairos_contracts` (contract version 0.13.0), and TypeScript types are generated from it. Each
+`shared/python/kairos_contracts` (contract version 0.14.0), and TypeScript types are generated from it. Each
 component (events, policy, audit, knowledge, memory, firewall, models, agents, tools, sandbox, browser, converters,
 probe and more) has a **fake** and a **real** implementation, chosen per component with `KAIROS_MODE_<COMPONENT>`.
 This let four people build in parallel against the same interfaces, lets the whole UI run against a mock gateway with
@@ -447,7 +505,8 @@ every event in `shared/catalogs/events.yaml`.
 | Packaging | **uv** workspaces | six packages, one lock file, fast installs |
 | Database | **Postgres 16 + pgvector** | knowledge, embeddings, memory and audit in one transactional store |
 | Events | **Redis 7** | event mirror for streaming to clients |
-| Models | **Ollama**, **Qwen 2.5 7B Instruct**, **nomic-embed-text** | strong local reasoning that fits in 8 GB VRAM; private by design |
+| Models | **Ollama**, **Gemma 4 E4B** (thinking, vision, 128K context), **Qwen 2.5 7B** as fallback, **nomic-embed-text** | strong local reasoning that fits in 8 GB VRAM; private by design |
+| Agent routing | **Jev's typed-decision interface**, answered by **Laya** (ModernBERT and mmBERT encoders, PyTorch on the CPU) | calibrated probabilities in one forward pass, no text to parse, nothing leaves the machine |
 | Sandboxes | **Docker** (internal networks, non-root, resource limits) | isolation for tools that touch code or the web |
 | Browser | **Playwright** (Chromium), **@playwright/mcp** | real page rendering and screenshots inside a sandbox |
 | Tool protocol | **Model Context Protocol (MCP)** | plug in any MCP server as a governed tool |
@@ -456,7 +515,7 @@ every event in `shared/catalogs/events.yaml`.
 | Desktop | **Next.js 16**, **React**, **Tailwind 4**, **TanStack Query**, container queries | a fast, responsive desktop-in-a-browser |
 | Phone | **Expo SDK 57**, **React Native 0.86**, native Google sign-in | one codebase, a real Android APK |
 | Shell OS | **Ubuntu 24.04 on WSL 2**, **FUSE** (fusepy), systemd | `/org` as a real filesystem |
-| Quality | **pytest**, pytest-cov, **ruff**, **eslint**, **tsc**, Vitest, GitHub Actions | 535 tests, lint and type checks, CI on every push |
+| Quality | **pytest**, pytest-cov, **ruff**, **eslint**, **tsc**, Vitest, GitHub Actions | 564 tests, lint and type checks, CI on every push |
 | Demo ops | PowerShell scripts, `preflight.py`, `demo_run.py` | one-command boot, readiness checks, scored runs |
 
 ---
@@ -468,7 +527,7 @@ every event in `shared/catalogs/events.yaml`.
 | An agent takes a harmful action | Agents hold no credentials; every action is a syscall through policy; writes need a person; verification and rollback |
 | Prompt injection in documents or email | Context firewall: regex plus an optional LLM classifier; untrusted text is quoted as data |
 | Over-privileged agents | Capabilities and data scopes are the intersection of template, request, person and policy; sub-agents never widen |
-| Data exfiltration | Sandboxes have no network unless allowlisted; restricted data stays on local models; everything runs on one machine |
+| Data exfiltration | Sandboxes have no network unless allowlisted; restricted data stays on local models; the agent router runs locally, so goals never leave the machine; everything runs on one machine |
 | Arbitrary SQL | The kernel refuses anything it cannot read with confidence; read-only transactions; timeouts; row limits |
 | Unauthorized people | Sessions, Google sign-in, five roles enforced on every route; one-time codes for phones |
 | Credential leaks | Connector tokens encrypted in the vault, never in events, logs, audit or agent context |
@@ -481,7 +540,8 @@ Vulnerabilities are reported privately through GitHub's private vulnerability re
 
 ## 10. Results and measurements
 
-Measured on the demo laptop: RTX 5070 Laptop GPU (8 GB), `qwen2.5:7b-instruct` fully on the GPU.
+Measured on the demo laptop: RTX 5070 Laptop GPU (8 GB), `qwen2.5:7b-instruct` fully on the GPU. Gemma 4 is now the
+default and these gates are being re-run on it; Qwen is the fallback that produced these scores.
 
 | Scenario | Score | Wall time |
 |---|---|---|
@@ -499,14 +559,17 @@ Measured on the demo laptop: RTX 5070 Laptop GPU (8 GB), `qwen2.5:7b-instruct` f
 | Retrieval QA | 10/10 answered, MRR 0.90 |
 | Firewall classifier | 3 to 4 of 5 reworded injections, 0 false positives, about 0.2 s per document |
 | Components running real (not fake) | 16 of 16 |
+| Agent routing (Jev, local, CPU) | about 3.5 s for eleven typed questions; about a minute to load at boot |
+| Web research (Playwright in a sandbox) | verified live: the latest Python release found and cited from the public web |
 | Recovery | daemon killed mid-run: resumed from checkpoint, 8/8; model server restarted mid-run: retried, 8/8 |
 
 ---
 
 ## 11. Quality: testing and engineering process
 
-- **535 tests**: 442 Python (unit, contract suites run against both fakes and real implementations, integration) and
-  93 web (including WCAG AA contrast for both themes). Python coverage 85%.
+- **564 tests**: 469 Python (unit, contract suites run against both fakes and real implementations, integration,
+  and the router's parsing and guard rails) and 95 web (including WCAG AA contrast for both themes and the routing
+  card). Python coverage 85%. Tests run with the router off (`KAIROS_JEV=off`), so they never download a model.
 - **Static checks**: ruff for Python; eslint and TypeScript for the desktop and the phone; a contrast script for the
   phone palette.
 - **CI** (GitHub Actions): ruff, the full Python suite against Postgres with pgvector and real Docker sandboxes, and a
@@ -523,8 +586,10 @@ Measured on the demo laptop: RTX 5070 Laptop GPU (8 GB), `qwen2.5:7b-instruct` f
 ## 12. Limitations, trade-offs and future work
 
 **Trade-offs we chose**
-- **A 7B local model**: privacy and an 8 GB GPU over the reasoning depth of large hosted models. Prompts and agents
-  are designed for its strengths, and every run is scored.
+- **A small local model** (Gemma 4 E4B): privacy and an 8 GB GPU over the reasoning depth of large hosted models.
+  Prompts and agents are designed for its strengths, and every run is scored.
+- **A zero-shot decision model for routing**: the Jev-compatible checkpoint is not fine-tuned on KAIROS goals yet, so
+  guard rails and the rules decide whenever it is unsure. Routing on the CPU costs about 3.5 s per goal.
 - **Firewall classifier opt-in**: the regex layer is instant and never misses a known pattern; the classifier catches
   rewordings at about 0.2 s per document.
 - **Conservative SQL checks without a full parser**: some valid queries are refused rather than risk an unsafe one.
@@ -538,6 +603,9 @@ Measured on the demo laptop: RTX 5070 Laptop GPU (8 GB), `qwen2.5:7b-instruct` f
 - The APK is debug-signed.
 
 **Future work**
+- **n8n workflows on a schedule**: when the same plan shape keeps repeating, freeze it into an n8n workflow run by a
+  cron trigger, with no re-planning; every step still calls the gateway, so policy, approval and audit apply.
+- Fine-tune the router on logged routing decisions, and route on the GPU when there is room.
 - Multi-node kernel with a shared process table and queue; horizontal scaling of tool workers and sandboxes.
 - Push notifications and approval from a watch or chat.
 - More connectors (email, Slack, Drive) through MCP.
@@ -555,9 +623,9 @@ KAIROS is built four ways through one shared contract (`shared/`), each person o
 | Person | Owns |
 |---|---|
 | **Kamal Karteek U** (`@kamalllx`) | the kernel and governed execution, the desktop OS, KAIROS OS on WSL, the phone app and APK |
-| **Mishka Tiwari** (`@mishhkaaa`) | agents and the planner, dynamic agents, the thought-process stream, the SQL tool, the web researcher |
+| **Mishka Tiwari** (`@mishhkaaa`) | agents and the planner, the Jev router, dynamic agents, the thought-process stream, the SQL tool, the web researcher |
 | **Mayeraa Singh** (`@mayeraasingh`) | knowledge, ingestion and retrieval, identity, organizations and connectors |
-| **Manjunath Patil** (`@manjunath3155`) | models and routing, platform and infrastructure, settings, the Python package, demo data |
+| **Manjunath Patil** (`@manjunath3155`) | models and routing (Gemma 4 and the fallback), n8n workflows, platform and infrastructure, settings, the Python package, demo data |
 
 ---
 
@@ -573,19 +641,27 @@ to act is `ctx.syscall()`, and the kernel executes the tool itself, only after p
 **What if the model is tricked by a document?** The firewall flags instruction-like text and quotes it as data. Even if
 a model were persuaded, it still cannot act outside its capabilities, and every write still needs a person.
 
-**Why local models?** Because the target users are organizations that cannot send private data to a cloud. A 7B model
-on an 8 GB laptop GPU is enough for all four scored scenarios.
+**Why local models?** Because the target users are organizations that cannot send private data to a cloud. Gemma 4
+E4B on an 8 GB laptop GPU does the reasoning; the agent router runs on the CPU; nothing needs a cloud account.
+
+**Why Jev, and why not just ask the LLM which agents to use?** A decision model returns calibrated probabilities in one
+pass instead of text to parse, so the choice is fast to make, easy to show and consistent across rewordings. We use
+Jev's typed-question interface and answer it locally with the open, Jev-compatible Laya model, so there is no key and
+no data leaves the machine. When it is unsure, the planner's rules decide.
+
+**What does Gemma 4 add?** It is the default model for every agent; its thinking mode is on for the final synthesis,
+and its vision reads sandbox screenshots as evidence. If it fails, Qwen 2.5 takes over automatically.
 
 **How do you know it works, rather than worked once?** Every scenario is scored automatically out of 8, including the
-story of the run, and must pass on real models before any merge; plus 535 tests and CI on every push.
+story of the run, and must pass on real models before any merge; plus 564 tests and CI on every push.
 
 **How does it scale?** Components sit behind one typed contract and can be swapped or moved independently; the
 scheduler already enforces quotas, concurrency and preemption, and checkpoints let tasks survive restarts. Today it is
 a single node; multi-node is future work.
 
-**How are agents created for a new kind of question?** The planner picks role templates that fit the goal (for example
-a data engineer and a writer for a vendor-payments question), and the kernel generates them with rights limited by the
-intersection described in section 4.4.
+**How are agents created for a new kind of question?** The Jev router scores every role template for the goal, the
+planner keeps the ones that fit (for example a data engineer and a writer for a vendor-payments question), and the
+kernel generates them with rights limited by the intersection described in section 4.4.
 
 **What happens when data changes?** Memories record their sources; an edit marks dependent memories stale in about
 0.1 s, and they are re-derived in about 3.5 s.
@@ -603,6 +679,9 @@ intersection described in section 4.4.
 | **Data scope** | the `/org` paths an agent may read |
 | **Role template** | a manifest describing a kind of agent (finance, research, data engineer…) from which agents are generated |
 | **Planner** | the first process of a task; it understands the goal and creates the specialists |
+| **Jev router** | the planner's agent router: Jev's typed questions (`choice`, `score`, `noul`) answered with calibrated probabilities by a local decision model (Laya) |
+| **Laya** | the open, Jev-compatible decision model (Apache 2.0) that answers the router's questions on the CPU |
+| **Gemma 4** | Google's open model family; `gemma4:e4b-it-qat` is KAIROS's default, with thinking and vision |
 | **Approval** | a pending decision by a person on a syscall that policy marked as requiring one |
 | **Audit chain** | the per-task journal in which each entry hashes the previous one |
 | **Context firewall** | the layer that flags untrusted, instruction-like text in retrieved documents |

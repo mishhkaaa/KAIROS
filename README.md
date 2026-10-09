@@ -4,12 +4,15 @@
 
 <p align="center">
   <a href="https://github.com/mishhkaaa/KAIROS/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/mishhkaaa/KAIROS/actions/workflows/ci.yml/badge.svg?branch=main"></a>
-  <img alt="Tests: 442 Python, 93 web" src="https://img.shields.io/badge/tests-442_Python_·_93_web-2FB344?style=flat-square&labelColor=151A21">
+  <img alt="Tests: 469 Python, 95 web" src="https://img.shields.io/badge/tests-469_Python_·_95_web-2FB344?style=flat-square&labelColor=151A21">
   <img alt="Coverage 85%" src="https://img.shields.io/badge/coverage-85%25_Python-2FB344?style=flat-square&labelColor=151A21">
   <img alt="Code quality: ruff, eslint and tsc clean" src="https://img.shields.io/badge/code_quality-ruff_·_eslint_·_tsc_clean-2BB8A3?style=flat-square&labelColor=151A21">
   <img alt="Demo gates: 4 scenarios at 8/8" src="https://img.shields.io/badge/demo_gates-4_scenarios_·_8%2F8-2FB344?style=flat-square&labelColor=151A21">
   <img alt="Accessibility: WCAG AA" src="https://img.shields.io/badge/a11y-WCAG_AA-4C86D9?style=flat-square&labelColor=151A21">
-  <img alt="Contract 0.13.0" src="https://img.shields.io/badge/contract-0.13.0-9D8CE8?style=flat-square&labelColor=151A21">
+  <img alt="Contract 0.14.0" src="https://img.shields.io/badge/contract-0.14.0-9D8CE8?style=flat-square&labelColor=151A21">
+  <img alt="Models: Gemma 4, local" src="https://img.shields.io/badge/models-Gemma_4_·_local-E2B04A?style=flat-square&labelColor=151A21">
+  <img alt="Agent router: Jev, local" src="https://img.shields.io/badge/agent_router-Jev_·_local-E2B04A?style=flat-square&labelColor=151A21">
+  <a href="https://pypi.org/project/kairos-os/"><img alt="PyPI: kairos-os" src="https://img.shields.io/pypi/v/kairos-os?style=flat-square&labelColor=151A21&label=pypi%20kairos-os"></a>
   <img alt="Status: Beta" src="https://img.shields.io/badge/status-beta-D99A25?style=flat-square&labelColor=151A21">
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-F1F5F9?style=flat-square&labelColor=151A21"></a>
 </p>
@@ -27,14 +30,19 @@
 > the job in hand. Every action that touches the outside world is a syscall that policy can stop, a person can
 > approve, a sandbox can contain and a hash-chained journal records. People sign in with roles and use it from a
 > desktop in the browser, from their phone, or from a Linux shell. All of it runs on one machine, on local models.
+>
+> **The right agent, at the right moment.** Before anything runs, a local Jev decision model reads the goal and scores
+> every agent in one pass, so only the agents a goal needs are created. Gemma 4 does the reasoning, thinks before it
+> synthesizes, and reads screenshots; nothing needs a cloud account. It works for any organization's goals: questions,
+> data questions, investigations and web research.
 
 <p align="center">
-  <img src="docs/readme/numbers.svg" alt="Measured on the demo laptop: all four scored scenarios pass 8 of 8, 8 agent roles made per task, a person approves every write, memories go stale 0.1 s after a source edit, 16 of 16 components real, 535 tests passing" width="100%">
+  <img src="docs/readme/numbers.svg" alt="Measured on the demo laptop: all four scored scenarios pass 8 of 8, 8 agent roles made per task, a person approves every write, memories go stale 0.1 s after a source edit, 16 of 16 components real, 564 tests passing" width="100%">
 </p>
 
 ## Contents
 
-1. [Context and overview](#1-context-and-overview): [pitch](#11-elevator-pitch-and-value-proposition) · [badges](#12-badges-and-status-indicators) · [how it works for a user](#13-how-it-works-for-a-user) · [what we are adding next](#14-what-we-are-adding-next)
+1. [Context and overview](#1-context-and-overview): [pitch](#11-elevator-pitch-and-value-proposition) · [badges](#12-badges-and-status-indicators) · [how it works for a user](#13-how-it-works-for-a-user) · [Jev, Gemma 4 and what is next](#14-jev-gemma-4-and-what-is-next) · [challenge requirements](#15-hacktoberfest-hack-day-challenge-requirements)
 2. [Architecture and system design](#2-architecture-and-system-design): [diagrams](#21-architecture-diagrams) · [execution flow](#22-end-to-end-execution-flow) · [documentation](#23-documentation-links)
 3. [Installation and configuration](#3-installation-and-configuration): [prerequisites](#31-prerequisites-and-tech-stack) · [install](#32-step-by-step-installation) · [environment](#33-environment-variables-matrix)
 4. [Developer experience and quality control](#4-developer-experience-and-quality-control): [usage](#41-usage-snippets) · [testing](#42-testing-and-qa-commands)
@@ -74,7 +82,7 @@ Answers arrive without sources, memories never expire, and when a document chang
 
 **The answer.** KAIROS solves all three the way operating systems solved them for programs: **isolation, permissions, a kernel that mediates every privileged operation, and a journal**. Then it gives the people using it what an operating system gives its users: accounts, a desktop, a shell, and a way in from their phone.
 
-**Who it is for.** Teams that want AI agents working on private data without sending it out: operations and finance leads who need answers with sources, approvers who must sign off before anything changes, engineers and IT who need to see and govern what agents do, and organizations that must keep data on hardware they own.
+**Who it is for.** Any organization that wants AI agents working on its private data without sending it out: people who need answers with sources (HR, operations, finance, engineering, legal), analysts who need numbers from the company database, approvers who must sign off before anything changes, engineers and IT who need to see and govern what agents do, and organizations that must keep data on hardware they own.
 
 <p align="center">
   <img src="docs/readme/os-analogy.svg" alt="Classic OS concepts mapped to KAIROS: process to AI agent, filesystem to /org knowledge, system call to governed action, and more" width="100%">
@@ -90,6 +98,7 @@ Answers arrive without sources, memories never expire, and when a document chang
 |---|---|---|
 | Kernel | **Agents are processes** | PIDs, parents, quotas, capabilities, pause, kill, checkpoints; a task resumes after the daemon dies |
 | Governance | **Every action is a syscall** | policy, approval by a person, sandbox, verify, commit or roll back; a hash-chained audit journal (`chain_verified`) |
+| Routing | **The right agents, decided in one pass** | a local Jev decision model scores the goal type and every agent with calibrated probabilities; only agents over 0.5 are created, and the planner's rules take over when it is unsure |
 | Agents | **Agents made for the job** | each task's agents are generated from role templates and bounded by the role, the request, the person's permissions and org policy |
 | Transparency | **A visible thought process** | `task.understood`, `agent.planned`, `agent.thought`; tool results reported by the kernel, not the agent |
 | Knowledge | **A filesystem with provenance** | `/org` documents with owner, privacy, trust and source; hybrid lexical, vector and graph search |
@@ -99,14 +108,15 @@ Answers arrive without sources, memories never expire, and when a document chang
 | Tools | **Connected apps, governed** | Jira, SQL, a sandboxed browser, GitHub, Calendar and MCP servers; writes wait for a person; tokens in an encrypted vault |
 | Data | **Your own files** | uploads, and folders of this computer mounted and watched |
 | Surfaces | **Desktop, phone, shell** | a desktop OS in the browser, an Android app, and KAIROS OS: a Linux where `/org` is a real filesystem |
-| Privacy | **Local by default** | models run on the machine's GPU through Ollama; restricted data never reaches a remote model |
+| Models | **Gemma 4, with a fallback** | `gemma4:e4b-it-qat` plans and reasons on an 8 GB GPU, thinks before it synthesizes and reads sandbox screenshots; Qwen 2.5 takes over if it errors or times out |
+| Privacy | **Local by default** | models and the agent router run on the machine; restricted data never reaches a remote model |
 
 ### 1.2 Badges and status indicators
 
 | Badge | Source |
 |---|---|
 | CI | [GitHub Actions](https://github.com/mishhkaaa/KAIROS/actions/workflows/ci.yml): ruff, the full Python suite against Postgres with pgvector and real Docker sandboxes, and a check that generated contract files are current |
-| Tests | `uv run pytest -q` (442) and `npm --prefix apps/web test` (93) |
+| Tests | `uv run pytest -q` (469) and `npm --prefix apps/web test` (95) |
 | Coverage | `pytest --cov` over the six Python packages: 85% of 10,785 statements (section [4.2](#42-testing-and-qa-commands)) |
 | Code quality | `uvx ruff check .`, `eslint`, and `tsc --noEmit` for the web and phone apps, all clean |
 | Demo gates | four scenarios scored on real models before every merge (section [5.1](#51-benchmarks-and-maturity-status)) |
@@ -114,6 +124,17 @@ Answers arrive without sources, memories never expire, and when a document chang
 | Status | Beta: see section [5.1](#51-benchmarks-and-maturity-status) |
 
 ### 1.3 How it works for a user
+
+<p align="center">
+  <img src="docs/readme/screens/desktop.png" alt="The KAIROS desktop: a greeting with the system's state (69 documents at /org, 9 agents, gemma4 local, Jev router, RTX 5070 Laptop GPU), the Ask bar, widgets for running tasks, approvals, this machine and knowledge, and a wallpaper of /org documents grouped by folder" width="100%">
+</p>
+
+<table>
+<tr>
+<td width="50%" valign="top"><img src="docs/readme/screens/run-jev.png" alt="A live Apollo run: the story on the left with the Jev routing card (an investigation at 0.98, a bar per agent with the 0.5 line), the planner thinking with gemma4, four agents as faces, 28 documents referred to with the vendor email flagged untrusted, and the browser sandbox"><br><b>A live run.</b> The Jev router scores every agent with the 0.5 line, the planner thinks with Gemma 4, the vendor email is flagged untrusted, and the research agent's browser sandbox opens the vendor's page.</td>
+<td width="50%" valign="top"><img src="docs/readme/screens/settings.png" alt="Settings overview: contract 0.14.0, default model gemma4, agent router Jev local, data never leaves the machine, vault encrypted, with an approval request for a Jira write in the corner"><br><b>Settings and an approval.</b> Gemma 4 as the default model, the Jev router running locally, nothing leaving the machine; in the corner, the run has paused for a person to approve its Jira write.</td>
+</tr>
+</table>
 
 **Three ways in.** The same kernel, permissions and audit journal, whichever door you use.
 
@@ -128,7 +149,7 @@ Answers arrive without sources, memories never expire, and when a document chang
 
 <table>
 <tr>
-<td width="33%" valign="top"><b>1. The task docks left and tells its story.</b> What the planner understood, which agents it created and why, what each one thinks, every model call, retrieval and tool call, in order.</td>
+<td width="33%" valign="top"><b>1. The task docks left and tells its story.</b> How the Jev router scored the goal and every agent, what the planner understood, which agents it created and why, what each one thinks, every model call, retrieval and tool call, in order.</td>
 <td width="33%" valign="top"><b>2. The run stage shows what is happening.</b> Agents are faces that work, wait and doze. Every document read appears under "Referred to"; the vendor email hiding a prompt injection is red and untrusted, read as data only.</td>
 <td width="33%" valign="top"><b>3. A person decides, then the kernel commits.</b> Writing to Jira is a privileged syscall, so policy pauses it. Approve from the desktop, the phone or the shell; the write is executed, verified, committed and journaled.</td>
 </tr>
@@ -136,26 +157,74 @@ Answers arrive without sources, memories never expire, and when a document chang
 
 The answer: Apollo is **31% (6.2 lakh) over budget**, with three root causes each cited to its documents, a recovery plan, the research agent's screenshot of the vendor's status page taken in a sandbox with no internet, and `chain_verified: true`.
 
+Every goal starts the same way: the Jev router answers typed questions about it (what kind of goal, which agents, does it ask for a change or for the web), and the story shows a bar per agent with the 0.5 line.
+
 | Ask it | What happens |
 |---|---|
+| *"Summarize the decisions our teams made this week, with the documents behind each one."* | Jev routes it as a question: no specialists and no writes. The planner reads the right documents whole and answers with its sources. |
+| *"What does our security policy say about sharing customer data with vendors?"* | The same path, for any policy, person or system in `/org`. |
 | *"Which vendors did we overpay?"* | Nobody scripted this. The planner creates a data engineer that writes SQL the kernel checks before it runs, and a writer that files the note after approval. CloudCo overpaid by 1.44 lakh, PayCo by 0.42, TalentX by 0.11. |
 | *"What do we know about Priya?"* | A plain question: no specialists, no writes. The planner reads the documents that hold the rarest words of the question and answers with its sources. |
-| *"What is the latest Python release? Search the web."* | The web researcher searches and reads public pages through governed `browser.open` syscalls, in a sandbox whose only route out is the public internet. |
+| *"What is the latest stable Python release? Search the web."* | Jev scores the web researcher high. It searches (Wikipedia first, then other engines) and reads public pages with Playwright through governed `browser.open` syscalls, in a sandbox whose only route out is the public internet, and answers with the URLs it read. |
 | *"Why is Apollo over budget?"* | A focused investigation: only the finance specialist runs, and nothing is written. |
 
 The desktop also has **Settings** (one read-only picture of the running system: model routing, agents, tools and their risk, what needs a human, the stack with live health), **Organization** (people, invitations and the role matrix, enforced on every gateway route), **Connections** (GitHub and Google Calendar as governed tools; reads allowed, writes wait for an approver; tokens encrypted and never shown to an agent) and **Add knowledge** (drag files in with live progress, or mount a folder of this computer that is watched and re-ingested as you save).
 
-### 1.4 What we are adding next
+### 1.4 Jev, Gemma 4 and what is next
 
-| | What it does |
-|---|---|
-| **JEPA agent router** | After the planner reads a goal, a small joint-embedding predictive model trained on past runs predicts the ideal team in embedding space and gives every agent a spawn probability in one pass. Agents above the threshold start at once; when no agent is confident, the LLM planner decides and the run becomes training data. |
-| **n8n workflows on a schedule** | When the same plan shape keeps repeating, it is frozen into an n8n workflow and run by a cron trigger, with no re-planning or re-spawning. Every workflow step still calls the gateway, so policy, approval and audit apply. |
-| **Gemma 4 alongside Qwen 2.5** | Ollama serves both; the model router sends harder reasoning, screenshots and long documents to Gemma 4. |
+**The Jev agent router, run locally.** Asking a language model "which agents should handle this?" on every goal is
+slow and inconsistent. The planner asks its routing questions in Jev's typed format (TypeSafe's System One interface:
+a state plus `choice`, `score` and `noul` questions, answered with calibrated probabilities instead of generated text).
+The answers come from Laya, the open Jev-compatible decision model (Apache 2.0), on this machine's CPU: no API key,
+and the goal never leaves the machine. One call answers eleven questions in about 3.5 s on a laptop CPU:
+
+| Question | Type | Used for |
+|---|---|---|
+| What kind of request is this? | `choice`: question, data, investigation | the planner's path |
+| Is each role needed? (finance, engineering, research, analyst, data engineer, writer, web researcher, action) | `noul` per role | which agents are created (at or above 0.5) |
+| Does it ask to change something? | `noul` | whether the action agent and its approved write run |
+| Does it need the public internet? | `noul` | whether the web researcher runs |
+
+The router is a guide inside guard rails: an investigation needs a project to record its findings on, a database
+question named outright stays one, Jev can add a write but never remove one the goal asked for, and an answer under
+0.55 confidence leaves the decision to the planner's rules. The story shows the scores (`task.understood.route_scores`,
+`agent.planned.score`), Settings shows whether the router is running, and `KAIROS_JEV=off` switches it off.
+
+**Gemma 4 as the default model.** `gemma4:e4b-it-qat` (about 6 GB, quantization-aware) plans, reasons and extracts
+on an 8 GB GPU. Its thinking mode is on for the investigation's synthesis (`ModelRequest.think`), and its vision reads
+the research agent's sandbox screenshot of a vendor's status page (`ChatMessage.images`): status tables and badges
+that text extraction flattens. A model that is not pulled is skipped; one that errors or times out is retried on
+Qwen 2.5 7B, then Llama 3.2 (`fallback` in [`models/models.yaml`](models/models.yaml)).
+
+**Next: n8n workflows on a schedule.** When the same plan shape keeps repeating, it will be frozen into an n8n
+workflow and run by a cron trigger, with no re-planning or re-spawning. Every workflow step will still call the
+gateway, so policy, approval and audit apply.
 
 <p align="center">
-  <img src="docs/readme/architecture-next.svg" alt="KAIROS architecture with the JEPA agent router, n8n workflows on a cron trigger and Gemma 4 marked in gold" width="100%">
+  <img src="docs/readme/architecture-next.svg" alt="KAIROS architecture with the Jev agent router, n8n workflows on a cron trigger and Gemma 4 marked in gold" width="100%">
 </p>
+
+### 1.5 Hacktoberfest Hack Day challenge requirements
+
+| Requirement | How KAIROS meets it |
+|---|---|
+| **Best Use of Gemma 4:** Gemma 4 plays a meaningful role | `gemma4:e4b-it-qat` is the default model for every agent: planning, reasoning, extraction and answers. Its **thinking mode** is on for the investigation's synthesis, its **vision** reads the research agent's sandbox screenshots, and its long context lets the planner read whole documents. See [section 1.4](#14-jev-gemma-4-and-what-is-next) and [`models/models.yaml`](models/models.yaml). |
+| **Best Open-Source AI Project:** open-source or open-weight AI is important | Every model is open-weight and runs locally: Gemma 4 does the reasoning, the Jev-compatible Laya model routes the agents, `nomic-embed-text` powers search and memory, and Qwen 2.5 is the fallback. No feature needs a cloud API. |
+| **Public GitHub repository with an open-source license** | This repository, [github.com/mishhkaaa/KAIROS](https://github.com/mishhkaaa/KAIROS), under the [MIT License](LICENSE). The Python client is published on PyPI as [`kairos-os`](https://pypi.org/project/kairos-os/) (MIT). |
+| **Be honest about what is implemented and planned** | Implemented and verified: everything in sections 1.1 to 1.4 except n8n workflows, which are the next step. The scored benchmarks in section 5.1 were measured on Qwen 2.5 and are being re-run on Gemma 4. |
+
+**Open models and their licenses**
+
+| Model | Role in KAIROS | License |
+|---|---|---|
+| Gemma 4 E4B (`gemma4:e4b-it-qat`) | default model: reasoning, thinking, vision | Apache 2.0 |
+| Laya (`convaiinnovations/laya`) | the Jev-compatible agent router, on the CPU | Apache 2.0 |
+| nomic-embed-text | embeddings for hybrid search and memory | Apache 2.0 |
+| Qwen 2.5 7B Instruct | fallback chat model | Apache 2.0 |
+| Llama 3.2 3B | last-resort fallback | Llama 3.2 Community License |
+
+KAIROS's own code is MIT. Models are downloaded by Ollama and Hugging Face at install time and are not redistributed in this repository.
+
 
 ---
 
@@ -237,7 +306,8 @@ sequenceDiagram
     participant A as action-agent@T
     U->>K: submit goal (Alt Space)
     K->>P: spawn root process
-    P-->>U: task.understood, agent.planned (the story)
+    P->>P: Jev router (local): goal type + a probability per agent
+    P-->>U: task.understood with the scores, agent.planned (the story)
     P->>K: hybrid search over /org
     K-->>P: evidence (vendor email flagged UNTRUSTED)
     rect rgba(43,184,163,0.12)
@@ -249,7 +319,8 @@ sequenceDiagram
     F-->>P: overrun 6.2 lakh (31%), cited drivers
     E-->>P: backfill failure on APOLLO-12, vendor block
     R->>S: browser.open vendor-docs (allowlisted, no internet)
-    S-->>R: screenshot: SDK v5 GA slipped
+    S-->>R: page text + screenshot
+    R->>R: Gemma 4 reads the screenshot: SDK v5 GA slipped
     R-->>P: findings with sources
     end
     P->>A: create with the findings
@@ -262,7 +333,7 @@ sequenceDiagram
     K->>K: execute, verify, commit, append audit
     end
     A-->>P: committed
-    P->>K: 3 cited root causes + recovery-plan.md
+    P->>K: Gemma 4 thinks, then 3 cited root causes + recovery-plan.md
     K-->>U: result, memories consolidated, generated agents cleaned up
 ```
 
@@ -351,21 +422,22 @@ Every non-final state can also move to `TERMINATED` (a kill; a task is cancelled
 | Python | **>= 3.12** | managed by [uv](https://docs.astral.sh/uv/) (>= 0.4) |
 | Node.js | **>= 20** (tested on 24) | the desktop (Next.js 16) and the phone app (Expo SDK 57) |
 | Docker | **>= 24** (tested on Docker Desktop 28) | Postgres + pgvector, Redis, the vendor site, and the agent sandboxes |
-| Ollama | **>= 0.5** (tested on 0.34) | `qwen2.5:7b-instruct` and `nomic-embed-text` |
-| GPU | **NVIDIA, >= 8 GB VRAM** | tested on an RTX 5070 Laptop (8 GB); the 7B model must fit entirely on the GPU. No GPU: use the mock gateway or fake mode |
+| Ollama | **>= 0.5** (tested on 0.34) | `gemma4:e4b-it-qat` and `nomic-embed-text`; `qwen2.5:7b-instruct` as the fallback |
+| Agent router | the `jev` dependency group | the Jev-compatible decision model on the CPU; about 1.7 GB of weights on first use |
+| GPU | **NVIDIA, >= 8 GB VRAM** | tested on an RTX 5070 Laptop (8 GB); Gemma 4 E4B must fit entirely on the GPU. No GPU: use the mock gateway or fake mode |
 | RAM / disk | **16 GB** (32 GB recommended) / about 25 GB free | models, images and the Android SDK |
 | OS | Windows 11 (the demo machine) or Linux | `scripts/win/*.ps1` for Windows; a Linux appliance installer in `infra/appliance` |
 | Optional: phone | Android Studio (SDK 36, JDK 21) | to build the APK; any Android 10+ phone or the emulator |
 | Optional: KAIROS OS | WSL 2 | `scripts/wsl/install-kairos-os.ps1` creates its own distro |
 
-**Stack:** FastAPI and Pydantic v2 (gateway, kernel, contract) · Postgres 16 with pgvector · Redis 7 · Ollama · Docker (sandboxes, Playwright browser, MCP) · Next.js 16, Tailwind 4, TanStack Query · Expo SDK 57, React Native 0.86 · Ubuntu 24.04 on WSL with FUSE · Google Identity, Fernet (vault).
+**Stack:** FastAPI and Pydantic v2 (gateway, kernel, contract) · Postgres 16 with pgvector · Redis 7 · Ollama with Gemma 4 · Jev-compatible decision model (Laya, PyTorch on the CPU) · Docker (sandboxes, Playwright browser, MCP) · Next.js 16, Tailwind 4, TanStack Query · Expo SDK 57, React Native 0.86 · Ubuntu 24.04 on WSL with FUSE · Google Identity, Fernet (vault).
 
 ### 3.2 Step-by-step installation
 
 ```bash
 # 1. clone and install
 git clone https://github.com/mishhkaaa/KAIROS && cd KAIROS
-uv sync --all-packages --all-extras
+uv sync --all-packages --all-extras --group jev        # --group jev adds the local agent router
 npm --prefix apps/web ci
 cp .env.example .env                                   # tests read it; keep KAIROS_DEFAULT_MODE=fake there
 
@@ -375,12 +447,13 @@ docker build -t kairos/sandbox-base:latest    execution/images/sandbox-base
 docker build -t kairos/sandbox-browser:latest execution/images/sandbox-browser
 
 # 3. local models
-ollama pull qwen2.5:7b-instruct && ollama pull nomic-embed-text
+ollama pull gemma4:e4b-it-qat && ollama pull nomic-embed-text
+ollama pull qwen2.5:7b-instruct                        # optional: the fallback model
 
 # 4. the kernel and gateway, on real components
 export KAIROS_DEFAULT_MODE=real KAIROS_OKF_DIR=./data/okf KAIROS_KNOWLEDGE_WATCH=true \
        KAIROS_MODELS_CONFIG=./models/models.7b-only.yaml KAIROS_GATEWAY_PORT=8089
-uv run kairosd                                         # leave running; Swagger at http://localhost:8089/docs
+uv run kairosd                                         # leave running; loads the Jev router at boot; Swagger at /docs
 
 # 5. in a second terminal: index the knowledge, seed the demo database
 curl -X POST http://localhost:8089/knowledge/reindex
@@ -388,14 +461,14 @@ uv run python scripts/seed_demo_data.py
 
 # 6. the desktop
 cd apps/web && echo "NEXT_PUBLIC_KAIROS_URL=http://localhost:8089" > .env.local
-npm run build && npx next start -p 3000                # open http://localhost:3000
+npm run build && npx next start -p 3000                # open http://localhost:3000 (or `npx next dev -p 3000`)
 
 # 7. verify
 uv run python scripts/preflight.py --gateway http://127.0.0.1:8089                 # must print "all green"
 uv run python scripts/demo_run.py run --auto-approve --check-story --gateway http://127.0.0.1:8089   # 8/8
 ```
 
-**On the Windows demo laptop** the same steps are scripted: `scripts\win\kairos-boot.ps1` starts everything and opens the boot screen; `scripts\win\reset-demo.ps1` resets between rehearsals. On an 8 GB GPU use `models/models.7b-only.yaml`; run the stack's Postgres on 5434 if a native one holds 5432.
+**On the Windows demo laptop** the same steps are scripted: `scripts\win\kairos-boot.ps1` starts everything and opens the boot screen; `scripts\win\reset-demo.ps1` resets between rehearsals. On an 8 GB GPU use `models/models.7b-only.yaml` (Gemma 4 for every class, Qwen as the fallback). Machine-specific ports go in `scripts/win/local.ps1` (git-ignored), for example `$env:KAIROS_PG_PORT = "5435"` when another Postgres holds 5432.
 
 <details>
 <summary><b>No GPU: every screen against the contract's mock gateway</b></summary>
@@ -437,8 +510,9 @@ Every setting is read by `kairos_contracts.wiring.Settings` with the prefix `KAI
 | `KAIROS_REDIS_URL` | the event mirror | URL | `redis://127.0.0.1:6379/0` | |
 | `KAIROS_DEMO_DATA_URL` | the demo company's database behind the SQL tool | URL | `postgresql+psycopg://kairos:kairos@localhost:5432/kairos_demo_data` | for vendors, multitool |
 | `KAIROS_OLLAMA_URL` | the model runtime | URL | `http://localhost:11434` | **yes** |
-| `KAIROS_DEFAULT_CHAT_MODEL` · `KAIROS_DEFAULT_EMBED_MODEL` | fallback models | string | `qwen2.5:7b-instruct` · `nomic-embed-text` | |
-| `KAIROS_MODELS_CONFIG` | model routing per kind of task | path | `./models/models.yaml` | 8 GB GPU: `models.7b-only.yaml` |
+| `KAIROS_DEFAULT_CHAT_MODEL` · `KAIROS_DEFAULT_EMBED_MODEL` | models when no routing file is read | string | `qwen2.5:7b-instruct` · `nomic-embed-text` | |
+| `KAIROS_JEV` | the local Jev agent router; `off` makes the planner's rules choose the agents | `on \| off` | `on` (when installed) | |
+| `KAIROS_MODELS_CONFIG` | model routing per kind of task, with a `fallback` list | path | `./models/models.yaml` | 8 GB GPU: `models.7b-only.yaml` |
 | `KAIROS_GATEWAY_HOST` · `KAIROS_GATEWAY_PORT` | where the gateway listens | string · int | `0.0.0.0` · `8080` | demo uses `8089` |
 | `KAIROS_KNOWLEDGE_WATCH` | republish edits under the bundle (memory invalidation) | bool | `false` | **yes** (`true`) |
 | `KAIROS_FIREWALL_LLM` | add the local LLM classifier to the regex firewall | bool | `false` | |
@@ -519,9 +593,9 @@ wsl -d kairos-os -- kairos ask "Brief me on Zeus"     # KAIROS OS
 command for any machine that can reach a gateway. Full documentation: [`sdk/python/README.md`](sdk/python/README.md).
 
 ```bash
-pip install kairos-os
+pip install kairos-os                                   # https://pypi.org/project/kairos-os/
 kairos connect https://your-gateway.example && kairos login --as priya@acme.example
-kairos ask "Why is Project Apollo over budget?"
+kairos ask "Summarize the decisions our teams made this week"
 ```
 
 ```python
@@ -533,12 +607,12 @@ task = Kairos("http://localhost:8089").ask("Brief me on Zeus budget risk", on_en
 
 | What | Command |
 |---|---|
-| Python unit, contract and integration suites (442) | `uv run pytest -q` |
+| Python unit, contract and integration suites (469) | `uv run pytest -q` (the Jev router is off in tests; `agents/tests/test_routing.py` covers it) |
 | A single package | `uv run pytest -q kernel/tests` (also `knowledge/`, `agents/`, `execution/`, `models/`, `shared/python/tests`, `tests/integration`) |
 | Coverage (85%) | `uv run --with pytest-cov pytest -q --cov=kernel/kairos_kernel --cov=knowledge/kairos_knowledge --cov=agents/kairos_agents --cov=execution/kairos_execution --cov=models/kairos_models --cov=shared/python/kairos_contracts` |
 | Python lint and static analysis | `uvx ruff check .` |
 | Contract artifacts are current | `uv run kairos-export-contracts && git diff --exit-code shared/` |
-| Desktop: lint, unit tests (93, incl. WCAG contrast), build | `npm --prefix apps/web run lint` · `npm --prefix apps/web test` · `npm --prefix apps/web run build` |
+| Desktop: lint, unit tests (95, incl. WCAG contrast), build | `npm --prefix apps/web run lint` · `npm --prefix apps/web test` · `npm --prefix apps/web run build` |
 | Phone: types and contrast | `npm --prefix apps/mobile run typecheck` · `npm --prefix apps/mobile run contrast` |
 | Readiness of a live stack | `uv run python scripts/preflight.py --gateway http://127.0.0.1:8089` |
 | End-to-end scenario gates on real models | `uv run python scripts/demo_run.py run --auto-approve --check-story [--scenario zeus\|vendors\|multitool]` |
@@ -552,7 +626,7 @@ CI runs ruff, the full Python suite against Postgres with pgvector and real Dock
 
 ### 5.1 Benchmarks and maturity status
 
-Measured on the demo laptop (RTX 5070 Laptop GPU, 8 GB; `qwen2.5:7b-instruct`, fully on the GPU).
+Measured on the demo laptop (RTX 5070 Laptop GPU, 8 GB; `qwen2.5:7b-instruct`, fully on the GPU). Gemma 4 is now the default; the scenario gates are being re-run on it, and Qwen remains the fallback that produced these scores.
 
 | End-to-end scenario | Score | Wall time |
 |---|---|---|
@@ -564,7 +638,8 @@ Measured on the demo laptop (RTX 5070 Laptop GPU, 8 GB; `qwen2.5:7b-instruct`, f
 
 | Component metric | Result |
 |---|---|
-| Model throughput | >= 25 tokens/s required by preflight, 7B fully on the GPU |
+| Model throughput | >= 25 tokens/s required by preflight, the chat model fully on the GPU |
+| Agent routing (Jev, local, CPU) | about 3.5 s for eleven typed questions; about a minute to load at boot |
 | Memory invalidation after a source edit | about 0.1 s |
 | Memory re-derivation | about 3.5 s |
 | Retrieval quality on the QA set | 10/10 answered, MRR 0.90 |
@@ -594,7 +669,9 @@ Measured on the demo laptop (RTX 5070 Laptop GPU, 8 GB; `qwen2.5:7b-instruct`, f
 | `403 PERMISSION_DENIED` | the caller's role does not allow it | expected: see the role matrix in the Organization app; dev mode header callers are owners |
 | Vendors or multitool fail on SQL | `kairos_demo_data` missing or not seeded | `uv run python scripts/seed_demo_data.py` (also before each rehearsal) |
 | The policy engine fails at boot after adding a YAML file | every `policies/*.yaml` is loaded as a policy | put non-policy tables in a subfolder (`policies/rbac/`) |
-| Browser tests skip; no sandbox screenshot | the browser image is not built | `docker build -t kairos/sandbox-browser:latest execution/images/sandbox-browser` |
+| Every `browser.open` fails; browser tests skip; no sandbox screenshot | the sandbox images are not built under the `kairos/` names | `docker build -t kairos/sandbox-base:latest execution/images/sandbox-base` and `docker build -t kairos/sandbox-browser:latest execution/images/sandbox-browser` |
+| The story says "Routed by the planner's rules" | the Jev router is not installed or `KAIROS_JEV=off` | `uv sync --all-packages --all-extras --group jev`, restart kairosd; Settings then shows "agent router: Jev, local" |
+| Answers come from Qwen, not Gemma | `gemma4:e4b-it-qat` is not pulled, or it errored and the router fell back | `ollama pull gemma4:e4b-it-qat`; the kairosd log names every fallback |
 | The phone cannot connect | `10.0.2.2` only works on the emulator; a phone needs the laptop's address | USB: `adb reverse tcp:8089 tcp:8089` and `http://localhost:8089`; Wi-Fi: `scripts\win\phone-access.ps1` |
 | APK build dies quietly or with "insufficient memory" | Gradle killed with its shell, stderr as fatal in PowerShell, or the paging file exhausted | `apps/mobile/scripts/build-apk.ps1` handles the first two; close the emulator or pass `-Workers 2` |
 | `apt` hangs while installing KAIROS OS | some networks drop large packets on WSL's NAT path | the installer relays apt through Windows (`scripts/wsl/apt-proxy.py`) |
@@ -602,7 +679,8 @@ Measured on the demo laptop (RTX 5070 Laptop GPU, 8 GB; `qwen2.5:7b-instruct`, f
 | A rehearsal's answer cites unexpected documents | uploads, mounts or synced connector data are still in `/org` | remove `data/okf/uploads`, `mnt`, `github`, `calendar`; disconnect connectors; `reset-demo.ps1` |
 
 **Technical trade-offs**
-- **A 7B local model** keeps data on the machine and fits an 8 GB laptop GPU, at the cost of shorter reasoning than large hosted models; prompts and agents are written to its strengths, and every run is scored.
+- **A small local model** (Gemma 4 E4B) keeps data on the machine and fits an 8 GB laptop GPU, at the cost of shorter reasoning than large hosted models; prompts and agents are written to its strengths, and every run is scored.
+- **A zero-shot decision model for routing**: the Jev-compatible checkpoint is not fine-tuned on KAIROS goals yet, so the guard rails and the rules stay in charge whenever it is unsure; fine-tuning on logged routing decisions is the next step.
 - **Regex plus an optional classifier** in the firewall: the regex is fast and never misses a known pattern; the classifier catches rewordings but costs about 0.2 s per document, so it is opt-in.
 - **SQL checks without a parser** (none is in the lock file): the kernel refuses any statement it cannot read with confidence, so some valid queries are refused.
 - **Mounted folders are read-only mirrors**: agents never write to your disk; changes go through governed paths.
@@ -629,7 +707,7 @@ The security model in one breath: agents hold no credentials and act only throug
 | | Owns |
 |---|---|
 | **Kamal Karteek U** ([@kamalllx](https://github.com/kamalllx)) | the kernel and governed execution, the desktop OS, KAIROS OS on WSL, the phone app and APK |
-| **Mishka Tiwari** ([@mishhkaaa](https://github.com/mishhkaaa)) | agents and the planner, dynamic agents, the thought-process stream, the SQL tool, the JEPA router |
+| **Mishka Tiwari** ([@mishhkaaa](https://github.com/mishhkaaa)) | agents and the planner, dynamic agents, the thought-process stream, the SQL tool, the Jev router |
 | **Mayeraa Singh** ([@mayeraasingh](https://github.com/mayeraasingh)) | knowledge, ingestion and retrieval, identity, organizations and connectors |
 | **Manjunath Patil** ([@manjunath3155](https://github.com/manjunath3155)) | models and routing, n8n workflows, platform and infrastructure, the Python package, demo data |
 

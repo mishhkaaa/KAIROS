@@ -59,3 +59,23 @@ describe("run story", () => {
     expect(story.every((x) => x.status !== "active")).toBe(true);
   });
 });
+
+describe("the routing decision", () => {
+  it("shows Jev's scores once, highest first, with the agents over the line marked", () => {
+    const understood = ev("task.understood", { intent: "why is Apollo late", plan_summary: "x", goal_type: "investigation", router: "jev",
+      route_scores: { "research-agent": 0.2, "finance-agent": 0.91, "engineering-agent": 0.6 }, route_ms: 38.4 }, 101);
+    const story = buildStory([understood, { ...understood, event_id: "again" } as Event,
+      ev("agent.planned", { role: "finance-agent", why: "budget", score: 0.91 }, 101)], agents, "running");
+    expect(story.map((x) => x.kind)).toEqual(["understood", "routed", "understood", "planned"]);
+    expect(story[1].title).toBe("Jev routed this locally in 38 ms: an investigation");
+    expect(story[1].scores).toEqual([{ role: "finance-agent", p: 0.91, on: true }, { role: "engineering-agent", p: 0.6, on: true },
+      { role: "research-agent", p: 0.2, on: false }]);
+    expect(new Set(story.map((x) => x.id)).size).toBe(story.length);
+    expect(story[3].title).toBe("Chose a finance-agent (Jev 0.91)");
+  });
+
+  it("says when the rules chose the agents", () => {
+    const story = buildStory([ev("task.understood", { intent: "q", plan_summary: "x", goal_type: "question", router: "rules" })], {}, "running");
+    expect(story[1]).toMatchObject({ kind: "routed", title: "Routed by the planner's rules: a question" });
+  });
+});

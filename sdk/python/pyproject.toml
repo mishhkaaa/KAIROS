@@ -28,7 +28,7 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Homepage = "https://kairos-os-black.vercel.app"
+Homepage = "https://kairos-site-brown.vercel.app"
 Source = "https://github.com/mishhkaaa/KAIROS"
 Documentation = "https://github.com/mishhkaaa/KAIROS/tree/main/sdk/python#readme"
 Issues = "https://github.com/mishhkaaa/KAIROS/issues"

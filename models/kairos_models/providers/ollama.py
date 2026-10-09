@@ -7,6 +7,7 @@ from __future__ import annotations
 import json
 import logging
 import time
+from typing import Any
 
 import httpx
 from kairos_contracts.errors import KairosError
@@ -23,6 +24,15 @@ def task_prefixed(model: str, req: EmbedRequest) -> list[str]:
     """The texts as the model expects them: nomic models get their task prefix when the request says what they are."""
     prefix = _NOMIC_PREFIX.get(req.input_type or "") if model.split(":")[0].endswith("nomic-embed-text") else None
     return [f"{prefix}{t}" for t in req.texts] if prefix else list(req.texts)
+
+
+# Model families with a thinking mode; other models are never sent `think` (Ollama refuses it for them).
+THINKING_FAMILIES = ("gemma4", "qwen3", "deepseek-r1", "gpt-oss")
+THINK_BUDGET = 1024
+
+
+def thinks(model: str) -> bool:
+    return model.split("/")[-1].startswith(THINKING_FAMILIES)
 
 
 class OllamaProvider:
@@ -44,11 +54,17 @@ class OllamaProvider:
             return KairosError("MODEL_UNAVAILABLE", f"{what}: cannot reach Ollama at {self.base_url} ({kind})")
         return KairosError("MODEL_UNAVAILABLE", f"{what}: {kind}: {e}")
 
-    def _body(self, req: ModelRequest, model: str, stream: bool) -> dict:
+    def _body(self, req: ModelRequest, model: str, stream: bool, think: bool = True) -> dict:
+        def message(m: Any) -> dict:
+            out = {"role": m.role.value, "content": m.content}
+            if m.images:
+                out["images"] = m.images  # base64, for vision models (Gemma 4)
+            return out
+
         body: dict = {
             "model": model,
             "stream": stream,
-            "messages": [{"role": m.role.value, "content": m.content} for m in req.messages],
+            "messages": [message(m) for m in req.messages],
             "options": {
                 "temperature": req.temperature,
                 "num_predict": req.max_tokens,
@@ -57,12 +73,18 @@ class OllamaProvider:
         }
         if req.json_schema:
             body["format"] = req.json_schema  # Ollama structured outputs
+        if req.think and think and thinks(model):
+            body["think"] = True
+            body["options"]["num_predict"] = req.max_tokens + THINK_BUDGET  # the thinking comes out of the same budget
         return body
 
     async def generate(self, req: ModelRequest, model: str) -> ModelResponse:
         t0 = time.perf_counter()
         try:
             r = await self.client.post("/api/chat", json=self._body(req, model, stream=False))
+            if r.status_code == 400 and req.think and "think" in r.text.lower():
+                # This build of the model has no thinking mode: answer without it
+                r = await self.client.post("/api/chat", json=self._body(req, model, stream=False, think=False))
             r.raise_for_status()
         except httpx.HTTPStatusError as e:
             raise KairosError("MODEL_UNAVAILABLE", f"ollama {model}: HTTP {e.response.status_code} — {e.response.text[:200]}") from e

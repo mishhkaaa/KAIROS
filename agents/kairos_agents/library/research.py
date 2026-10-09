@@ -21,6 +21,7 @@ from kairos_agents.sdk import (
     cite,
     gather_evidence,
     keep_retrieved,
+    look,
     plural,
     project_of,
     propose_action,
@@ -54,6 +55,23 @@ VENDORS: dict[str, tuple[str, str, str]] = {
 
 class ResearchAgent(KairosAgent):
     """Gathers evidence from knowledge base and web pages for research tasks."""
+
+    @staticmethod
+    async def _read_screenshot(ctx: Any, artifacts: list[str], goal: str) -> str:
+        """Gemma 4 reads the sandbox's screenshot of the page: status tables and badges often carry what the page's text
+        extraction flattens. Empty when there is no screenshot or no vision model."""
+        shots = [a for a in artifacts or [] if str(a).endswith(".png")]
+        if not shots:
+            return ""
+        try:
+            png = await ctx.get_artifact(shots[-1])
+        except Exception:  # noqa: BLE001
+            return ""
+        seen = await look(ctx, png, f"This is a vendor's web page. What does it say that matters for: {goal[:300]}? "
+                                    "List release names, statuses and dates exactly as shown.")
+        if seen:
+            await think(ctx, "read", "Read the page's screenshot with the vision model.")
+        return seen
 
     async def run(self, goal: str, ctx: Any) -> AgentResult:
         await ctx.log("research-agent: starting", data={"goal": goal[:200]})
@@ -95,6 +113,9 @@ class ResearchAgent(KairosAgent):
                     browser_text = f"\nVendor docs ({vendor_url}):\n{page_text[:1000]}"
                     urls_opened.append(vendor_url)
                     await ctx.log(f"research-agent: opened {vendor_url}")
+                    seen_page = await self._read_screenshot(ctx, result.tool_result.artifacts, goal)
+                    if seen_page:
+                        browser_text += f"\nWhat the screenshot of {vendor_url} shows (read by the vision model):\n{seen_page[:800]}"
             except Exception as e:
                 await ctx.log(f"research-agent: browser open failed (non-fatal): {e}", level="warning")
 

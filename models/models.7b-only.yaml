@@ -1,15 +1,18 @@
 # Model routing for an 8 GB GPU (P3): one chat model stays resident next to the embedder, so a summarization call
-# never evicts the 7B mid-run. Select it with KAIROS_MODELS_CONFIG=./models/models.7b-only.yaml.
+# never evicts it mid-run. Gemma 4 E4B (QAT, about 6 GB) does everything, vision included; Qwen 2.5 7B takes over only
+# when Gemma is not pulled, errors or times out. Select it with KAIROS_MODELS_CONFIG=./models/models.7b-only.yaml.
 embedding: nomic-embed-text
-default: qwen2.5:7b-instruct
+default: gemma4:e4b-it-qat
 by_task_class:
-  planning: qwen2.5:7b-instruct
-  reasoning: qwen2.5:7b-instruct
-  extraction: qwen2.5:7b-instruct
-  summarization: qwen2.5:7b-instruct
-  classification: qwen2.5:7b-instruct
-  code: qwen2.5-coder:7b
-  vision: llava:7b
-latency_critical: qwen2.5:7b-instruct
+  planning: gemma4:e4b-it-qat
+  reasoning: gemma4:e4b-it-qat
+  extraction: gemma4:e4b-it-qat
+  summarization: gemma4:e4b-it-qat
+  classification: gemma4:e4b-it-qat
+  code: gemma4:e4b-it-qat
+  vision: gemma4:e4b-it-qat
+latency_critical: gemma4:e4b-it-qat
+fallback:
+  - qwen2.5:7b-instruct
 remote:
   enabled: false          # approved remote models only; never for privacy=restricted

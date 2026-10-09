@@ -3,7 +3,7 @@
   "info": {
     "title": "KAIROS Gateway API",
     "description": "Contract for the KAIROS kernel gateway. Served here by the mock implementation.",
-    "version": "0.13.0"
+    "version": "0.14.0"
   },
   "paths": {
     "/health": {

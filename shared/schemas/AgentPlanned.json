@@ -26,6 +26,21 @@
       },
       "title": "Capabilities",
       "type": "array"
+    },
+    "score": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Laya's probability that this role is needed",
+      "title": "Score"
     }
   },
   "required": [

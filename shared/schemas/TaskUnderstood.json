@@ -30,6 +30,53 @@
       "maxLength": 240,
       "title": "Plan Summary",
       "type": "string"
+    },
+    "goal_type": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "\"question\", \"data\" or \"investigation\"",
+      "title": "Goal Type"
+    },
+    "router": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "What chose the agents: \"laya\" (the decision model) or \"rules\"",
+      "title": "Router"
+    },
+    "route_scores": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "description": "Laya's probability that each role is needed",
+      "title": "Route Scores",
+      "type": "object"
+    },
+    "route_ms": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "How long the routing decision took",
+      "title": "Route Ms"
     }
   },
   "required": [

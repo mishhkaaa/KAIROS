@@ -92,6 +92,10 @@ class TaskUnderstood(Contract):
     entities: list[str] = Field(default_factory=list, max_length=20, description='e.g. ["Project Apollo", "APOLLO-12"]')
     capabilities_needed: list[str] = Field(default_factory=list, max_length=20, description="e.g. knowledge.search, jira.write")
     plan_summary: str = Field(max_length=MAX_THOUGHT_CHARS)
+    goal_type: str | None = Field(None, description='"question", "data" or "investigation"')
+    router: str | None = Field(None, description='What chose the agents: "jev" (the decision model) or "rules"')
+    route_scores: dict[str, float] = Field(default_factory=dict, description="Jev's probability that each role is needed")
+    route_ms: float | None = Field(None, description="How long the routing decision took")
 
 
 class AgentPlanned(Contract):
@@ -100,6 +104,7 @@ class AgentPlanned(Contract):
     why: str = Field(max_length=MAX_THOUGHT_CHARS)
     scope: list[str] = Field(default_factory=list, description="/org paths or globs it may read")
     capabilities: list[str] = Field(default_factory=list)
+    score: float | None = Field(None, ge=0, le=1, description="Jev's probability that this role is needed")
 
 
 class AgentCreated(Contract):

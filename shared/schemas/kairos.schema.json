@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "KAIROS",
-  "description": "KAIROS contracts v0.13.0",
+  "description": "KAIROS contracts v0.14.0",
   "type": "object",
   "$defs": {
     "PrincipalKind": {
@@ -2702,6 +2702,13 @@
             }
           ],
           "default": null
+        },
+        "images": {
+          "description": "Base64 images for a vision model (Gemma 4 reads screenshots)",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         }
       },
       "required": [
@@ -2802,6 +2809,11 @@
             "type": "string"
           },
           "type": "array"
+        },
+        "think": {
+          "default": false,
+          "description": "Ask a reasoning model to think before it answers (Gemma 4's thinking mode)",
+          "type": "boolean"
         },
         "task_id": {
           "anyOf": [
@@ -3950,6 +3962,49 @@
         "plan_summary": {
           "maxLength": 240,
           "type": "string"
+        },
+        "goal_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "\"question\", \"data\" or \"investigation\""
+        },
+        "router": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "What chose the agents: \"laya\" (the decision model) or \"rules\""
+        },
+        "route_scores": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "description": "Laya's probability that each role is needed",
+          "type": "object"
+        },
+        "route_ms": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "How long the routing decision took"
         }
       },
       "required": [
@@ -3983,6 +4038,20 @@
             "type": "string"
           },
           "type": "array"
+        },
+        "score": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Laya's probability that this role is needed"
         }
       },
       "required": [

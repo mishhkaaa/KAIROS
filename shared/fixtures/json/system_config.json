@@ -1,7 +1,7 @@
 {
   "versions": {
     "kairos": "0.1.0",
-    "contract": "0.13.0",
+    "contract": "0.14.0",
     "python": "3.12.10",
     "node": "24.18.0"
   },

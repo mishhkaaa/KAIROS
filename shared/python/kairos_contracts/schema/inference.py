@@ -20,6 +20,7 @@ class ChatMessage(Contract):
     role: Role
     content: str
     name: str | None = None
+    images: list[str] = Field(default_factory=list, description="Base64 images for a vision model (Gemma 4 reads screenshots)")
 
 
 class TaskClass(StrEnum):
@@ -48,6 +49,7 @@ class ModelRequest(Contract):
     temperature: float = 0.2
     json_schema: dict[str, Any] | None = Field(None, description="Request structured JSON output")
     stop: list[str] = Field(default_factory=list)
+    think: bool = Field(False, description="Ask a reasoning model to think before it answers (Gemma 4's thinking mode)")
     # accounting — filled by the kernel's AgentContext, not by agents
     task_id: TaskId | None = None
     pid: Pid | None = None

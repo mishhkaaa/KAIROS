@@ -21,6 +21,14 @@
           ],
           "default": null,
           "title": "Name"
+        },
+        "images": {
+          "description": "Base64 images for a vision model (Gemma 4 reads screenshots)",
+          "items": {
+            "type": "string"
+          },
+          "title": "Images",
+          "type": "array"
         }
       },
       "required": [
@@ -138,6 +146,12 @@
       },
       "title": "Stop",
       "type": "array"
+    },
+    "think": {
+      "default": false,
+      "description": "Ask a reasoning model to think before it answers (Gemma 4's thinking mode)",
+      "title": "Think",
+      "type": "boolean"
     },
     "task_id": {
       "anyOf": [

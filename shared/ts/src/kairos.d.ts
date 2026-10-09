@@ -252,7 +252,7 @@ export type TrustLevel4 = "verified" | "trusted" | "unverified" | "untrusted";
 export type VerificationStatus2 = "unverified" | "verified" | "disputed" | "stale";
 
 /**
- * KAIROS contracts v0.13.0
+ * KAIROS contracts v0.14.0
  */
 export interface KAIROS {
   A2AMessage?: A2AMessage;
@@ -563,6 +563,10 @@ export interface AgentPlanned {
    */
   scope?: string[];
   capabilities?: string[];
+  /**
+   * Laya's probability that this role is needed
+   */
+  score?: number | null;
 }
 /**
  * This interface was referenced by `KAIROS`'s JSON-Schema
@@ -851,6 +855,10 @@ export interface ChatMessage {
   role: Role;
   content: string;
   name?: string | null;
+  /**
+   * Base64 images for a vision model (Gemma 4 reads screenshots)
+   */
+  images?: string[];
 }
 /**
  * This interface was referenced by `KAIROS`'s JSON-Schema
@@ -1469,6 +1477,10 @@ export interface ModelRequest {
     [k: string]: unknown;
   } | null;
   stop?: string[];
+  /**
+   * Ask a reasoning model to think before it answers (Gemma 4's thinking mode)
+   */
+  think?: boolean;
   task_id?: string | null;
   pid?: number | null;
 }
@@ -2384,6 +2396,24 @@ export interface TaskUnderstood {
         string
       ];
   plan_summary: string;
+  /**
+   * "question", "data" or "investigation"
+   */
+  goal_type?: string | null;
+  /**
+   * What chose the agents: "laya" (the decision model) or "rules"
+   */
+  router?: string | null;
+  /**
+   * Laya's probability that each role is needed
+   */
+  route_scores?: {
+    [k: string]: number;
+  };
+  /**
+   * How long the routing decision took
+   */
+  route_ms?: number | null;
 }
 /**
  * Built by the kernel from an ALLOWED/approved SyscallRequest. Agents never create these.

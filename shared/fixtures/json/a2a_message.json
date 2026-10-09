@@ -1,0 +1,19 @@
+{
+  "message_id": "MSG-3a",
+  "task_id": "T-1842",
+  "sender_pid": 103,
+  "receiver_pid": 101,
+  "sender": "engineering-agent",
+  "receiver": "planner-agent",
+  "type": "evidence",
+  "content": "Migration APOLLO-12 is 6 weeks late; dual-run doubles cloud cost.",
+  "payload": null,
+  "payload_ref": "artifact://T-1842/engineering-evidence.json",
+  "provenance": [
+    "/org/engineering/apollo-status",
+    "/org/decisions/ADR-042"
+  ],
+  "trust": "verified",
+  "in_reply_to": null,
+  "sent_at": "2026-09-27T10:00:28Z"
+}

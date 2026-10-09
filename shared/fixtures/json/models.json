@@ -1,0 +1,38 @@
+[
+  {
+    "name": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "local": true,
+    "context_window": 32768,
+    "capabilities": [
+      "chat",
+      "json"
+    ],
+    "embedding_dim": null,
+    "available": true
+  },
+  {
+    "name": "llama3.1:8b",
+    "provider": "ollama",
+    "local": true,
+    "context_window": 131072,
+    "capabilities": [
+      "chat",
+      "json",
+      "tools"
+    ],
+    "embedding_dim": null,
+    "available": true
+  },
+  {
+    "name": "nomic-embed-text",
+    "provider": "ollama",
+    "local": true,
+    "context_window": 8192,
+    "capabilities": [
+      "embed"
+    ],
+    "embedding_dim": 768,
+    "available": true
+  }
+]

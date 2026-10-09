@@ -1,0 +1,42 @@
+{
+  "pid": 102,
+  "agent": "finance-agent",
+  "status": "completed",
+  "summary": "31% overrun (6.2 lakh): cloud dual-run +1.9, engineering +2.5, vendor support +1.8.",
+  "output": {
+    "overrun_lakh": 6.2,
+    "overrun_pct": 31,
+    "drivers": [
+      {
+        "item": "cloud",
+        "delta": 1.9,
+        "cause": "ADR-042 dual-run extended by migration slip"
+      },
+      {
+        "item": "engineering",
+        "delta": 2.5,
+        "cause": "migration backfill rework"
+      },
+      {
+        "item": "vendor",
+        "delta": 1.8,
+        "cause": "emergency SDK support contract"
+      }
+    ]
+  },
+  "artifacts": [],
+  "evidence": [
+    "/org/finance/apollo-budget",
+    "/org/decisions/ADR-042"
+  ],
+  "actions": [],
+  "usage": {
+    "tokens_prompt": 6240,
+    "tokens_completion": 1560,
+    "tool_calls": 0,
+    "children_spawned": 0,
+    "wall_seconds": 0.0,
+    "gpu_seconds": 0.0
+  },
+  "error": null
+}

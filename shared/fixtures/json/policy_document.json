@@ -1,0 +1,47 @@
+{
+  "policy": "finance-agent-v1",
+  "description": "",
+  "priority": 100,
+  "applies_to": {
+    "agents": [
+      "finance-agent"
+    ],
+    "roles": [
+      "*"
+    ]
+  },
+  "knowledge": {
+    "allow": [
+      "/org/finance/**",
+      "/org/projects/**"
+    ],
+    "deny": []
+  },
+  "filesystem": {
+    "read": [
+      "/workspace/**"
+    ],
+    "write": [
+      "/workspace/reports/**"
+    ]
+  },
+  "network": {
+    "allow": [
+      "jira.company.internal:443"
+    ],
+    "deny": []
+  },
+  "tools": {
+    "allow": [
+      "postgres.read",
+      "jira.read",
+      "jira.write"
+    ],
+    "deny": []
+  },
+  "approval": {
+    "jira.write": "required",
+    "database.write": "required",
+    "external.email": "required"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "ready": true,
+  "version": "0.1.0",
+  "contract_version": "0.1.0",
+  "uptime_s": 5231.0,
+  "components": [
+    {
+      "component": "kernel",
+      "ok": true,
+      "mode": "fake",
+      "detail": ""
+    },
+    {
+      "component": "knowledge",
+      "ok": true,
+      "mode": "fake",
+      "detail": ""
+    },
+    {
+      "component": "memory",
+      "ok": true,
+      "mode": "fake",
+      "detail": ""
+    },
+    {
+      "component": "models",
+      "ok": true,
+      "mode": "fake",
+      "detail": ""
+    },
+    {
+      "component": "agents",
+      "ok": true,
+      "mode": "fake",
+      "detail": ""
+    },
+    {
+      "component": "tools",
+      "ok": true,
+      "mode": "fake",
+      "detail": ""
+    },
+    {
+      "component": "sandbox",
+      "ok": true,
+      "mode": "fake",
+      "detail": ""
+    }
+  ]
+}

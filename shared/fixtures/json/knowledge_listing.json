@@ -1,0 +1,61 @@
+{
+  "path": "/org",
+  "entries": [
+    {
+      "path": "/org/decisions",
+      "title": "Decisions",
+      "type": "index",
+      "is_dir": true,
+      "privacy": "internal"
+    },
+    {
+      "path": "/org/engineering",
+      "title": "Engineering",
+      "type": "index",
+      "is_dir": true,
+      "privacy": "internal"
+    },
+    {
+      "path": "/org/finance",
+      "title": "Finance",
+      "type": "index",
+      "is_dir": true,
+      "privacy": "internal"
+    },
+    {
+      "path": "/org/inbox",
+      "title": "Inbox",
+      "type": "index",
+      "is_dir": true,
+      "privacy": "internal"
+    },
+    {
+      "path": "/org/people",
+      "title": "People",
+      "type": "index",
+      "is_dir": true,
+      "privacy": "internal"
+    },
+    {
+      "path": "/org/policies",
+      "title": "Policies",
+      "type": "index",
+      "is_dir": true,
+      "privacy": "internal"
+    },
+    {
+      "path": "/org/projects",
+      "title": "Projects",
+      "type": "index",
+      "is_dir": true,
+      "privacy": "internal"
+    },
+    {
+      "path": "/org/systems",
+      "title": "Systems",
+      "type": "index",
+      "is_dir": true,
+      "privacy": "internal"
+    }
+  ]
+}

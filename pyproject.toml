@@ -21,6 +21,9 @@ members = [
 
 [dependency-groups]
 dev = ["pytest>=8", "httpx>=0.27", "ruff>=0.6", "kairos-contracts[api,test]"]
+# The Jev-compatible decision model for the agent router, run locally (Laya, ~1.7 GB of weights on first use).
+# Not a default group, so CI stays light: `uv sync --all-packages --all-extras --group jev`.
+jev = ["laya>=0.4"]
 
 [tool.uv.sources]
 kairos-contracts = { workspace = true }

@@ -11,7 +11,7 @@
   </defs>
   <rect width="1280" height="200" rx="24" fill="#0D1117"/>
   <g class="t">
-    <text x="48" y="44" font-size="13" font-weight="800" letter-spacing="1.6" fill="#5B6675">MEASURED ON THE DEMO LAPTOP · RTX 5070 LAPTOP GPU, 8 GB · qwen2.5:7b-instruct · CONTRACT 0.13.0</text>
+    <text x="48" y="44" font-size="13" font-weight="800" letter-spacing="1.6" fill="#5B6675">MEASURED ON THE DEMO LAPTOP · RTX 5070 LAPTOP GPU, 8 GB · qwen2.5:7b-instruct · CONTRACT 0.14.0</text>
     <g transform="translate(48 70)">
       <rect width="186" height="104" rx="14" fill="#103A35"/>
       <text x="18" y="56" class="v" fill="#5FDCC8">8/8</text><text x="18" y="84" class="l">every scored scenario (4)</text>
@@ -34,7 +34,7 @@
     </g>
     <g transform="translate(1048 70)">
       <rect width="186" height="104" rx="14" fill="#142A45"/>
-      <text x="18" y="56" class="v" fill="#8DB5EE">535</text><text x="18" y="84" class="l">tests passing</text>
+      <text x="18" y="56" class="v" fill="#8DB5EE">564</text><text x="18" y="84" class="l">tests passing</text>
     </g>
   </g>
 </svg>

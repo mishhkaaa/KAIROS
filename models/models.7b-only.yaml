@@ -1,0 +1,15 @@
+# Model routing for an 8 GB GPU (P3): one chat model stays resident next to the embedder, so a summarization call
+# never evicts the 7B mid-run. Select it with KAIROS_MODELS_CONFIG=./models/models.7b-only.yaml.
+embedding: nomic-embed-text
+default: qwen2.5:7b-instruct
+by_task_class:
+  planning: qwen2.5:7b-instruct
+  reasoning: qwen2.5:7b-instruct
+  extraction: qwen2.5:7b-instruct
+  summarization: qwen2.5:7b-instruct
+  classification: qwen2.5:7b-instruct
+  code: qwen2.5-coder:7b
+  vision: llava:7b
+latency_critical: qwen2.5:7b-instruct
+remote:
+  enabled: false          # approved remote models only; never for privacy=restricted

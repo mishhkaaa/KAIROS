@@ -35,7 +35,7 @@ export function Knowledge() {
         <View style={{ gap: 12, marginBottom: 4 }}>
           <Title sub="Documents, decisions, tickets and meetings under /org.">Knowledge</Title>
           <View style={s.row}>
-            <TextInput value={q} onChangeText={setQ} onSubmitEditing={search} returnKeyType="search" placeholder="apollo budget variance" placeholderTextColor={C.text3} style={[s.input, { flex: 1 }]} accessibilityLabel="Search" />
+            <TextInput value={q} onChangeText={setQ} onSubmitEditing={search} returnKeyType="search" placeholder="security policy vendors" placeholderTextColor={C.text3} style={[s.input, { flex: 1 }]} accessibilityLabel="Search" />
             <Button label="Search" onPress={search} busy={busy} />
           </View>
           {error && <Notice tone="error">{error}</Notice>}

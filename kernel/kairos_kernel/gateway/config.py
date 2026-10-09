@@ -86,6 +86,22 @@ def models_config(path: Path, available: list[ModelInfo]) -> ModelsConfig:
                         routes=[route(t, m) for t, m in pairs if m], models=available)
 
 
+def agent_router() -> StackComponent:
+    """The planner's agent router: Jev's typed decisions run locally (the Laya checkpoint), or the planner's rules.
+    Checked by package, not imported: the kernel never imports an agent split."""
+    import importlib.util
+    import os
+
+    on = os.getenv("KAIROS_JEV", "on").lower() not in ("off", "0", "false", "no")
+    installed = importlib.util.find_spec("laya") is not None
+    if on and installed:
+        return StackComponent(component="agent_router", mode="real", implementation="Jev decision model, local (Laya checkpoint)",
+                              ok=True, detail="scores every agent in one pass; the rules decide when it is unsure")
+    why = "switched off (KAIROS_JEV=off)" if not on else "not installed (uv sync --group jev)"
+    return StackComponent(component="agent_router", mode="fake(fallback)", implementation="planner rules", ok=True,
+                          detail=f"Jev router {why}; keyword rules choose the agents")
+
+
 async def build_system_config(k: Kernel) -> SystemConfig:
     svc, s = k.services, k.settings
     health = {c.component: c for c in k.components()}
@@ -93,6 +109,7 @@ async def build_system_config(k: Kernel) -> SystemConfig:
                             ok=h.ok, detail=h.detail)
              for name, h in health.items() if name != "kernel"]
     stack.insert(0, StackComponent(component="kernel", mode="real", implementation=_impl(k), ok=k.ready))
+    stack.append(agent_router())
 
     async def safe(coro: Any, default: Any) -> Any:  # one broken service must not take the whole page down
         try:
@@ -117,7 +134,8 @@ async def build_system_config(k: Kernel) -> SystemConfig:
         tools=tools,
         policies=sorted((policy_summary(d) for d in policies), key=lambda p: (p.priority, p.policy)),
         firewall=FirewallConfig(regex=True, llm_classifier=s.firewall_llm),
-        feature_flags={"knowledge_watch": s.knowledge_watch, "firewall_llm": s.firewall_llm},
+        feature_flags={"knowledge_watch": s.knowledge_watch, "firewall_llm": s.firewall_llm,
+                       "jev_router": agent_router().mode == "real"},
         endpoints=[EndpointInfo(name="gateway", url=f"http://{s.gateway_host}:{s.gateway_port}"),
                    *(EndpointInfo(name=n, url=redact_url(u)) for n, u in
                      (("database", s.database_url), ("redis", s.redis_url), ("ollama", s.ollama_url), ("jira", s.jira_url)))],

@@ -7,10 +7,12 @@ import { useSession } from "../session";
 import { C } from "../theme";
 import { Button, Card, Label, Notice, Orb, s, Title } from "../ui";
 
+// One example of each kind of goal the Jev router tells apart; any organization's goals work the same way.
 const SUGGESTIONS: [string, string][] = [
-  ["Investigate Project Apollo's overrun", "Investigate why Project Apollo is over budget and six weeks behind schedule. Identify root causes, update the tracker, and prepare a recovery plan."],
-  ["Brief the steering committee on Zeus", "Prepare a steering-committee briefing on Project Zeus budget risk for Q4: identify the risk drivers with evidence, update the tracker, and propose mitigations."],
-  ["Who is blocked on Apollo?", "Who is blocked on Project Apollo this week, and on what?"],
+  ["Investigate a project overrun", "Investigate why Project Apollo is over budget and six weeks behind schedule. Identify root causes, update the tracker, and prepare a recovery plan."],
+  ["Summarize this week's decisions", "Summarize the decisions our teams made this week, with the documents behind each one."],
+  ["Which vendors did we overpay?", "Which vendors did we overpay last quarter? Draft a note for finance."],
+  ["Search the web", "What is the latest stable Python release? Search the web."],
 ];
 type Priority = NonNullable<TaskCreate["priority"]>;
 

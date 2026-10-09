@@ -1,0 +1,10 @@
+# Example MCP server configuration. Point KAIROS_MCP_CONFIG at a copy of this file.
+# Each server becomes a tool named `name`; its MCP tools become operations. Policies must allow `capability`
+# (e.g. add `mcp.call` to a policy's tools.allow, usually with `approval: {mcp.call: required}`).
+servers:
+  - name: notes
+    command: python
+    args: [execution/tests/mcp_server_sample.py]
+    capability: mcp.call
+    risk: medium
+    timeout_s: 60

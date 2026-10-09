@@ -564,7 +564,7 @@ export interface AgentPlanned {
   scope?: string[];
   capabilities?: string[];
   /**
-   * Laya's probability that this role is needed
+   * Jev's probability that this role is needed
    */
   score?: number | null;
 }
@@ -2401,11 +2401,11 @@ export interface TaskUnderstood {
    */
   goal_type?: string | null;
   /**
-   * What chose the agents: "laya" (the decision model) or "rules"
+   * What chose the agents: "jev" (the decision model) or "rules"
    */
   router?: string | null;
   /**
-   * Laya's probability that each role is needed
+   * Jev's probability that each role is needed
    */
   route_scores?: {
     [k: string]: number;

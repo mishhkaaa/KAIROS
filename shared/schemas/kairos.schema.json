@@ -3985,13 +3985,13 @@
             }
           ],
           "default": null,
-          "description": "What chose the agents: \"laya\" (the decision model) or \"rules\""
+          "description": "What chose the agents: \"jev\" (the decision model) or \"rules\""
         },
         "route_scores": {
           "additionalProperties": {
             "type": "number"
           },
-          "description": "Laya's probability that each role is needed",
+          "description": "Jev's probability that each role is needed",
           "type": "object"
         },
         "route_ms": {
@@ -4051,7 +4051,7 @@
             }
           ],
           "default": null,
-          "description": "Laya's probability that this role is needed"
+          "description": "Jev's probability that this role is needed"
         }
       },
       "required": [

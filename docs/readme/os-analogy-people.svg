@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="560" viewBox="0 0 1280 560" role="img" aria-labelledby="t d">
+  <title id="t">The OS analogy, for people</title>
+  <desc id="d">More operating-system ideas and what each one became in KAIROS: users and roles, login, process creation, mounts, a keychain, drivers, tracing, a shell, a desktop and system settings.</desc>
+  <defs>
+    <style>
+      .t { font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif; }
+      .os { fill: #1B222B; stroke: #3B4653; }
+      .oslbl { fill: #A9B3BF; font-size: 17px; font-weight: 600; }
+      .lbl { font-size: 17px; font-weight: 700; }
+      .cap { fill: #8A95A3; font-size: 13.5px; }
+    </style>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0L10 5L0 10z" fill="#5B6675"/>
+    </marker>
+  </defs>
+  <rect width="1280" height="560" rx="24" fill="#0D1117"/>
+  <text x="64" y="70" class="t" font-size="30" font-weight="800" fill="#F1F5F9">Then it got <tspan fill="#2BB8A3">users, a shell and a phone</tspan></text>
+  <text x="64" y="102" class="t" font-size="16" fill="#8A95A3">KAIROS keeps going down the list of what an operating system gives its users.</text>
+  <g class="t" transform="translate(64 136)">
+    <g transform="translate(0 0)">
+      <rect class="os" x="0" y="0" width="176" height="52" rx="12"/><text class="oslbl" x="88" y="32" text-anchor="middle">Users and groups</text>
+      <line x1="184" y1="26" x2="224" y2="26" stroke="#5B6675" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="232" y="0" width="320" height="52" rx="12" fill="#103A35" stroke="#2BB8A3"/><text class="lbl" x="250" y="24" fill="#5FDCC8">Orgs, people, roles</text>
+      <text class="cap" x="250" y="43">owner to viewer, checked on every route</text>
+    </g>
+    <g transform="translate(0 76)">
+      <rect class="os" x="0" y="0" width="176" height="52" rx="12"/><text class="oslbl" x="88" y="32" text-anchor="middle">Login</text>
+      <line x1="184" y1="26" x2="224" y2="26" stroke="#5B6675" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="232" y="0" width="320" height="52" rx="12" fill="#142A45" stroke="#4C86D9"/><text class="lbl" x="250" y="24" fill="#8DB5EE">Google sign-in, sessions</text>
+      <text class="cap" x="250" y="43">a one-time code signs in the phone</text>
+    </g>
+    <g transform="translate(0 152)">
+      <rect class="os" x="0" y="0" width="176" height="52" rx="12"/><text class="oslbl" x="88" y="32" text-anchor="middle">fork + exec</text>
+      <line x1="184" y1="26" x2="224" y2="26" stroke="#5B6675" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="232" y="0" width="320" height="52" rx="12" fill="#3A2A0E" stroke="#D99A25"/><text class="lbl" x="250" y="24" fill="#F0C06A">Agents made for the task</text>
+      <text class="cap" x="250" y="43">role, request, user and policy intersected</text>
+    </g>
+    <g transform="translate(0 228)">
+      <rect class="os" x="0" y="0" width="176" height="52" rx="12"/><text class="oslbl" x="88" y="32" text-anchor="middle">mount</text>
+      <line x1="184" y1="26" x2="224" y2="26" stroke="#5B6675" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="232" y="0" width="320" height="52" rx="12" fill="#1F3A1A" stroke="#2FB344"/><text class="lbl" x="250" y="24" fill="#7FD68C">Folders of this computer</text>
+      <text class="cap" x="250" y="43">/org/mnt, watched, read-only mirror</text>
+    </g>
+    <g transform="translate(0 304)">
+      <rect class="os" x="0" y="0" width="176" height="52" rx="12"/><text class="oslbl" x="88" y="32" text-anchor="middle">Keychain</text>
+      <line x1="184" y1="26" x2="224" y2="26" stroke="#5B6675" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="232" y="0" width="320" height="52" rx="12" fill="#2A2342" stroke="#9D8CE8"/><text class="lbl" x="250" y="24" fill="#C3B8F5">Encrypted connector vault</text>
+      <text class="cap" x="250" y="43">tokens never reach an agent</text>
+    </g>
+  </g>
+  <g class="t" transform="translate(684 136)">
+    <g transform="translate(0 0)">
+      <rect class="os" x="0" y="0" width="176" height="52" rx="12"/><text class="oslbl" x="88" y="32" text-anchor="middle">Device drivers</text>
+      <line x1="184" y1="26" x2="224" y2="26" stroke="#5B6675" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="232" y="0" width="320" height="52" rx="12" fill="#103A35" stroke="#2BB8A3"/><text class="lbl" x="250" y="24" fill="#5FDCC8">GitHub, Calendar, SQL, MCP</text>
+      <text class="cap" x="250" y="43">governed tools; writes need a person</text>
+    </g>
+    <g transform="translate(0 76)">
+      <rect class="os" x="0" y="0" width="176" height="52" rx="12"/><text class="oslbl" x="88" y="32" text-anchor="middle">strace / dmesg</text>
+      <line x1="184" y1="26" x2="224" y2="26" stroke="#5B6675" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="232" y="0" width="320" height="52" rx="12" fill="#142A45" stroke="#4C86D9"/><text class="lbl" x="250" y="24" fill="#8DB5EE">Thought-process events</text>
+      <text class="cap" x="250" y="43">understood, planned, thought, query</text>
+    </g>
+    <g transform="translate(0 152)">
+      <rect class="os" x="0" y="0" width="176" height="52" rx="12"/><text class="oslbl" x="88" y="32" text-anchor="middle">Shell</text>
+      <line x1="184" y1="26" x2="224" y2="26" stroke="#5B6675" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="232" y="0" width="320" height="52" rx="12" fill="#3A2A0E" stroke="#D99A25"/><text class="lbl" x="250" y="24" fill="#F0C06A">kairos-os on WSL</text>
+      <text class="cap" x="250" y="43">/org as a real filesystem, kairos ask</text>
+    </g>
+    <g transform="translate(0 228)">
+      <rect class="os" x="0" y="0" width="176" height="52" rx="12"/><text class="oslbl" x="88" y="32" text-anchor="middle">Desktop</text>
+      <line x1="184" y1="26" x2="224" y2="26" stroke="#5B6675" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="232" y="0" width="320" height="52" rx="12" fill="#1F3A1A" stroke="#2FB344"/><text class="lbl" x="250" y="24" fill="#7FD68C">Windows, rail, Spotlight</text>
+      <text class="cap" x="250" y="43">Alt Space, the run stage, agent faces</text>
+    </g>
+    <g transform="translate(0 304)">
+      <rect class="os" x="0" y="0" width="176" height="52" rx="12"/><text class="oslbl" x="88" y="32" text-anchor="middle">System settings</text>
+      <line x1="184" y1="26" x2="224" y2="26" stroke="#5B6675" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="232" y="0" width="320" height="52" rx="12" fill="#2A2342" stroke="#9D8CE8"/><text class="lbl" x="250" y="24" fill="#C3B8F5">The Settings centre</text>
+      <text class="cap" x="250" y="43">GET /system/config, read-only, searchable</text>
+    </g>
+  </g>
+</svg>

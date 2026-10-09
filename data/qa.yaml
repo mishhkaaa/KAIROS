@@ -1,0 +1,24 @@
+# Retrieval QA for the demo bundle (P4 authors, P2 turns it into a test over data/okf).
+# Kept OUTSIDE data/okf so the questions never become retrievable knowledge themselves.
+# Pass rule per question: expected[0] is in the top 3 hits. Target: >= 9/10.
+questions:
+  - q: Why is Project Apollo over budget?
+    expected: [/org/finance/apollo-budget, /org/finance/cloud-bill-2026-09, /org/decisions/ADR-042]
+  - q: What caused the ledger migration backfill to fail?
+    expected: [/org/engineering/postmortem-backfill-failure, /org/jira/apollo-12, /org/jira/apollo-14]
+  - q: Why is the PayCo SDK v5 upgrade blocked?
+    expected: [/org/jira/apollo-31, /org/systems/payco-sdk, /org/decisions/ADR-045]
+  - q: Who leads Project Apollo?
+    expected: [/org/people/priya-sharma, /org/projects/apollo, /org/people/engineering]
+  - q: How much did Apollo cloud spend increase in August and September?
+    expected: [/org/finance/cloud-bill-2026-09, /org/finance/cloud-bill-2026-08, /org/inbox/email-finance-cloud-alert]
+  - q: What is the emergency PayCo support contract and what did it cost?
+    expected: [/org/finance/vendor-contracts, /org/jira/apollo-33, /org/finance/apollo-budget]
+  - q: When can the legacy reconciliation pipeline be decommissioned?
+    expected: [/org/decisions/ADR-042, /org/jira/apollo-18, /org/engineering/reconciliation-parity-report]
+  - q: How should we write a project recovery plan?
+    expected: [/org/playbooks/recovery-planning, /org/policies/approvals, /org/meetings/steering-2026-09-18]
+  - q: Which actions need human approval?
+    expected: [/org/policies/approvals, /org/policies/security, /org/finance/vendor-contracts]
+  - q: What did the Apollo steering committee decide on 2026-09-18?
+    expected: [/org/meetings/steering-2026-09-18, /org/meetings/steering-2026-08-28, /org/inbox/email-cto-escalation]

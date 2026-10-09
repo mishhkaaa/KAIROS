@@ -1,0 +1,16 @@
+[
+ {
+  "type": "message",
+  "user": "U02MARCO",
+  "ts": "1789029000.000001",
+  "text": "Any update on v5 certification? Our cut-over depends on it.",
+  "thread_ts": "1789029000.000001"
+ },
+ {
+  "type": "message",
+  "user": "U07PAYCO",
+  "ts": "1789033500.000002",
+  "text": "The PCI certification audit is still open. We expect GA in October and will confirm the date next week.",
+  "thread_ts": "1789029000.000001"
+ }
+]

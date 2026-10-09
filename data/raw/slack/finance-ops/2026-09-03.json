@@ -1,0 +1,23 @@
+[
+ {
+  "type": "message",
+  "user": "U05ANANYA",
+  "ts": "1788433500.000001",
+  "text": "Heads-up: Apollo cloud is at 5.5 lakh vs 5.0 budget after the August bill.",
+  "thread_ts": "1788433500.000001"
+ },
+ {
+  "type": "message",
+  "user": "U06MEERA",
+  "ts": "1788433800.000002",
+  "text": "What drove it?",
+  "thread_ts": "1788433500.000001"
+ },
+ {
+  "type": "message",
+  "user": "U05ANANYA",
+  "ts": "1788434040.000003",
+  "text": "Reconciliation compute doubled: legacy + new pipeline both running since the migration slipped.",
+  "thread_ts": "1788433500.000001"
+ }
+]

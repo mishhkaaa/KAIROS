@@ -26,12 +26,16 @@ export const DEMO_PROMPT =
 // The second scenario from docs/DEMO_SCRIPT.md ("Project Zeus budget risk").
 export const ZEUS_PROMPT =
   "Prepare a steering-committee briefing on Project Zeus budget risk for Q4: identify the risk drivers with evidence, update the tracker, and propose mitigations.";
+// One example of each kind of goal the Jev router tells apart: an investigation, a summary, a data question, a policy
+// question and a question for the public web. Any organization's goals work the same way.
 const SUGGESTIONS: [string, string][] = [
-  ["Apollo demo prompt", DEMO_PROMPT],
-  ["Zeus demo prompt", ZEUS_PROMPT],
-  ["Who is blocked on Apollo this week?", "Who is blocked on Project Apollo this week, and on what?"],
+  ["Investigate a project overrun", DEMO_PROMPT],
+  ["Summarize this week's decisions", "Summarize the decisions our teams made this week, with the documents behind each one."],
+  ["Which vendors did we overpay?", "Which vendors did we overpay last quarter? Draft a note for finance."],
+  ["What does our security policy say?", "What does our security policy say about sharing customer data with vendors?"],
+  ["Search the web", "What is the latest stable Python release? Search the web."],
 ];
-const CHIP_TEXT: Record<string, string> = { "Apollo demo prompt": "Investigate Project Apollo's overrun", "Zeus demo prompt": "Brief the steering committee on Zeus risk" };
+const CHIP_TEXT: Record<string, string> = {};
 
 type Priority = NonNullable<TaskCreate["priority"]>;
 const PRIORITIES: Priority[] = ["high", "normal", "background"];

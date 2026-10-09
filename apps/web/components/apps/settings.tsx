@@ -64,6 +64,7 @@ function Overview({ c }: { c: SystemConfig }) {
           <Fact label="contract" value={c.versions.contract} />
           <Fact label="environment" value={c.env} />
           <Fact label="default model" value={c.models.default.replace(/:.*$/, "")} />
+          <Fact label="agent router" value={flags.jev_router ? "Jev, local" : "rules"} tone={flags.jev_router ? "ok" : "warn"} />
           <Fact label="data leaves the machine" value={c.models.remote_enabled ? "allowed" : "never"} tone={c.models.remote_enabled ? "warn" : "ok"} />
           <Fact label="sign-in" value={flags.google_sign_in ? "Google" : "dev"} tone={flags.google_sign_in ? "ok" : "warn"} />
           <Fact label="vault" value={flags.vault_encrypted ? "encrypted" : "dev obfuscation"} tone={flags.vault_encrypted ? "ok" : "warn"} />

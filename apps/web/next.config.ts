@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
   // A second build can live beside the kiosk's (NEXT_DIST_DIR=.next-preview) without replacing the one it serves.
   distDir: process.env.NEXT_DIST_DIR || ".next",
   turbopack: { root: path.join(__dirname, "..", "..") },
+  devIndicators: false,
 };
 
 export default nextConfig;

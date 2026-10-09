@@ -9,6 +9,7 @@ import {
   Database,
   Flag,
   GitFork,
+  Gauge,
   Globe,
   Lightbulb,
   type LucideIcon,
@@ -34,6 +35,7 @@ import type { OrbState } from "thinking-orbs";
 const KIND: Record<StepKind, [LucideIcon, string, OrbState]> = {
   ask: [MessageSquareText, "#0e9f86", "listening"],
   understood: [Lightbulb, "#7b61ff", "shaping"],
+  routed: [Gauge, "#e2a63b", "solving"],
   planned: [Route, "#00b3c7", "connecting"],
   created: [GitFork, "#16b67a", "shaping"],
   thought: [MessageCircle, "#c56cf0", "composing"],
@@ -98,6 +100,24 @@ export function DataTable({ columns, rows }: { columns: string[]; rows: unknown[
   );
 }
 
+/** Jev's probability per agent, with the spawn line at 0.5. */
+export function RouteBars({ scores }: { scores: NonNullable<Step["scores"]> }) {
+  return (
+    <ul className="mt-2 space-y-1" aria-label="Probability that each agent is needed">
+      {scores.map((r) => (
+        <li key={r.role} className="grid grid-cols-[8.5rem_1fr_2.5rem] items-center gap-2 text-xs">
+          <span className={cn("truncate", r.on ? "font-medium" : "text-text-2")}>{r.role.replace(/-agent$/, "")}</span>
+          <span className="relative h-2 rounded-full bg-surface-3">
+            <span className="absolute inset-y-0 left-0 rounded-full transition-[width] duration-500" style={{ width: `${Math.round(r.p * 100)}%`, background: r.on ? "#0e9f86" : "var(--text-3, #9aa3b2)" }} />
+            <span className="absolute -inset-y-1 left-1/2 border-l border-dashed border-[#e2a63b]" aria-hidden />
+          </span>
+          <span className={cn("text-right font-mono tabular-nums", r.on ? "" : "text-text-2")}>{r.p.toFixed(2)}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function StepRow({ step }: { step: Step }) {
   const [Icon, colour] = KIND[step.kind];
   return (
@@ -131,6 +151,7 @@ function StepRow({ step }: { step: Step }) {
           </pre>
         )}
         {step.table && <DataTable columns={step.table.columns} rows={step.table.rows} />}
+        {!!step.scores?.length && <RouteBars scores={step.scores} />}
       </div>
     </li>
   );

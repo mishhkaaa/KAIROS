@@ -7,6 +7,7 @@ import type { Event } from "@kairos/contracts";
 export type StepKind =
   | "ask"
   | "understood"
+  | "routed"
   | "planned"
   | "created"
   | "thought"
@@ -37,6 +38,8 @@ export interface Step {
   /** SQL or another query (for `query`). */
   code?: string;
   table?: { columns: string[]; rows: unknown[][] };
+  /** The router's probability per role (for `routed`), highest first; `on` when it clears the spawn threshold. */
+  scores?: { role: string; p: number; on: boolean }[];
   /** How many events this step folds together (repeated thinking, several spawns). */
   count: number;
   /** Model tokens spent in a `think` step. */
@@ -60,6 +63,21 @@ const list = (e: Event, k: string) => {
 
 const shortModel = (m?: string) => (m ?? "the model").replace(/:.*$/, "").replace(/-instruct$/, "");
 
+export const SPAWN_THRESHOLD = 0.5;
+
+/** The routing step for a task.understood event: Jev's decision with a bar per role, or a note that the rules decided. */
+export function routeOf(e: Event): Omit<Step, "id" | "count" | "status" | "ts"> | null {
+  const router = s(e, "router");
+  if (!router) return null;
+  const kind = s(e, "goal_type") ?? "request";
+  const article = /^[aeiou]/.test(kind) ? "an" : "a";
+  if (router !== "jev") return { kind: "routed", title: `Routed by the planner's rules: ${article} ${kind}`, detail: "The Jev router is not running, so keyword rules chose the agents." };
+  const raw = e.payload?.route_scores;
+  const scores = raw && typeof raw === "object" ? Object.entries(raw as Record<string, unknown>).filter(([, p]) => typeof p === "number").map(([role, p]) => ({ role, p: p as number, on: (p as number) >= SPAWN_THRESHOLD })).sort((a, b) => b.p - a.p) : [];
+  const ms = n(e, "route_ms");
+  return { kind: "routed", title: `Jev routed this locally${ms !== undefined ? ` in ${Math.round(ms)} ms` : ""}: ${article} ${kind}`, detail: "One pass of the decision model scored every agent; only those over the line are created.", scores };
+}
+
 export function buildStory(events: Event[], agents: Record<number, string>, taskStatus?: string | null): Step[] {
   const steps: Step[] = [];
   const who = (e: Event) => (e.pid ? (agents[e.pid] ?? s(e, "agent") ?? `PID ${e.pid}`) : undefined);
@@ -73,12 +91,21 @@ export function buildStory(events: Event[], agents: Record<number, string>, task
       case "task.created":
         push(e, { kind: "ask", title: "You asked KAIROS", detail: s(e, "goal") });
         break;
-      case "task.understood":
+      case "task.understood": {
         push(e, { kind: "understood", title: "Understood the request", detail: [s(e, "intent"), list(e, "capabilities_needed").length ? `needs ${list(e, "capabilities_needed").join(", ")}` : ""].filter(Boolean).join(" · ") || s(e, "plan_summary") });
+        const route = routeOf(e);
+        // The routing decision is shown once per task, even when the planner re-states what it understood.
+        if (route && !steps.some((x) => x.kind === "routed")) {
+          push(e, route);
+          steps[steps.length - 1].id += ":route"; // its own key next to the understood step from the same event
+        }
         break;
-      case "agent.planned":
-        push(e, { kind: "planned", title: `Chose a ${s(e, "role") ?? "specialist"}`, detail: s(e, "why"), paths: list(e, "scope") });
+      }
+      case "agent.planned": {
+        const score = n(e, "score");
+        push(e, { kind: "planned", title: `Chose a ${s(e, "role") ?? "specialist"}${score !== undefined ? ` (Jev ${score.toFixed(2)})` : ""}`, detail: s(e, "why"), paths: list(e, "scope") });
         break;
+      }
       case "agent.created":
       case "process.spawned": {
         const name = s(e, "manifest_name") ?? s(e, "agent") ?? agent ?? "an agent";

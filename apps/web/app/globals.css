@@ -1,0 +1,359 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* Themes are chosen by next-themes on <html data-theme>. */
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+/* Fonts are bundled from npm (geist, @fontsource-variable/jetbrains-mono) via next/font/local: the demo box may have
+   no internet at build time. */
+@theme inline {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, "Segoe UI", system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --font-heading: var(--font-sans);
+
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
+  --color-card: var(--surface-1);
+  --color-card-foreground: var(--text);
+  --color-popover: var(--surface-2);
+  --color-popover-foreground: var(--text);
+  --color-primary: var(--brand);
+  --color-primary-foreground: var(--on-brand);
+  --color-secondary: var(--surface-2);
+  --color-secondary-foreground: var(--text);
+  --color-muted: var(--surface-2);
+  --color-muted-foreground: var(--text-muted);
+  --color-accent: var(--surface-3);
+  --color-accent-foreground: var(--text);
+  --color-destructive: var(--st-failed);
+  --color-border: var(--line);
+  --color-input: var(--line-strong);
+  --color-ring: var(--brand);
+  --color-sidebar: var(--surface-1);
+  --color-sidebar-foreground: var(--text);
+  --color-sidebar-primary: var(--brand);
+  --color-sidebar-primary-foreground: var(--on-brand);
+  --color-sidebar-accent: var(--surface-3);
+  --color-sidebar-accent-foreground: var(--text);
+  --color-sidebar-border: var(--line);
+  --color-sidebar-ring: var(--brand);
+
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-text-2: var(--text-2);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-subtle: var(--brand-subtle);
+
+  /* One palette for process/task state everywhere: RUNNING green, WAITING amber, PAUSED blue, FAILED red,
+     COMPLETED grey, TERMINATED dark grey (a filled chip, so its light text keeps contrast). */
+  --color-st-running: var(--st-running);
+  --color-st-waiting: var(--st-waiting);
+  --color-st-paused: var(--st-paused);
+  --color-st-failed: var(--st-failed);
+  --color-st-completed: var(--st-completed);
+  --color-st-terminated: var(--st-terminated);
+  --color-st-terminated-fg: var(--st-terminated-fg);
+  --color-st-checkpoint: var(--st-paused);
+  --color-st-retrying: var(--risk-high);
+  --color-st-idle: var(--text-muted);
+
+  --color-risk-low: var(--risk-low);
+  --color-risk-medium: var(--risk-medium);
+  --color-risk-high: var(--risk-high);
+  --color-risk-critical: var(--risk-critical);
+  --color-untrusted: var(--untrusted-fg);
+  --color-untrusted-bg: var(--untrusted-bg);
+
+  /* Event families in the timeline and audit journal. */
+  --color-ev-knowledge: var(--ev-knowledge);
+  --color-ev-syscall: var(--brand);
+  --color-ev-policy: var(--brand);
+  --color-ev-approval: var(--st-waiting);
+  --color-ev-tool: var(--ev-tool);
+  --color-ev-memory: var(--text-2);
+  --color-ev-danger: var(--st-failed);
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+
+  --shadow-panel: var(--shadow);
+  --shadow-window: var(--win-shadow);
+  --shadow-window-idle: var(--win-shadow-idle);
+  --color-grout: var(--grout);
+  --color-glass: var(--glass);
+  --color-glass-strong: var(--glass-strong);
+  --color-glass-edge: var(--glass-edge);
+  --color-hairline: var(--hairline);
+  --color-chrome-ink: var(--chrome-ink);
+  --color-tl-close: #ff5f57;
+  --color-tl-min: #febc2e;
+  --color-tl-max: #28c840;
+  --ease-out-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Dark is the default (operator console); every foreground/background pair is AA-checked in lib/tokens.test.ts. */
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+  --radius: 10px;
+  --bg: #0d1117;
+  --surface-1: #151a21;
+  --surface-2: #1b222b;
+  --surface-3: #222a34;
+  --line: #2d3743;
+  --line-strong: #3b4653;
+  --text: #f1f5f9;
+  --text-2: #a9b3bf;
+  --text-muted: #8a95a3;
+  --brand: #2bb8a3;
+  --brand-hover: #36cdb6;
+  --brand-subtle: #103a35;
+  --on-brand: #04211d;
+  --st-running: #2fb344;
+  --st-waiting: #d99a25;
+  --st-paused: #6a9be3;
+  --st-failed: #eb6a6a;
+  --st-completed: #8a949f;
+  --st-terminated: #4a525b;
+  --st-terminated-fg: #e8ecf0;
+  --risk-low: #8a95a3;
+  --risk-medium: #d99a25;
+  --risk-high: #e87921;
+  --risk-critical: #eb6a6a;
+  --untrusted-bg: #4a1518;
+  --untrusted-fg: #f06a6a;
+  --ev-knowledge: #5b9bd5;
+  --ev-tool: #8aa4c2;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 16px rgb(0 0 0 / 0.25);
+  --grout: #07090c;
+  --glass: rgb(30 36 45 / 0.62);
+  --glass-strong: rgb(24 29 37 / 0.82);
+  --glass-edge: rgb(255 255 255 / 0.10);
+  --hairline: rgb(255 255 255 / 0.08);
+  --chrome-ink: #eef2f6;
+  /* Windows light from above: a tight contact shadow and a long soft one, tinted with the grout. */
+  --win-shadow: 0 1px 0 rgb(255 255 255 / 0.04) inset, 0 2px 4px rgb(2 4 8 / 0.5), 0 24px 60px -12px rgb(2 4 8 / 0.75);
+  --win-shadow-idle: 0 1px 2px rgb(2 4 8 / 0.45), 0 12px 32px -12px rgb(2 4 8 / 0.6);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --grout: #dfe6f0;
+  /* macOS-style materials: translucent chrome over the colourful wallpaper. */
+  --glass: rgb(255 255 255 / 0.58);
+  --glass-strong: rgb(255 255 255 / 0.80);
+  --glass-edge: rgb(255 255 255 / 0.70);
+  --hairline: rgb(15 23 42 / 0.10);
+  --chrome-ink: #1d1d1f;
+  --win-shadow: 0 0 0 0.5px rgb(15 23 42 / 0.18), 0 10px 24px -6px rgb(30 41 59 / 0.18), 0 32px 80px -12px rgb(30 41 59 / 0.32);
+  --win-shadow-idle: 0 0 0 0.5px rgb(15 23 42 / 0.14), 0 8px 28px -10px rgb(30 41 59 / 0.22);
+  --bg: #f6f7f9;
+  --surface-1: #ffffff;
+  --surface-2: #f1f3f6;
+  --surface-3: #e8ecf1;
+  --line: #d5dbe3;
+  --line-strong: #b8c1cc;
+  --text: #0f172a;
+  --text-2: #475569;
+  --text-muted: #5b6675;
+  --brand: #0b6b60;
+  --brand-hover: #0f7f71;
+  --brand-subtle: #ddf3ef;
+  --on-brand: #ffffff;
+  --st-running: #17702b;
+  --st-waiting: #8f5f00;
+  --st-paused: #2d62b3;
+  --st-failed: #b42f2f;
+  --st-completed: #5e6873;
+  --st-terminated: #3e454d;
+  --st-terminated-fg: #e8ecf0;
+  --risk-low: #5b6675;
+  --risk-medium: #8f5f00;
+  --risk-high: #9e4a00;
+  --risk-critical: #b42f2f;
+  --untrusted-bg: #fdecec;
+  --untrusted-fg: #b42323;
+  --ev-knowledge: #2b63a0;
+  --ev-tool: #4a6784;
+  --shadow: 0 1px 2px rgb(15 23 42 / 0.06), 0 4px 16px rgb(15 23 42 / 0.06);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+    font-size: 16px; /* text-sm = 14px, the smallest body size (projector) */
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "tnum" 1;
+  }
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+}
+
+/* Radix's scroll lock reserves a scrollbar gap on <body> while a sheet is open. Phones have no scrollbar, and the gap
+   it computes there squeezes the page and zooms the layout out, pushing the approval card off screen. */
+@media (max-width: 767px) {
+  html body[data-scroll-locked] {
+    margin-right: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@keyframes row-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+.row-in {
+  animation: row-in 200ms var(--ease-out-soft);
+}
+
+@keyframes activity {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.activity-dot {
+  animation: activity 1.6s ease-in-out infinite;
+}
+
+/* React Flow follows the theme */
+.react-flow__attribution { display: none; }
+.react-flow__edge-path { stroke: var(--line-strong); }
+
+/* ---- Desktop ---------------------------------------------------------------------------------------------------- */
+::selection { background: color-mix(in srgb, var(--brand) 35%, transparent); }
+* { scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
+
+/* In the components layer, so utilities such as `hidden` still win. */
+@layer components {
+.win-btn {
+  display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 22px; border-radius: 6px;
+  color: var(--text-2); transition: background-color 120ms, color 120ms;
+}
+.win-btn:hover { background: var(--surface-3); color: var(--text); }
+.bar-btn {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 24px; border-radius: 6px;
+  color: var(--text); transition: background-color 120ms;
+}
+.bar-btn:hover { background: var(--surface-3); }
+}
+
+@keyframes window-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+.window-in { animation: window-in 180ms cubic-bezier(0.2, 0.8, 0.2, 1); transform-origin: 50% 30%; }
+
+@keyframes notice-in {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: none; }
+}
+.notice-in { animation: notice-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+
+/* ---- Signal: the desktop's materials and motion ------------------------------------------------------------ */
+/* The ground under the kairos: plain cool paper, a touch lighter at the top. Pure CSS: it costs nothing per frame. */
+.ground {
+  background-color: #eef1f6;
+  background-image: linear-gradient(180deg, #f7f8fb 0%, #eef1f6 45%, #e8ecf3 100%);
+}
+[data-theme="dark"] .ground {
+  background-color: #0c1018;
+  background-image: linear-gradient(180deg, #111623 0%, #0c1018 50%, #0a0d14 100%);
+}
+
+/* The same floor in CSS, for the screens before the desktop (sign-in, onboarding). */
+.floor {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Crect x='3' y='3' width='24' height='24' rx='5' fill='%231e293b' fill-opacity='0.045'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, #f7f8fb 0%, #eef1f6 45%, #e8ecf3 100%);
+}
+[data-theme="dark"] .floor {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Crect x='3' y='3' width='24' height='24' rx='5' fill='%23e2e8f0' fill-opacity='0.05'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, #111623 0%, #0c1018 50%, #0a0d14 100%);
+}
+
+/* Chrome that floats over the ground (status strip, command rail): the only blurred surfaces, and small ones. */
+.chrome {
+  background: rgb(255 255 255 / 0.82);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgb(15 23 42 / 0.08);
+}
+[data-theme="dark"] .chrome { background: rgb(22 27 38 / 0.86); border-color: rgb(255 255 255 / 0.08); }
+
+/* Solid floating panels: widgets, stage cards, menus, Spotlight. No blur, so nothing to recomposite. */
+.panel {
+  background: var(--surface-1);
+  border: 1px solid var(--hairline);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.06), 0 12px 32px -14px rgb(15 23 42 / 0.22);
+}
+/* Kept for older markup; now solid for the same reason. */
+.material, .material-strong { background: var(--surface-1); border: 1px solid var(--hairline); }
+
+@keyframes spotlight-in {
+  from { opacity: 0; transform: translateY(-12px) scale(0.965); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes spotlight-out {
+  from { opacity: 1; transform: none; }
+  to { opacity: 0; transform: translateY(-6px) scale(0.98); }
+}
+.spotlight-in { animation: spotlight-in 240ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.spotlight-out { animation: spotlight-out 130ms cubic-bezier(0.4, 0, 1, 1) both; }
+
+@keyframes dock-bounce {
+  0%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-10px); }
+  55% { transform: translateY(0); }
+  72% { transform: translateY(-4px); }
+}
+.dock-bounce { animation: dock-bounce 900ms cubic-bezier(0.3, 0.7, 0.4, 1) 3; }
+
+@keyframes stage-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.stage-in { animation: stage-in 300ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+@keyframes dock-left {
+  from { transform: translateX(-28px); opacity: 0.5; }
+  to { transform: none; opacity: 1; }
+}
+.dock-left-in { animation: dock-left 380ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+/* Typing dots: the model is writing. */
+@keyframes typing {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.45; }
+  30% { transform: translateY(-3px); opacity: 1; }
+}
+.typing-dot { animation: typing 1.1s ease-in-out infinite; }
+
+/* Rail items lift on hover with the compositor only (transform), never layout. */
+.rail-item > .rail-icon { transition: transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1); will-change: transform; }
+.rail-item:hover > .rail-icon { transform: translateY(-4px) scale(1.08); }
+.rail-item:active > .rail-icon { transform: translateY(-1px) scale(0.97); }

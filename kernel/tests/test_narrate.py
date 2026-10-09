@@ -48,7 +48,7 @@ def test_narrate_publishes_the_story_with_the_kernels_pid(make_kernel):
     assert t.status == TaskStatus.COMPLETED and errors == ["BAD_REQUEST"]
     understood, planned, thought = (k.bus.of_type(x) for x in ("task.understood", "agent.planned", "agent.thought"))
     assert understood[0].payload["entities"] == ["Project Apollo"] and understood[0].task_id == t.task_id
-    assert planned[0].payload == {"role": "finance-agent", "why": "budget", "scope": ["/org/finance"], "capabilities": []}
+    assert planned[0].payload == {"role": "finance-agent", "why": "budget", "scope": ["/org/finance"], "capabilities": [], "score": None}
     pid = understood[0].pid
     assert thought[0].pid == pid and thought[0].payload["pid"] == pid != 999  # an agent cannot speak for another pid
     assert not k.bus.of_type("tool.query")

@@ -60,7 +60,7 @@ Cloud agents need your finance sheets, tickets and email in someone else's data 
 <td width="33%" valign="top">
 
 **It acts without asking.**<br>
-An agent that can call tools can also call the wrong one. "The model decided to" is not an audit trail, and one poisoned email can steer it.
+An agent that can call tools can also call the wrong one. "The model decided to" is not an audit trail, and one poisoned email can steer it
 
 </td>
 <td width="33%" valign="top">

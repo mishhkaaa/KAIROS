@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import re
 from typing import Any, TypeVar
 
@@ -130,6 +131,29 @@ def cite(evidence: EvidenceSet) -> str:
     return "\n".join(lines) or "- (no evidence found)"
 
 
+# When the default model's structured output is unusable, ask_json retries once on this model (the 8 GB profile's
+# fallback). Empty disables the retry.
+JSON_FALLBACK_MODEL = os.getenv("KAIROS_JSON_FALLBACK_MODEL", "qwen2.5:7b-instruct")
+
+
+def _salvage_json(text: str) -> Any:
+    """JSON from a reply that wraps it in a code fence or adds text around it."""
+    if not text:
+        return None
+    t = re.sub(r"^```(?:json)?\s*|\s*```$", "", text.strip())
+    try:
+        return json.loads(t)
+    except (json.JSONDecodeError, TypeError):
+        pass
+    start, end = t.find("{"), t.rfind("}")
+    if 0 <= start < end:
+        try:
+            return json.loads(t[start:end + 1])
+        except (json.JSONDecodeError, TypeError):
+            return None
+    return None
+
+
 async def ask_json[T: BaseModel](
     ctx: Any,
     system: str,
@@ -138,10 +162,12 @@ async def ask_json[T: BaseModel](
     task_class: TaskClass = TaskClass.REASONING,
     max_tokens: int = 1200,
     think: bool = False,
+    model_hint: str | None = None,
 ) -> T | None:
     """Structured LLM call. Returns None instead of raising when the model output is unusable.
 
-    The router handles JSON repair; we handle validation here.
+    The router handles JSON repair; we handle validation here. Output the default model cannot shape into the schema
+    is retried once on JSON_FALLBACK_MODEL (Gemma 4 first, then Qwen 2.5).
     """
     resp = await ctx.llm(
         ModelRequest(
@@ -153,19 +179,20 @@ async def ask_json[T: BaseModel](
             json_schema=schema.model_json_schema(),
             max_tokens=max_tokens,
             think=think,
+            model_hint=model_hint,
         )
     )
-    data = resp.parsed
-    if data is None:
-        try:
-            data = json.loads(resp.content)
-        except (json.JSONDecodeError, TypeError):
-            return None
+    data = resp.parsed if resp.parsed is not None else _salvage_json(resp.content)
     try:
-        return schema.model_validate(data)
+        if data is not None:
+            return schema.model_validate(data)
     except ValidationError as e:
         log.debug("ask_json validation failed for %s: %s", schema.__name__, e)
-        return None
+    fallback = JSON_FALLBACK_MODEL
+    if model_hint is None and fallback and not str(getattr(resp, "model", "")).startswith(fallback.split(":")[0]):
+        log.info("ask_json: %s output unusable for %s; retrying on %s", getattr(resp, "model", "?"), schema.__name__, fallback)
+        return await ask_json(ctx, system, user, schema, task_class, max_tokens, think=False, model_hint=fallback)
+    return None
 
 
 async def look(ctx: Any, image: bytes, question: str, max_tokens: int = 400) -> str:

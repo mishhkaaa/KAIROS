@@ -1,0 +1,9 @@
+# Scheduled agents (P1). Point KAIROS_KERNEL_SCHEDULES_FILE at a copy of this file.
+schedules:
+  - name: daily-budget-watch
+    every_s: 86400
+    goal: "Check every active project's budget variance and flag anything more than 10% over plan"
+    priority: background
+  - name: policy-drift-review
+    every_s: 604800
+    goal: "Review agent activity of the last week against the security policy and summarise exceptions"

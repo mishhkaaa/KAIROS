@@ -1,0 +1,44 @@
+[project]
+name = "kairos-kernel"
+version = "0.1.0"
+description = "KAIROS AI kernel: tasks, processes, scheduler, lifecycle, policy, syscalls, transactions, audit, gateway, CLI"
+requires-python = ">=3.12"
+dependencies = [
+    "kairos-contracts[api]",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "sqlalchemy>=2.0",
+    "aiosqlite>=0.20",
+    "redis>=5",
+    "typer>=0.12",
+    "rich>=13",
+    "httpx>=0.27",
+    "websockets>=12",
+    "google-auth>=2.30",      # verifies Google ID tokens (KAIROS_AUTH=google)
+    "requests>=2.31",         # google-auth's transport for Google's signing keys
+    "cryptography>=42",       # the connector token vault (Fernet)
+    "python-multipart>=0.0.9",  # file uploads
+    "watchfiles>=0.21",       # mounted folders of this computer
+]
+
+[project.scripts]
+ai = "kairos_kernel.cli.main:app"
+ai-ps = "kairos_kernel.cli.main:ps"
+ai-tree = "kairos_kernel.cli.main:tree"
+ai-top = "kairos_kernel.cli.main:top"
+ai-kill = "kairos_kernel.cli.main:kill"
+ai-audit = "kairos_kernel.cli.main:audit"
+ai-checkpoint = "kairos_kernel.cli.main:checkpoint"
+ai-resume = "kairos_kernel.cli.main:resume"
+ai-mount = "kairos_kernel.cli.main:mount"
+ai-demo = "kairos_kernel.demo:main"
+
+[tool.uv.sources]
+kairos-contracts = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["kairos_kernel"]

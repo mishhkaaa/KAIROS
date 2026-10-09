@@ -1,0 +1,47 @@
+[project]
+name = "kairos-os"
+version = "0.1.0"
+description = "Python client and command line for KAIROS, the operating system for organizational AI: governed, auditable AI agents on your own machine."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.9"
+authors = [
+    { name = "Kamal Karteek U" },
+    { name = "Mishka Tiwari" },
+    { name = "Manjunath Patil" },
+    { name = "Mayeraa Singh" },
+]
+keywords = ["ai", "agents", "llm", "operating-system", "governance", "human-in-the-loop", "audit", "ollama", "rag", "kairos"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries",
+    "Typing :: Typed",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://kairos-os-black.vercel.app"
+Source = "https://github.com/mishhkaaa/KAIROS"
+Documentation = "https://github.com/mishhkaaa/KAIROS/tree/main/sdk/python#readme"
+Issues = "https://github.com/mishhkaaa/KAIROS/issues"
+
+[project.scripts]
+kairos = "kairos_os.cli:main"
+
+[build-system]
+requires = ["hatchling==1.27.0"]  # writes metadata 2.4, which PyPI and twine accept
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/kairos_os"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/kairos_os", "tests", "README.md", "LICENSE", "pyproject.toml"]

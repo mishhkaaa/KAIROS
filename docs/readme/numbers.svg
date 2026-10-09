@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="200" viewBox="0 0 1280 200" role="img" aria-labelledby="t d">
+  <title id="t">Measured on the demo laptop</title>
+  <desc id="d">All four scored scenarios (Apollo, Zeus, Vendors, Multitool) pass 8 of 8 on a local 7B model; 8 agent roles generated per task; a person approves every write; memories go stale 0.1 seconds after a source edit; 16 of 16 components real; 442 Python and 93 web tests pass.</desc>
+  <defs>
+    <style>
+      .t { font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif; }
+      .v { font-size: 44px; font-weight: 800; }
+      .u { font-size: 20px; font-weight: 700; }
+      .l { font-size: 14px; fill: #A9B3BF; }
+    </style>
+  </defs>
+  <rect width="1280" height="200" rx="24" fill="#0D1117"/>
+  <g class="t">
+    <text x="48" y="44" font-size="13" font-weight="800" letter-spacing="1.6" fill="#5B6675">MEASURED ON THE DEMO LAPTOP · RTX 5070 LAPTOP GPU, 8 GB · qwen2.5:7b-instruct · CONTRACT 0.13.0</text>
+    <g transform="translate(48 70)">
+      <rect width="186" height="104" rx="14" fill="#103A35"/>
+      <text x="18" y="56" class="v" fill="#5FDCC8">8/8</text><text x="18" y="84" class="l">every scored scenario (4)</text>
+    </g>
+    <g transform="translate(248 70)">
+      <rect width="186" height="104" rx="14" fill="#2A2342"/>
+      <text x="18" y="56" class="v" fill="#C3B8F5">8</text><text x="18" y="84" class="l">agent roles, made per task</text>
+    </g>
+    <g transform="translate(448 70)">
+      <rect width="186" height="104" rx="14" fill="#3A2A0E"/>
+      <text x="18" y="56" class="v" fill="#F0C06A">1</text><text x="18" y="84" class="l">person approves each write</text>
+    </g>
+    <g transform="translate(648 70)">
+      <rect width="186" height="104" rx="14" fill="#3D1618"/>
+      <text x="18" y="56" class="v" fill="#F2A1A1">0.1<tspan class="u"> s</tspan></text><text x="18" y="84" class="l">stale-memory alert</text>
+    </g>
+    <g transform="translate(848 70)">
+      <rect width="186" height="104" rx="14" fill="#1F3A1A"/>
+      <text x="18" y="56" class="v" fill="#7FD68C">16/16</text><text x="18" y="84" class="l">components real</text>
+    </g>
+    <g transform="translate(1048 70)">
+      <rect width="186" height="104" rx="14" fill="#142A45"/>
+      <text x="18" y="56" class="v" fill="#8DB5EE">535</text><text x="18" y="84" class="l">tests passing</text>
+    </g>
+  </g>
+</svg>

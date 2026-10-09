@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760" role="img" aria-labelledby="t d">
+  <title id="t">KAIROS architecture</title>
+  <desc id="d">Clients talk to one gateway; the kernel governs every agent, model call, knowledge read and action; services and infrastructure run on one machine.</desc>
+  <defs>
+    <style>
+      .t { font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif; }
+      .m { font-family: ui-monospace, "SFMono-Regular", "Cascadia Mono", Menlo, Consolas, monospace; }
+      .h { font-size: 15px; font-weight: 800; letter-spacing: 1.5px; }
+      .b { font-size: 16px; font-weight: 700; fill: #F1F5F9; }
+      .s { font-size: 12.5px; fill: #A9B3BF; }
+      .flow { stroke-dasharray: 6 6; animation: dash 1.6s linear infinite; }
+      @keyframes dash { to { stroke-dashoffset: -24; } }
+      @media (prefers-reduced-motion: reduce) { .flow { animation: none; } }
+    </style>
+    <linearGradient id="k" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#103A35"/><stop offset="1" stop-color="#0F2B2E"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="760" rx="24" fill="#0D1117"/>
+  <text x="48" y="58" class="t" font-size="28" font-weight="800" fill="#F1F5F9">Architecture</text>
+  <text x="48" y="86" class="t" font-size="15" fill="#8A95A3">One box. One governed path from a goal to a committed, audited action.</text>
+
+  <!-- clients -->
+  <g class="t">
+    <text x="48" y="130" class="h" fill="#8A95A3">CLIENTS</text>
+    <rect x="48" y="144" width="370" height="64" rx="14" fill="#1B222B" stroke="#3B4653"/>
+    <text x="68" y="172" class="b">Web console</text><text x="68" y="193" class="s">Next.js · React Flow · live timeline, approvals</text>
+    <rect x="455" y="144" width="370" height="64" rx="14" fill="#1B222B" stroke="#3B4653"/>
+    <text x="475" y="172" class="b">ai-* CLI</text><text x="475" y="193" class="s">ai-ps · ai-top · ai-kill · ai-audit · ai-tree</text>
+    <rect x="862" y="144" width="370" height="64" rx="14" fill="#1B222B" stroke="#3B4653"/>
+    <text x="882" y="172" class="b">Phone / thin clients</text><text x="882" y="193" class="s">approve from anywhere on the private network</text>
+  </g>
+
+  <g stroke="#2BB8A3" stroke-width="2" fill="none" opacity="0.8">
+    <path class="flow" d="M233 208V238"/><path class="flow" d="M640 208V238"/><path class="flow" d="M1047 208V238"/>
+  </g>
+
+  <!-- gateway -->
+  <g class="t">
+    <rect x="48" y="238" width="1184" height="54" rx="14" fill="#142A45" stroke="#4C86D9"/>
+    <text x="68" y="271" class="b">Gateway</text>
+    <text x="160" y="271" class="s m" fill="#8DB5EE">REST  /tasks  /agents  /approvals  /knowledge  /memory  /audit  /system    ·    WebSocket  /ws/events</text>
+  </g>
+
+  <g stroke="#2BB8A3" stroke-width="2" fill="none" opacity="0.8"><path class="flow" d="M640 292V318"/></g>
+
+  <!-- kernel -->
+  <g class="t">
+    <rect x="48" y="318" width="1184" height="170" rx="16" fill="url(#k)" stroke="#2BB8A3"/>
+    <text x="68" y="350" class="h" fill="#5FDCC8">KERNEL</text>
+    <text x="146" y="350" class="s">kairosd: every agent, model call, read and action passes through here</text>
+    <g>
+      <rect x="68" y="366" width="214" height="104" rx="12" fill="#0D1117" stroke="#2BB8A3" stroke-opacity="0.5"/>
+      <text x="84" y="392" class="b">Process table</text>
+      <text x="84" y="414" class="s">PIDs, states, quotas</text><text x="84" y="432" class="s">spawn · pause · kill</text><text x="84" y="450" class="s">scheduler + preemption</text>
+      <rect x="296" y="366" width="214" height="104" rx="12" fill="#0D1117" stroke="#D99A25" stroke-opacity="0.6"/>
+      <text x="312" y="392" class="b">Policy engine</text>
+      <text x="312" y="414" class="s">YAML rules, hot reload</text><text x="312" y="432" class="s">allow · deny · approve</text><text x="312" y="450" class="s">scopes + privacy levels</text>
+      <rect x="524" y="366" width="214" height="104" rx="12" fill="#0D1117" stroke="#D99A25" stroke-opacity="0.6"/>
+      <text x="540" y="392" class="b">Approvals</text>
+      <text x="540" y="414" class="s">human in the loop</text><text x="540" y="432" class="s">evidence on every card</text><text x="540" y="450" class="s">console, CLI or phone</text>
+      <rect x="752" y="366" width="214" height="104" rx="12" fill="#0D1117" stroke="#2FB344" stroke-opacity="0.6"/>
+      <text x="768" y="392" class="b">Transactions</text>
+      <text x="768" y="414" class="s">execute · verify</text><text x="768" y="432" class="s">commit or roll back</text><text x="768" y="450" class="s">checkpoints + resume</text>
+      <rect x="980" y="366" width="232" height="104" rx="12" fill="#0D1117" stroke="#E05252" stroke-opacity="0.6"/>
+      <text x="996" y="392" class="b">Audit journal</text>
+      <text x="996" y="414" class="s">SHA-256 hash chain</text><text x="996" y="432" class="s">per task, append-only</text><text x="996" y="450" class="s">tamper evident</text>
+    </g>
+  </g>
+
+  <g stroke="#2BB8A3" stroke-width="2" fill="none" opacity="0.8">
+    <path class="flow" d="M166 488V514"/><path class="flow" d="M398 488V514"/><path class="flow" d="M640 488V514"/><path class="flow" d="M882 488V514"/><path class="flow" d="M1114 488V514"/>
+  </g>
+
+  <!-- services -->
+  <g class="t">
+    <rect x="48" y="514" width="224" height="112" rx="14" fill="#142A45" stroke="#4C86D9"/>
+    <text x="64" y="540" class="b">Knowledge FS</text>
+    <text x="64" y="562" class="s">/org as a filesystem</text><text x="64" y="580" class="s">lexical + semantic + graph</text><text x="64" y="598" class="s">provenance + trust</text>
+    <rect x="286" y="514" width="224" height="112" rx="14" fill="#3D1618" stroke="#E05252"/>
+    <text x="302" y="540" class="b">Context firewall</text>
+    <text x="302" y="562" class="s">flags injected text</text><text x="302" y="580" class="s">documents are data,</text><text x="302" y="598" class="s">never instructions</text>
+    <rect x="524" y="514" width="232" height="112" rx="14" fill="#1F3A1A" stroke="#2FB344"/>
+    <text x="540" y="540" class="b">Memory</text>
+    <text x="540" y="562" class="s">findings with sources</text><text x="540" y="580" class="s">stale the moment a</text><text x="540" y="598" class="s">source changes</text>
+    <rect x="770" y="514" width="224" height="112" rx="14" fill="#2A2342" stroke="#9D8CE8"/>
+    <text x="786" y="540" class="b">Agents + models</text>
+    <text x="786" y="562" class="s">planner, finance, eng,</text><text x="786" y="580" class="s">research, action agents</text><text x="786" y="598" class="s">policy model router</text>
+    <rect x="1008" y="514" width="224" height="112" rx="14" fill="#3A2A0E" stroke="#D99A25"/>
+    <text x="1024" y="540" class="b">Execution</text>
+    <text x="1024" y="562" class="s">tools + MCP</text><text x="1024" y="580" class="s">Docker sandboxes</text><text x="1024" y="598" class="s">headless browser</text>
+  </g>
+
+  <!-- infrastructure -->
+  <g class="t">
+    <rect x="48" y="650" width="1184" height="74" rx="14" fill="#151A21" stroke="#2D3743"/>
+    <text x="68" y="680" class="h" fill="#8A95A3">ON ONE MACHINE</text>
+    <g class="m" font-size="14" font-weight="600">
+      <rect x="68" y="690" width="210" height="24" rx="12" fill="#1B222B"/><text x="173" y="707" text-anchor="middle" fill="#8DB5EE">Postgres + pgvector</text>
+      <rect x="290" y="690" width="96" height="24" rx="12" fill="#1B222B"/><text x="338" y="707" text-anchor="middle" fill="#F29090">Redis</text>
+      <rect x="398" y="690" width="284" height="24" rx="12" fill="#1B222B"/><text x="540" y="707" text-anchor="middle" fill="#5FDCC8">Ollama · qwen2.5:7b · nomic-embed</text>
+      <rect x="694" y="690" width="186" height="24" rx="12" fill="#1B222B"/><text x="787" y="707" text-anchor="middle" fill="#F0C06A">Docker sandboxes</text>
+      <rect x="892" y="690" width="160" height="24" rx="12" fill="#1B222B"/><text x="972" y="707" text-anchor="middle" fill="#7FD68C">NVIDIA GPU</text>
+      <rect x="1064" y="690" width="148" height="24" rx="12" fill="#1B222B"/><text x="1138" y="707" text-anchor="middle" fill="#C3B8F5">SQLite journal</text>
+    </g>
+  </g>
+</svg>

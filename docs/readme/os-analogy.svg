@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="560" viewBox="0 0 1280 560" role="img" aria-labelledby="t d">
+  <title id="t">The OS analogy</title>
+  <desc id="d">Classic operating-system concepts and what each one becomes in KAIROS.</desc>
+  <defs>
+    <style>
+      .t { font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif; }
+      .m { font-family: ui-monospace, "SFMono-Regular", "Cascadia Mono", Menlo, Consolas, monospace; }
+      .os { fill: #1B222B; stroke: #3B4653; }
+      .oslbl { fill: #A9B3BF; font-size: 17px; font-weight: 600; }
+      .lbl { font-size: 17px; font-weight: 700; }
+      .cap { fill: #8A95A3; font-size: 13.5px; }
+    </style>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0L10 5L0 10z" fill="#5B6675"/>
+    </marker>
+  </defs>
+  <rect width="1280" height="560" rx="24" fill="#0D1117"/>
+  <text x="64" y="70" class="t" font-size="30" font-weight="800" fill="#F1F5F9">An operating system, <tspan fill="#2BB8A3">for AI</tspan></text>
+  <text x="64" y="102" class="t" font-size="16" fill="#8A95A3">Every idea that made computers safe to share, applied to agents that act on your company's knowledge.</text>
+
+  <!-- row template: os box 190 wide, arrow, kairos box 300 wide -->
+  <g class="t" transform="translate(64 136)">
+    <g>
+      <rect class="os" x="0" y="0" width="176" height="52" rx="12"/><text class="oslbl" x="88" y="32" text-anchor="middle">Process</text>
+      <line x1="184" y1="26" x2="224" y2="26" stroke="#5B6675" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="232" y="0" width="300" height="52" rx="12" fill="#103A35" stroke="#2BB8A3"/><text class="lbl" x="250" y="24" fill="#5FDCC8">AI agent with a PID</text>
+      <text class="cap" x="250" y="43">state, quota, capabilities, parent</text>
+    </g>
+    <g transform="translate(0 76)">
+      <rect class="os" x="0" y="0" width="176" height="52" rx="12"/><text class="oslbl" x="88" y="32" text-anchor="middle">Filesystem</text>
+      <line x1="184" y1="26" x2="224" y2="26" stroke="#5B6675" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="232" y="0" width="300" height="52" rx="12" fill="#142A45" stroke="#4C86D9"/><text class="lbl" x="250" y="24" fill="#8DB5EE">/org knowledge</text>
+      <text class="cap" x="250" y="43">Markdown + provenance, hybrid search</text>
+    </g>
+    <g transform="translate(0 152)">
+      <rect class="os" x="0" y="0" width="176" height="52" rx="12"/><text class="oslbl" x="88" y="32" text-anchor="middle">System call</text>
+      <line x1="184" y1="26" x2="224" y2="26" stroke="#5B6675" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="232" y="0" width="300" height="52" rx="12" fill="#3A2A0E" stroke="#D99A25"/><text class="lbl" x="250" y="24" fill="#F0C06A">Governed action</text>
+      <text class="cap" x="250" y="43">policy, approval, sandbox, commit</text>
+    </g>
+    <g transform="translate(0 228)">
+      <rect class="os" x="0" y="0" width="176" height="52" rx="12"/><text class="oslbl" x="88" y="32" text-anchor="middle">RAM / page cache</text>
+      <line x1="184" y1="26" x2="224" y2="26" stroke="#5B6675" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="232" y="0" width="300" height="52" rx="12" fill="#1F3A1A" stroke="#2FB344"/><text class="lbl" x="250" y="24" fill="#7FD68C">Working set + memory</text>
+      <text class="cap" x="250" y="43">paged into the context window</text>
+    </g>
+    <g transform="translate(0 304)">
+      <rect class="os" x="0" y="0" width="176" height="52" rx="12"/><text class="oslbl" x="88" y="32" text-anchor="middle">Permissions</text>
+      <line x1="184" y1="26" x2="224" y2="26" stroke="#5B6675" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="232" y="0" width="300" height="52" rx="12" fill="#2A2342" stroke="#9D8CE8"/><text class="lbl" x="250" y="24" fill="#C3B8F5">Capabilities + policy</text>
+      <text class="cap" x="250" y="43">YAML rules, scopes, privacy levels</text>
+    </g>
+  </g>
+
+  <g class="t" transform="translate(684 136)">
+    <g>
+      <rect class="os" x="0" y="0" width="176" height="52" rx="12"/><text class="oslbl" x="88" y="32" text-anchor="middle">Scheduler</text>
+      <line x1="184" y1="26" x2="224" y2="26" stroke="#5B6675" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="232" y="0" width="300" height="52" rx="12" fill="#103A35" stroke="#2BB8A3"/><text class="lbl" x="250" y="24" fill="#5FDCC8">Kernel + model router</text>
+      <text class="cap" x="250" y="43">priorities, quotas, local GPU</text>
+    </g>
+    <g transform="translate(0 76)">
+      <rect class="os" x="0" y="0" width="176" height="52" rx="12"/><text class="oslbl" x="88" y="32" text-anchor="middle">IPC / pipes</text>
+      <line x1="184" y1="26" x2="224" y2="26" stroke="#5B6675" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="232" y="0" width="300" height="52" rx="12" fill="#142A45" stroke="#4C86D9"/><text class="lbl" x="250" y="24" fill="#8DB5EE">Agent-to-agent messages</text>
+      <text class="cap" x="250" y="43">routed and logged by the kernel</text>
+    </g>
+    <g transform="translate(0 152)">
+      <rect class="os" x="0" y="0" width="176" height="52" rx="12"/><text class="oslbl" x="88" y="32" text-anchor="middle">Device driver</text>
+      <line x1="184" y1="26" x2="224" y2="26" stroke="#5B6675" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="232" y="0" width="300" height="52" rx="12" fill="#3A2A0E" stroke="#D99A25"/><text class="lbl" x="250" y="24" fill="#F0C06A">Tools + MCP connectors</text>
+      <text class="cap" x="250" y="43">Jira, files, browser, in sandboxes</text>
+    </g>
+    <g transform="translate(0 228)">
+      <rect class="os" x="0" y="0" width="176" height="52" rx="12"/><text class="oslbl" x="88" y="32" text-anchor="middle">Journal</text>
+      <line x1="184" y1="26" x2="224" y2="26" stroke="#5B6675" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="232" y="0" width="300" height="52" rx="12" fill="#3D1618" stroke="#E05252"/><text class="lbl" x="250" y="24" fill="#F29090">Hash-chained audit</text>
+      <text class="cap" x="250" y="43">every call, read and decision</text>
+    </g>
+    <g transform="translate(0 304)">
+      <rect class="os" x="0" y="0" width="176" height="52" rx="12"/><text class="oslbl" x="88" y="32" text-anchor="middle">Checkpoint</text>
+      <line x1="184" y1="26" x2="224" y2="26" stroke="#5B6675" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="232" y="0" width="300" height="52" rx="12" fill="#1F3A1A" stroke="#2FB344"/><text class="lbl" x="250" y="24" fill="#7FD68C">Crash-safe resume</text>
+      <text class="cap" x="250" y="43">tasks restart from their last snapshot</text>
+    </g>
+  </g>
+
+  <g class="m" font-size="13" fill="#5B6675">
+    <text x="64" y="530">classic OS</text>
+    <text x="296" y="530" fill="#2BB8A3">KAIROS</text>
+  </g>
+</svg>

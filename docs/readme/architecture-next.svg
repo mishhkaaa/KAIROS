@@ -1,0 +1,214 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1060" role="img" aria-labelledby="t d">
+  <title id="t">KAIROS architecture</title>
+  <desc id="d">Clients reach one gateway. Inside the kernel, the planner hands each goal to a JEPA router that scores every agent and spawns only the likely ones; repeated plans become n8n workflows run on a cron. Every action passes the kernel core: policy, approval, sandbox, verify, commit, audit. Below sit knowledge and memory, execution and tools, and local models through Ollama: Qwen 2.5, Gemma 4 and nomic-embed-text.</desc>
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&amp;family=Hanken+Grotesk:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@500&amp;display=swap');
+      .d { font-family: 'Bricolage Grotesque', 'Hanken Grotesk', 'Segoe UI', sans-serif; }
+      .b { font-family: 'Hanken Grotesk', 'Segoe UI', sans-serif; }
+      .m { font-family: 'IBM Plex Mono', Consolas, monospace; }
+    </style>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0E1526"/><stop offset="1" stop-color="#0A0F1C"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.45" r="0.6">
+      <stop offset="0" stop-color="#E2B04A" stop-opacity="0.10"/><stop offset="1" stop-color="#E2B04A" stop-opacity="0"/>
+    </radialGradient>
+    <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#8792A6"/>
+    </marker>
+    <marker id="ag" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#E2B04A"/>
+    </marker>
+  </defs>
+
+  <rect width="1600" height="1060" fill="url(#bg)"/>
+  <rect width="1600" height="1060" fill="url(#glow)"/>
+
+  <!-- title -->
+  <text x="60" y="62" class="d" font-size="34" font-weight="700" fill="#EDE8DA">KAIROS architecture</text>
+  <text x="60" y="90" class="b" font-size="16" fill="#8792A6">One private machine. Agents run as processes, every action is a governed syscall, and the right agents are chosen at the right moment.</text>
+  <g transform="translate(1250 48)">
+    <rect width="290" height="46" rx="10" fill="#121A2C" stroke="#25304A"/>
+    <rect x="16" y="15" width="16" height="16" rx="4" fill="none" stroke="#E2B04A" stroke-width="2"/>
+    <text x="42" y="28" class="b" font-size="14" fill="#EDE8DA">New in KAIROS</text>
+    <rect x="160" y="15" width="16" height="16" rx="4" fill="#1A2338" stroke="#33405C"/>
+    <text x="186" y="28" class="b" font-size="14" fill="#A9B2C3">Core platform</text>
+  </g>
+
+  <!-- clients -->
+  <g class="b" font-size="15">
+    <g transform="translate(60 118)">
+      <rect width="350" height="68" rx="12" fill="#121A2C" stroke="#25304A"/>
+      <text x="22" y="30" class="d" font-size="18" font-weight="700" fill="#EDE8DA">Desktop OS</text>
+      <text x="22" y="52" fill="#8792A6">Windows, Spotlight, live runs, in the browser</text>
+    </g>
+    <g transform="translate(436 118)">
+      <rect width="350" height="68" rx="12" fill="#121A2C" stroke="#25304A"/>
+      <text x="22" y="30" class="d" font-size="18" font-weight="700" fill="#EDE8DA">Phone app</text>
+      <text x="22" y="52" fill="#8792A6">Android: watch runs, approve actions</text>
+    </g>
+    <g transform="translate(812 118)">
+      <rect width="350" height="68" rx="12" fill="#121A2C" stroke="#25304A"/>
+      <text x="22" y="30" class="d" font-size="18" font-weight="700" fill="#EDE8DA">KAIROS OS shell</text>
+      <text x="22" y="52" fill="#8792A6">Linux where /org is a real filesystem</text>
+    </g>
+    <g transform="translate(1188 118)">
+      <rect width="352" height="68" rx="12" fill="#121A2C" stroke="#25304A"/>
+      <text x="22" y="30" class="d" font-size="18" font-weight="700" fill="#EDE8DA">Python SDK and CLI</text>
+      <text x="22" y="52" fill="#8792A6">pip install kairos-os</text>
+    </g>
+  </g>
+  <g stroke="#8792A6" stroke-width="1.5" marker-end="url(#ar)">
+    <line x1="235" y1="188" x2="235" y2="240"/><line x1="611" y1="188" x2="611" y2="240"/>
+    <line x1="987" y1="188" x2="987" y2="240"/><line x1="1364" y1="188" x2="1364" y2="240"/>
+  </g>
+  <rect x="555" y="202" width="490" height="26" rx="13" fill="#0E1526" stroke="#25304A"/>
+  <text x="800" y="220" text-anchor="middle" class="b" font-size="14" fill="#8792A6">HTTPS and WebSocket, Google sign-in, five roles checked on every route</text>
+
+  <!-- gateway -->
+  <rect x="60" y="246" width="1480" height="54" rx="12" fill="#151E33" stroke="#33405C"/>
+  <text x="84" y="279" class="d" font-size="18" font-weight="700" fill="#EDE8DA">Gateway</text>
+  <text x="180" y="279" class="b" font-size="15" fill="#A9B2C3">FastAPI: REST, live event stream, organizations and roles, encrypted token vault</text>
+  <line x1="800" y1="300" x2="800" y2="324" stroke="#8792A6" stroke-width="1.5" marker-end="url(#ar)"/>
+
+  <!-- kernel container -->
+  <rect x="60" y="328" width="1480" height="380" rx="18" fill="#0F1729" stroke="#3A4766" stroke-width="1.5"/>
+  <text x="84" y="360" class="d" font-size="20" font-weight="700" fill="#EDE8DA">KAIROS kernel</text>
+  <text x="240" y="360" class="b" font-size="14" fill="#8792A6">the trusted control plane: agents ask, the kernel decides</text>
+
+  <!-- orchestration -->
+  <rect x="84" y="378" width="752" height="196" rx="14" fill="#121A2C" stroke="#25304A"/>
+  <text x="104" y="404" class="b" font-size="13" font-weight="600" fill="#A9B2C3">Orchestration: choosing who works on a goal</text>
+
+  <g transform="translate(104 420)">
+    <rect width="150" height="136" rx="12" fill="#1A2338" stroke="#33405C"/>
+    <text x="16" y="30" class="d" font-size="17" font-weight="700" fill="#EDE8DA">Planner</text>
+    <text x="16" y="54" class="b" font-size="13" fill="#A9B2C3">reads the goal</text>
+    <text x="16" y="72" class="b" font-size="13" fill="#A9B2C3">and the question</text>
+    <text x="16" y="90" class="b" font-size="13" fill="#A9B2C3">type, embeds it</text>
+    <text x="16" y="118" class="m" font-size="11" fill="#8792A6">nomic-embed-text</text>
+  </g>
+  <line x1="256" y1="488" x2="284" y2="488" stroke="#E2B04A" stroke-width="1.8" marker-end="url(#ag)"/>
+
+  <g transform="translate(288 420)">
+    <rect width="290" height="136" rx="12" fill="#1C2236" stroke="#E2B04A" stroke-width="2"/>
+    <text x="16" y="28" class="d" font-size="17" font-weight="700" fill="#F3D48A">JEPA agent router</text>
+    <text x="16" y="47" class="b" font-size="12" fill="#A9B2C3">predicts the team in embedding space;</text>
+    <text x="16" y="62" class="b" font-size="12" fill="#A9B2C3">a spawn probability for every agent</text>
+    <g class="m" font-size="11" fill="#C9D0DC">
+      <text x="16" y="80">finance</text><rect x="104" y="72" width="140" height="8" rx="4" fill="#25304A"/><rect x="104" y="72" width="127" height="8" rx="4" fill="#49D3B4"/><text x="252" y="80">.91</text>
+      <text x="16" y="95">engineering</text><rect x="104" y="87" width="140" height="8" rx="4" fill="#25304A"/><rect x="104" y="87" width="118" height="8" rx="4" fill="#49D3B4"/><text x="252" y="95">.84</text>
+      <text x="16" y="110">research</text><rect x="104" y="102" width="140" height="8" rx="4" fill="#25304A"/><rect x="104" y="102" width="87" height="8" rx="4" fill="#49D3B4"/><text x="252" y="110">.62</text>
+      <text x="16" y="125" fill="#6E7891">web</text><rect x="104" y="117" width="140" height="8" rx="4" fill="#25304A"/><rect x="104" y="117" width="25" height="8" rx="4" fill="#5A6580"/><text x="252" y="125" fill="#6E7891">.18</text>
+    </g>
+    <line x1="174" y1="68" x2="174" y2="128" stroke="#E2B04A" stroke-dasharray="3 3" stroke-width="1.2"/>
+  </g>
+  <line x1="580" y1="488" x2="608" y2="488" stroke="#E2B04A" stroke-width="1.8" marker-end="url(#ag)"/>
+
+  <g transform="translate(612 420)">
+    <rect width="204" height="136" rx="12" fill="#1A2338" stroke="#33405C"/>
+    <text x="16" y="28" class="d" font-size="17" font-weight="700" fill="#EDE8DA">Agents spawned</text>
+    <text x="16" y="48" class="b" font-size="12" fill="#A9B2C3">only above the threshold</text>
+    <g class="b" font-size="13" fill="#C9D0DC">
+      <circle cx="22" cy="70" r="4" fill="#49D3B4"/><text x="34" y="74">finance agent</text>
+      <circle cx="22" cy="90" r="4" fill="#49D3B4"/><text x="34" y="94">engineering agent</text>
+      <circle cx="22" cy="110" r="4" fill="#49D3B4"/><text x="34" y="114">research agent</text>
+    </g>
+    <text x="16" y="130" class="b" font-size="11" fill="#8792A6">low confidence: ask the LLM planner</text>
+  </g>
+
+  <!-- n8n -->
+  <rect x="852" y="378" width="664" height="196" rx="14" fill="#1C2236" stroke="#E2B04A" stroke-width="2"/>
+  <text x="872" y="404" class="b" font-size="13" font-weight="600" fill="#F3D48A">n8n workflows: recurring work without re-planning</text>
+  <g class="b">
+    <g transform="translate(872 420)">
+      <rect width="146" height="136" rx="12" fill="#151E33" stroke="#33405C"/>
+      <text x="14" y="28" class="d" font-size="16" font-weight="700" fill="#EDE8DA">Repeat spotted</text>
+      <text x="14" y="52" font-size="12" fill="#A9B2C3">the same plan</text>
+      <text x="14" y="68" font-size="12" fill="#A9B2C3">shape runs again</text>
+      <text x="14" y="84" font-size="12" fill="#A9B2C3">and again</text>
+      <g fill="#49D3B4"><rect x="14" y="104" width="34" height="8" rx="4"/><rect x="54" y="104" width="34" height="8" rx="4"/><rect x="94" y="104" width="34" height="8" rx="4"/></g>
+    </g>
+    <line x1="1020" y1="488" x2="1040" y2="488" stroke="#E2B04A" stroke-width="1.8" marker-end="url(#ag)"/>
+    <g transform="translate(1044 420)">
+      <rect width="146" height="136" rx="12" fill="#151E33" stroke="#33405C"/>
+      <text x="14" y="28" class="d" font-size="16" font-weight="700" fill="#EDE8DA">Saved as flow</text>
+      <text x="14" y="52" font-size="12" fill="#A9B2C3">steps, agents and</text>
+      <text x="14" y="68" font-size="12" fill="#A9B2C3">tools frozen into</text>
+      <text x="14" y="84" font-size="12" fill="#A9B2C3">an n8n workflow</text>
+      <g stroke="#E2B04A" stroke-width="1.5" fill="#1C2236"><circle cx="26" cy="110" r="7"/><circle cx="72" cy="110" r="7"/><circle cx="118" cy="110" r="7"/></g>
+      <g stroke="#E2B04A" stroke-width="1.5"><line x1="33" y1="110" x2="65" y2="110"/><line x1="79" y1="110" x2="111" y2="110"/></g>
+    </g>
+    <line x1="1192" y1="488" x2="1212" y2="488" stroke="#E2B04A" stroke-width="1.8" marker-end="url(#ag)"/>
+    <g transform="translate(1216 420)">
+      <rect width="130" height="136" rx="12" fill="#151E33" stroke="#33405C"/>
+      <text x="14" y="28" class="d" font-size="16" font-weight="700" fill="#EDE8DA">Cron trigger</text>
+      <text x="14" y="52" font-size="12" fill="#A9B2C3">runs on a</text>
+      <text x="14" y="68" font-size="12" fill="#A9B2C3">schedule</text>
+      <text x="14" y="102" class="m" font-size="12" fill="#F3D48A">0 9 * * 1-5</text>
+      <text x="14" y="120" font-size="11" fill="#8792A6">weekdays 09:00</text>
+    </g>
+    <line x1="1348" y1="488" x2="1368" y2="488" stroke="#E2B04A" stroke-width="1.8" marker-end="url(#ag)"/>
+    <g transform="translate(1372 420)">
+      <rect width="124" height="136" rx="12" fill="#151E33" stroke="#33405C"/>
+      <text x="14" y="28" class="d" font-size="15" font-weight="700" fill="#EDE8DA">Still governed</text>
+      <text x="14" y="52" font-size="12" fill="#A9B2C3">each step is a</text>
+      <text x="14" y="68" font-size="12" fill="#A9B2C3">syscall through</text>
+      <text x="14" y="84" font-size="12" fill="#A9B2C3">policy and</text>
+      <text x="14" y="100" font-size="12" fill="#A9B2C3">approval</text>
+    </g>
+  </g>
+
+  <!-- kernel core -->
+  <text x="104" y="606" class="b" font-size="13" font-weight="600" fill="#A9B2C3">Kernel core: every action that touches the world is a syscall</text>
+  <g class="b" font-size="14" fill="#EDE8DA">
+    <g transform="translate(84 618)"><rect width="224" height="70" rx="10" fill="#1A2338" stroke="#33405C"/><text x="16" y="30" font-weight="600">Process table</text><text x="16" y="52" font-size="12" fill="#8792A6">PIDs, quotas, scheduler</text></g>
+    <g transform="translate(325.6 618)"><rect width="224" height="70" rx="10" fill="#1A2338" stroke="#33405C"/><text x="16" y="30" font-weight="600">Policy engine</text><text x="16" y="52" font-size="12" fill="#8792A6">YAML: allow, deny, ask</text></g>
+    <g transform="translate(567.2 618)"><rect width="224" height="70" rx="10" fill="#1A2338" stroke="#33405C"/><text x="16" y="30" font-weight="600">Approvals</text><text x="16" y="52" font-size="12" fill="#8792A6">a person signs off writes</text></g>
+    <g transform="translate(808.8 618)"><rect width="224" height="70" rx="10" fill="#1A2338" stroke="#33405C"/><text x="16" y="30" font-weight="600">Transactions</text><text x="16" y="52" font-size="12" fill="#8792A6">verify, commit or roll back</text></g>
+    <g transform="translate(1050.4 618)"><rect width="224" height="70" rx="10" fill="#1A2338" stroke="#33405C"/><text x="16" y="30" font-weight="600">Audit journal</text><text x="16" y="52" font-size="12" fill="#8792A6">SHA-256 hash chain</text></g>
+    <g transform="translate(1292 618)"><rect width="224" height="70" rx="10" fill="#1A2338" stroke="#33405C"/><text x="16" y="30" font-weight="600">Event bus</text><text x="16" y="52" font-size="12" fill="#8792A6">thoughts and state, live</text></g>
+  </g>
+  <g stroke="#8792A6" stroke-width="1.5" marker-end="url(#ar)">
+    <line x1="300" y1="710" x2="300" y2="734"/><line x1="800" y1="710" x2="800" y2="734"/><line x1="1300" y1="710" x2="1300" y2="734"/>
+  </g>
+
+  <!-- planes -->
+  <g class="b">
+    <g transform="translate(60 738)">
+      <rect width="480" height="176" rx="14" fill="#121A2C" stroke="#25304A"/>
+      <text x="22" y="34" class="d" font-size="19" font-weight="700" fill="#EDE8DA">Knowledge and memory</text>
+      <text x="22" y="62" font-size="14" fill="#C9D0DC">/org as a filesystem of Markdown documents</text>
+      <text x="22" y="86" font-size="14" fill="#C9D0DC">Hybrid search: full text, vectors, link graph</text>
+      <text x="22" y="110" font-size="14" fill="#C9D0DC">Context firewall: retrieved text is data</text>
+      <text x="22" y="134" font-size="14" fill="#C9D0DC">Memory that goes stale when a source changes</text>
+      <text x="22" y="158" class="m" font-size="11" fill="#8792A6">Postgres, pgvector, reciprocal rank fusion</text>
+    </g>
+    <g transform="translate(560 738)">
+      <rect width="480" height="176" rx="14" fill="#121A2C" stroke="#25304A"/>
+      <text x="22" y="34" class="d" font-size="19" font-weight="700" fill="#EDE8DA">Execution and tools</text>
+      <text x="22" y="62" font-size="14" fill="#C9D0DC">Docker sandboxes, no network unless allowed</text>
+      <text x="22" y="86" font-size="14" fill="#C9D0DC">Playwright browser and web research</text>
+      <text x="22" y="110" font-size="14" fill="#C9D0DC">Jira, GitHub, Calendar, SQL, MCP servers</text>
+      <text x="22" y="134" font-size="14" fill="#C9D0DC">Agents never hold a credential</text>
+      <text x="22" y="158" class="m" font-size="11" fill="#8792A6">non-root, read-only root, allowlisted egress</text>
+    </g>
+    <g transform="translate(1060 738)">
+      <rect width="480" height="176" rx="14" fill="#121A2C" stroke="#25304A"/>
+      <text x="22" y="34" class="d" font-size="19" font-weight="700" fill="#EDE8DA">Local models through Ollama</text>
+      <g transform="translate(22 50)"><rect width="206" height="44" rx="9" fill="#1A2338" stroke="#33405C"/><text x="14" y="20" font-size="14" font-weight="600" fill="#EDE8DA">Qwen 2.5 7B</text><text x="14" y="36" font-size="11" fill="#8792A6">planning and tool use</text></g>
+      <g transform="translate(240 50)"><rect width="218" height="44" rx="9" fill="#1C2236" stroke="#E2B04A" stroke-width="2"/><text x="14" y="20" font-size="14" font-weight="600" fill="#F3D48A">Gemma 4</text><text x="14" y="36" font-size="11" fill="#A9B2C3">reasoning, vision, long context</text></g>
+      <g transform="translate(22 104)"><rect width="206" height="44" rx="9" fill="#1A2338" stroke="#33405C"/><text x="14" y="20" font-size="14" font-weight="600" fill="#EDE8DA">nomic-embed-text</text><text x="14" y="36" font-size="11" fill="#8792A6">embeddings for search and JEPA</text></g>
+      <g transform="translate(240 104)"><rect width="218" height="44" rx="9" fill="#1A2338" stroke="#33405C"/><text x="14" y="20" font-size="14" font-weight="600" fill="#EDE8DA">Model router</text><text x="14" y="36" font-size="11" fill="#8792A6">restricted data stays local</text></g>
+      <text x="22" y="164" class="m" font-size="11" fill="#8792A6">open weights, on the machine's own GPU</text>
+    </g>
+  </g>
+
+  <!-- storage -->
+  <rect x="60" y="934" width="1480" height="54" rx="12" fill="#151E33" stroke="#33405C"/>
+  <text x="84" y="967" class="d" font-size="17" font-weight="700" fill="#EDE8DA">Persistent storage</text>
+  <text x="270" y="967" class="b" font-size="14" fill="#A9B2C3">OKF Markdown bundle, Postgres and pgvector, process checkpoints, the audit journal, workflow definitions, artifacts. Survives reboot.</text>
+
+  <text x="60" y="1030" class="b" font-size="13" fill="#6E7891">A goal flows top to bottom: client, gateway, planner, JEPA scores, spawned agents, syscalls through policy, approval, sandbox, verify, commit, audit.</text>
+</svg>

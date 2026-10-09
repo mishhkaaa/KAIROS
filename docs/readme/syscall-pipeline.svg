@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="400" viewBox="0 0 1280 400" role="img" aria-labelledby="t d">
+  <title id="t">A governed syscall</title>
+  <desc id="d">An agent's intent passes a policy check, human approval when required, sandboxed execution and verification before it is committed; failures roll back, denials are refused; every step is audited.</desc>
+  <defs>
+    <style>
+      .t { font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif; }
+      .m { font-family: ui-monospace, "SFMono-Regular", "Cascadia Mono", Menlo, Consolas, monospace; }
+      .n { font-size: 11.5px; font-weight: 800; letter-spacing: 1.2px; }
+      .b { font-size: 17px; font-weight: 700; fill: #F1F5F9; }
+      .s { font-size: 12.5px; fill: #A9B3BF; }
+      .go { stroke-dasharray: 5 7; animation: run 1.2s linear infinite; }
+      @keyframes run { to { stroke-dashoffset: -24; } }
+      @media (prefers-reduced-motion: reduce) { .go { animation: none; } }
+    </style>
+    <marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#2BB8A3"/></marker>
+    <marker id="r" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#E05252"/></marker>
+  </defs>
+  <rect width="1280" height="400" rx="24" fill="#0D1117"/>
+  <text x="48" y="56" class="t" font-size="28" font-weight="800" fill="#F1F5F9">Agent intent is not authorization</text>
+  <text x="48" y="84" class="t" font-size="15" fill="#8A95A3">Anything that changes the outside world is a syscall. The kernel, not the model, decides whether it happens.</text>
+
+  <g class="t">
+    <!-- 1 intent -->
+    <rect x="48" y="120" width="180" height="112" rx="14" fill="#2A2342" stroke="#9D8CE8"/>
+    <text x="66" y="146" class="n" fill="#C3B8F5">1  INTENT</text>
+    <text x="66" y="172" class="b">Agent asks</text>
+    <text x="66" y="194" class="s m">PID 105 action-agent</text>
+    <text x="66" y="212" class="s m">jira.write APOLLO-12</text>
+    <!-- 2 policy -->
+    <rect x="258" y="120" width="180" height="112" rx="14" fill="#103A35" stroke="#2BB8A3"/>
+    <text x="276" y="146" class="n" fill="#5FDCC8">2  POLICY</text>
+    <text x="276" y="172" class="b">Rules decide</text>
+    <text x="276" y="194" class="s">allow · deny ·</text>
+    <text x="276" y="212" class="s">require approval</text>
+    <!-- 3 approval -->
+    <rect x="468" y="120" width="180" height="112" rx="14" fill="#3A2A0E" stroke="#D99A25"/>
+    <text x="486" y="146" class="n" fill="#F0C06A">3  APPROVAL</text>
+    <text x="486" y="172" class="b">A human signs</text>
+    <text x="486" y="194" class="s">sees risk, arguments</text>
+    <text x="486" y="212" class="s">and the evidence</text>
+    <!-- 4 execute -->
+    <rect x="678" y="120" width="180" height="112" rx="14" fill="#142A45" stroke="#4C86D9"/>
+    <text x="696" y="146" class="n" fill="#8DB5EE">4  EXECUTE</text>
+    <text x="696" y="172" class="b">Tool runs</text>
+    <text x="696" y="194" class="s">in a sandbox when the</text>
+    <text x="696" y="212" class="s">tool needs one</text>
+    <!-- 5 verify -->
+    <rect x="888" y="120" width="160" height="112" rx="14" fill="#1B222B" stroke="#3B4653"/>
+    <text x="906" y="146" class="n" fill="#A9B3BF">5  VERIFY</text>
+    <text x="906" y="172" class="b">Check result</text>
+    <text x="906" y="194" class="s">post-condition</text>
+    <text x="906" y="212" class="s">re-read the target</text>
+    <!-- 6 commit -->
+    <rect x="1078" y="120" width="154" height="112" rx="14" fill="#1F3A1A" stroke="#2FB344"/>
+    <text x="1096" y="146" class="n" fill="#7FD68C">6  COMMIT</text>
+    <text x="1096" y="172" class="b">Done</text>
+    <text x="1096" y="194" class="s">journaled,</text>
+    <text x="1096" y="212" class="s">hash-chained</text>
+  </g>
+
+  <g stroke="#2BB8A3" stroke-width="2.5" fill="none">
+    <path class="go" d="M228 176H254" marker-end="url(#a)"/>
+    <path class="go" d="M438 176H464" marker-end="url(#a)"/>
+    <path class="go" d="M648 176H674" marker-end="url(#a)"/>
+    <path class="go" d="M858 176H884" marker-end="url(#a)"/>
+    <path class="go" d="M1048 176H1074" marker-end="url(#a)"/>
+  </g>
+
+  <!-- side paths -->
+  <g stroke="#E05252" stroke-width="2" fill="none" opacity="0.9">
+    <path d="M348 232V286" marker-end="url(#r)"/>
+    <path d="M558 232V286" marker-end="url(#r)"/>
+    <path d="M968 232V286" marker-end="url(#r)"/>
+  </g>
+  <g class="t">
+    <rect x="258" y="290" width="390" height="46" rx="12" fill="#3D1618" stroke="#E05252" stroke-opacity="0.7"/>
+    <text x="278" y="319" font-size="15" font-weight="700" fill="#F29090">Denied or rejected: refused, and the agent is told why</text>
+    <rect x="818" y="290" width="300" height="46" rx="12" fill="#3D1618" stroke="#E05252" stroke-opacity="0.7"/>
+    <text x="838" y="319" font-size="15" font-weight="700" fill="#F29090">Check fails: automatic rollback</text>
+  </g>
+  <text x="48" y="376" class="t m" font-size="13" fill="#5B6675">every step above emits an event (live in the console) and an audit entry (sha256, linked to the previous one)</text>
+</svg>

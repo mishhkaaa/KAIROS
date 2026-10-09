@@ -1,0 +1,47 @@
+[project]
+name = "kairos-workspace"
+version = "0.1.0"
+description = "KAIROS monorepo (uv workspace root). Work split: PROJECT.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = [
+    "shared/python",   # kairos-contracts  — joint ownership, changes need all-4 review
+    "kernel",          # kairos-kernel     — P1
+    "knowledge",       # kairos-knowledge  — P2 (ingestion/: P4)
+    "agents",          # kairos-agents     — P3
+    "models",          # kairos-models     — P3 (gpu/: P4)
+    "execution",       # kairos-execution  — P1 (browser/: P4)
+    "kairosd",         # composition root  — P1 maintains, everyone registers factories
+]
+
+[dependency-groups]
+dev = ["pytest>=8", "httpx>=0.27", "ruff>=0.6", "kairos-contracts[api,test]"]
+
+[tool.uv.sources]
+kairos-contracts = { workspace = true }
+
+[tool.pytest.ini_options]
+addopts = "--import-mode=importlib -q"
+testpaths = [
+    "shared/python/tests",
+    "kernel/tests",
+    "knowledge/tests",
+    "agents/tests",
+    "models/tests",
+    "execution/tests",
+    "tests/integration",
+    "sdk/python/tests",
+]
+
+[tool.ruff]
+line-length = 130
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501", "F403", "F405", "B008"]  # B008: FastAPI Query()/Body() defaults are idiomatic

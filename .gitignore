@@ -1,0 +1,45 @@
+# python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+
+# runtime data (the appliance uses /sovereign-data)
+.data/
+*.db
+
+# node
+node_modules/
+.next/
+out/
+
+# env / secrets
+.env
+.env.local
+*.pem
+
+# os / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# coding-agent context
+CLAUDE.local.md
+.context/
+
+# machine-specific settings for scripts/win
+scripts/win/local.ps1
+
+# design review captures (impeccable)
+.impeccable/
+
+# knowledge that lives on this box, not in the repo: uploads, mounted folders, connector syncs
+data/okf/uploads/
+data/okf/mnt/
+data/okf/github/
+data/okf/calendar/

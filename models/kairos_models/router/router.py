@@ -11,6 +11,8 @@ Routing rules (in priority order):
 6. Any local chat model that is pulled.
 7. Raise MODEL_UNAVAILABLE.
 
+At run time, a model that errors or times out is retried on config['fallback'] in order (Gemma 4 first, then Qwen 2.5).
+
 JSON repair rule (rule 4 in the spec):
 If json_schema was set and parsed is None or fails validation, retry once with a repair message.
 
@@ -86,6 +88,10 @@ class PolicyRouter:
 
     def _is_pulled(self, model_name: str, models: list[ModelInfo]) -> bool:
         return any(m.name == model_name or m.name.startswith(model_name + ":") for m in models)
+
+    def _fallbacks(self, failed: str, models: list[ModelInfo]) -> list[str]:
+        """config['fallback'], in order: the pulled models to try when `failed` errors or times out."""
+        return [m for m in self._config.get("fallback", []) or [] if m != failed and self._is_pulled(m, models)]
 
     def _best_local_chat(self, models: list[ModelInfo]) -> str | None:
         for m in models:
@@ -164,7 +170,23 @@ class PolicyRouter:
         model_name, provider, reason = await self._resolve_model(request, local_only, models)
         log.debug("routing %s to %s/%s (reason: %s)", request.task_class, provider.name, model_name, reason)
 
-        resp = await provider.generate(request, model_name)
+        try:
+            resp = await provider.generate(request, model_name)
+        except KairosError as e:
+            if e.code not in ("MODEL_UNAVAILABLE", "TIMEOUT"):
+                raise
+            resp = None
+            for fallback in self._fallbacks(model_name, models):
+                log.warning("%s failed (%s); falling back to %s", model_name, e.message[:120], fallback)
+                model_name, provider = fallback, self._provider_for(fallback, models)
+                try:
+                    resp = await provider.generate(request, model_name)
+                    break
+                except KairosError as again:
+                    if again.code not in ("MODEL_UNAVAILABLE", "TIMEOUT"):
+                        raise
+            if resp is None:
+                raise
 
         # JSON repair: if schema was requested and parsed is None or invalid, retry once
         if request.json_schema and (resp.parsed is None or not _valid(resp.parsed, request.json_schema)):

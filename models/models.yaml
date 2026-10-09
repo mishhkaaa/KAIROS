@@ -1,14 +1,19 @@
 # Model routing config (P3). Names must exist in the local runtime (ollama list).
+# Gemma 4 (E4B, quantization-aware, about 6 GB) does planning, reasoning, extraction and vision on an 8 GB GPU.
+# A model that is not pulled is skipped; one that errors or times out is retried on `fallback` in order.
 embedding: nomic-embed-text
-default: qwen2.5:7b-instruct
+default: gemma4:e4b-it-qat
 by_task_class:
-  planning: qwen2.5:7b-instruct
-  reasoning: qwen2.5:7b-instruct
-  extraction: qwen2.5:7b-instruct
-  summarization: llama3.2:3b
-  classification: llama3.2:3b
+  planning: gemma4:e4b-it-qat
+  reasoning: gemma4:e4b-it-qat
+  extraction: gemma4:e4b-it-qat
+  summarization: gemma4:e4b-it-qat
+  classification: gemma4:e4b-it-qat
   code: qwen2.5-coder:7b
-  vision: llava:7b
-latency_critical: llama3.2:3b
+  vision: gemma4:e4b-it-qat
+latency_critical: gemma4:e4b-it-qat
+fallback:
+  - qwen2.5:7b-instruct
+  - llama3.2:3b
 remote:
   enabled: false          # approved remote models only; never for privacy=restricted

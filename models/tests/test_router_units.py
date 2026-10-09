@@ -58,10 +58,11 @@ def test_factory_reads_the_configured_models_file(tmp_path):
     assert build_model_router(s, ServiceBundle(settings=s))._config == {"default": "only-model", "embedding": "nomic-embed-text"}
     assert Settings().models_config == REPO_ROOT / "models" / "models.yaml"
 
-    # The 8 GB profile never routes a chat class to a second chat model, so nothing evicts the 7B mid-run.
-    seven_b = yaml.safe_load((REPO_ROOT / "models" / "models.7b-only.yaml").read_text(encoding="utf-8"))
-    chat = {k: v for k, v in seven_b["by_task_class"].items() if k not in ("code", "vision")}
-    assert set(chat.values()) == {seven_b["default"]} == {seven_b["latency_critical"]} == {"qwen2.5:7b-instruct"}
+    # The 8 GB profile routes every class, vision included, to one resident model (Gemma 4), so nothing evicts it
+    # mid-run; Qwen 2.5 is only the fallback.
+    eight_gb = yaml.safe_load((REPO_ROOT / "models" / "models.7b-only.yaml").read_text(encoding="utf-8"))
+    assert set(eight_gb["by_task_class"].values()) == {eight_gb["default"]} == {eight_gb["latency_critical"]} == {"gemma4:e4b-it-qat"}
+    assert eight_gb["fallback"] == ["qwen2.5:7b-instruct"]
 
 
 def test_an_embedding_failure_keeps_the_providers_reason():

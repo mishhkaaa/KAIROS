@@ -1,0 +1,26 @@
+# Error codes (kairos_contracts.errors.KairosError). HTTP mapping lives in errors.ERROR_HTTP_STATUS — keep both in sync.
+# Raise:   raise KairosError("KNOWLEDGE_FORBIDDEN", "/org/finance/payroll-2026")
+# Over HTTP the body is ErrorInfo: {code, message, retriable, details}
+
+BAD_REQUEST:               {http: 400, retriable: false, raised_by: any}
+UNAUTHENTICATED:           {http: 401, retriable: false, raised_by: P1-gateway}
+CAPABILITY_DENIED:         {http: 403, retriable: false, raised_by: P1-context, note: "agent lacks the capability for a ctx.* call"}
+KNOWLEDGE_FORBIDDEN:       {http: 403, retriable: false, raised_by: P2, note: "path outside principal scope or privacy level"}
+POLICY_DENIED:             {http: 403, retriable: false, raised_by: P1-policy}
+PERMISSION_DENIED:         {http: 403, retriable: false, raised_by: P1-gateway, note: "the signed-in user's role lacks the permission (policies/rbac/roles.yaml)"}
+NOT_FOUND:                 {http: 404, retriable: false, raised_by: any}
+TASK_NOT_FOUND:            {http: 404, retriable: false, raised_by: P1}
+PROCESS_NOT_FOUND:         {http: 404, retriable: false, raised_by: P1}
+AGENT_NOT_FOUND:           {http: 404, retriable: false, raised_by: P3-registry}
+KNOWLEDGE_NOT_FOUND:       {http: 404, retriable: false, raised_by: P2}
+APPROVAL_NOT_FOUND:        {http: 404, retriable: false, raised_by: P1}
+ARTIFACT_NOT_FOUND:        {http: 404, retriable: false, raised_by: P1-artifacts}
+INVALID_STATE_TRANSITION:  {http: 409, retriable: false, raised_by: P1-process}
+APPROVAL_ALREADY_RESOLVED: {http: 409, retriable: false, raised_by: P1-approvals}
+CONFLICT:                  {http: 409, retriable: false, raised_by: any, note: "already exists (an org, a member, a mount)"}
+QUOTA_EXCEEDED:            {http: 429, retriable: false, raised_by: P1-quota}
+TOOL_FAILED:               {http: 502, retriable: true,  raised_by: P1-transactions, note: "executors return ToolResult(status=error); kernel converts"}
+MODEL_UNAVAILABLE:         {http: 503, retriable: true,  raised_by: P3-router}
+SANDBOX_FAILED:            {http: 503, retriable: true,  raised_by: P1-sandbox (P4-browser for BrowserDriver)}
+TIMEOUT:                   {http: 504, retriable: true,  raised_by: any}
+INTERNAL:                  {http: 500, retriable: false, raised_by: any}

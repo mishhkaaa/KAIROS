@@ -1,0 +1,58 @@
+# Event catalog: who PRODUCES and who CONSUMES each event type.
+# Envelope: kairos_contracts.schema.Event  (event_id, type, ts, source, org_id, task_id, pid, correlation_id, payload)
+# Payload shapes below are the contract. Adding a field is non-breaking; renaming/removing is breaking.
+# Custom/experimental events: namespace them  x.<owner>.<name>  (e.g. x.p2.index_progress) until promoted here.
+
+task.created:            {producer: P1, consumers: [P2-ui], payload: {goal: str, user_id: str}}
+task.status_changed:     {producer: P1, consumers: [P2-ui], payload: {old: TaskStatus, new: TaskStatus}}
+task.completed:          {producer: P1, consumers: [P2-ui, P2-memory], payload: {summary: str}}
+task.failed:             {producer: P1, consumers: [P2-ui], payload: {reason: str, error: "ErrorInfo?"}}
+
+process.spawned:         {producer: P1, consumers: [P2-ui], payload: {agent: str, ppid: "int|null"}}
+process.state_changed:   {producer: P1, consumers: [P2-ui], payload: {old: AgentState, new: AgentState, reason: "str?"}}
+process.checkpointed:    {producer: P1, consumers: [P2-ui], payload: {checkpoint_id: str}}
+process.usage:           {producer: P1, consumers: [P2-ui, P1-cli], payload: ResourceUsage}
+agent.log:               {producer: "P1 (on behalf of P3 agents via ctx.log)", consumers: [P2-ui], payload: {level: str, message: str, data: "dict?"}}
+
+syscall.requested:       {producer: P1, consumers: [P2-ui], correlation_id: syscall_id, payload: {capability: str, tool: str, operation: str, risk: Risk}}
+syscall.decided:         {producer: P1, consumers: [P2-ui], correlation_id: syscall_id, payload: {decision: Decision, policy: str, reason: "str?"}}
+syscall.completed:       {producer: P1, consumers: [P2-ui], correlation_id: syscall_id, payload: {status: SyscallStatus}}
+approval.requested:      {producer: P1, consumers: [P2-ui], correlation_id: approval_id, payload: {approval_id: str, capability: str, tool: str, operation: str, risk: Risk, policy: str}}
+approval.resolved:       {producer: P1, consumers: [P2-ui], correlation_id: approval_id, payload: {approval_id: str, status: ApprovalStatus, resolved_by: str, comment: "str?"}}
+transaction.committed:   {producer: P1, consumers: [P2-ui, P2-memory], correlation_id: syscall_id, payload: {verified: bool}}
+transaction.rolled_back: {producer: P1, consumers: [P2-ui], correlation_id: syscall_id, payload: {reason: str}}
+policy.updated:          {producer: P1, consumers: [P2-ui], payload: {policies: "list[str] | null", error: "str? (set when a hot-reload was rejected; the previous policies stay active)"}}
+audit.appended:          {producer: P1, consumers: [P2-ui], payload: AuditEntry}
+
+ipc.message:             {producer: P1 (routing P3 messages), consumers: [P2-ui], payload: {message_id: str, sender: str, receiver: str, type: MessageType}}
+
+knowledge.changed:       {producer: P2, consumers: [P1-events -> P2-memory.invalidate, P2-ui], payload: KnowledgeChange}
+knowledge.reindexed:     {producer: P2, consumers: [P2-ui], payload: {count: int}}
+knowledge.retrieved:     {producer: "P1 (context, after P2 search)", consumers: [P2-ui], payload: {query: str, hits: int, filtered_by_policy: int, paths: "list[str]", flagged: "list[str] (paths with firewall_flags)"}}
+ingest.progress:         {producer: P1-gateway (uploads, mounts, connector sync), consumers: [P2-ui], payload: {file: str, stage: "received|converted|indexed|skipped|error", path: "str?", error: "str?"}}
+mount.synced:            {producer: P1-gateway (mounts), consumers: [P2-ui], payload: Mount}
+connector.changed:       {producer: P1-gateway (connectors), consumers: [P2-ui], payload: Connector (never the token)}
+memory.invalidated:      {producer: P2, consumers: [P1 (notify affected pids), P2-ui], payload: InvalidationReport}
+memory.consolidated:     {producer: P2, consumers: [P2-ui], payload: {created: int}}
+
+model.invoked:           {producer: "P1 (context, after P3 router)", consumers: [P2-ui], payload: {model: str, provider: str, local: bool, tokens: int}}
+
+sandbox.started:         {producer: P1, consumers: [P2-ui], payload: {sandbox_id: str, image: str}}
+sandbox.destroyed:       {producer: P1, consumers: [P2-ui], payload: {sandbox_id: str}}
+sandbox.screenshot:      {producer: P1, consumers: [P2-ui], payload: {sandbox_id: str, artifact: "ArtifactRef"}}
+tool.started:            {producer: P1, consumers: [P2-ui], correlation_id: syscall_id, payload: {tool: str, operation: str}}
+tool.completed:          {producer: P1, consumers: [P2-ui], correlation_id: syscall_id, payload: {tool: str, operation: str, status: ToolResultStatus}}
+
+system.ready:            {producer: P1, consumers: [P2-ui], payload: {components: "list[ComponentHealth]"}}
+system.health:           {producer: P1, consumers: [P2-ui], payload: ResourceSnapshot}
+cron.triggered:          {producer: P1, consumers: [P1-scheduler], payload: {job: str}}
+
+# Thought process (0.10.0): the run as a story for the UI (understood -> planned -> created -> thoughts -> query -> data).
+# Models: TaskUnderstood, AgentPlanned, AgentCreated, AgentThought, ToolQuery, TaskData in kairos_contracts.schema.events.
+# Text fields are short summaries written by agent/kernel code (<= 240 chars): never raw chain-of-thought or retrieved text.
+task.understood:         {producer: "P3 planner via ctx.narrate", consumers: [A-ui], payload: {intent: str, entities: "list[str]", capabilities_needed: "list[str]", plan_summary: str}}
+agent.planned:           {producer: "P3 planner via ctx.narrate", consumers: [A-ui], payload: {role: "str (template id; agent.created.template matches it)", why: str, scope: "list[str] (/org paths)", capabilities: "list[str]"}}
+agent.created:           {producer: "P1 (kernel, on spawn)", consumers: [A-ui], payload: {pid: int, manifest_name: str, template: str, generated: bool}}
+agent.thought:           {producer: "P3 agents via ctx.narrate (kernel stamps pid)", consumers: [A-ui], payload: {pid: int, step: "str (<= 40 chars)", text: "str (one sentence)"}}
+tool.query:              {producer: "P1 (context, after a query tool such as db.query)", consumers: [A-ui], correlation_id: syscall_id, payload: {pid: int, tool: str, query: str, rows: int, ms: int}}
+task.data:               {producer: "P1 (context, after a query tool)", consumers: [A-ui], correlation_id: syscall_id, payload: {columns: "list[str]", rows: "list[list[str|int|float|bool|null]] (<= 200)", source: str}}

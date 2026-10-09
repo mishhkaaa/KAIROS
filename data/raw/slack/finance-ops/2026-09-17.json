@@ -1,0 +1,16 @@
+[
+ {
+  "type": "message",
+  "user": "U05ANANYA",
+  "ts": "1789653600.000001",
+  "text": "For tomorrow's steering: Apollo total is 26.2 lakh vs 20.0 budget, 31% over.",
+  "thread_ts": "1789653600.000001"
+ },
+ {
+  "type": "message",
+  "user": "U05ANANYA",
+  "ts": "1789653840.000002",
+  "text": "Breakdown: engineering +2.5 (migration rework), cloud +1.9 (7 weeks dual-run), vendor +1.8 (PayCo emergency contract).",
+  "thread_ts": "1789653600.000001"
+ }
+]

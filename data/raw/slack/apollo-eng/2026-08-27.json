@@ -1,0 +1,30 @@
+[
+ {
+  "type": "message",
+  "subtype": "channel_join",
+  "user": "U03RAHUL",
+  "ts": "1787821200.000000",
+  "text": "<@U03RAHUL> has joined the channel"
+ },
+ {
+  "type": "message",
+  "user": "U01PRIYA",
+  "ts": "1787822100.000001",
+  "text": "Status check before steering: backfill still blocked on the duplicate recon ids from July.",
+  "thread_ts": "1787822100.000001"
+ },
+ {
+  "type": "message",
+  "user": "U03RAHUL",
+  "ts": "1787822400.000002",
+  "text": "Dedupe script v1 is almost ready. It handles duplicates inside a settlement batch.",
+  "thread_ts": "1787822100.000001"
+ },
+ {
+  "type": "message",
+  "user": "U04SARA",
+  "ts": "1787822640.000003",
+  "text": "Reminder: until APOLLO-12 lands we keep both reconciliation pipelines running (ADR-042). That is the doubled compute line.",
+  "thread_ts": "1787822100.000001"
+ }
+]

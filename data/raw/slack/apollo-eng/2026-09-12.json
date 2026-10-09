@@ -1,0 +1,30 @@
+[
+ {
+  "type": "message",
+  "user": "U01PRIYA",
+  "ts": "1789232400.000001",
+  "text": "Backfill attempt #2 failed again on dup recon ids :(",
+  "thread_ts": "1789232400.000001"
+ },
+ {
+  "type": "message",
+  "user": "U03RAHUL",
+  "ts": "1789232700.000002",
+  "text": "Different failure: these are duplicates *across* batches. v1 only removed within-batch ones.",
+  "thread_ts": "1789232400.000001"
+ },
+ {
+  "type": "message",
+  "user": "U02MARCO",
+  "ts": "1789232940.000003",
+  "text": "And PayCo says SDK v5 slips to October. See <http://vendor-docs/sdk-v5.html|their status page>.",
+  "thread_ts": "1789232400.000001"
+ },
+ {
+  "type": "message",
+  "user": "U01PRIYA",
+  "ts": "1789233120.000004",
+  "text": "So dual-run continues another month, cloud bill keeps doubling. <@U04SARA> can you estimate?",
+  "thread_ts": "1789232400.000001"
+ }
+]

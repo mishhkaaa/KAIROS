@@ -1,0 +1,16 @@
+[
+ {
+  "type": "message",
+  "user": "U03RAHUL",
+  "ts": "1789552800.000001",
+  "text": "Cross-batch remap table is in review (APOLLO-14). Dry run on the prod snapshot next.",
+  "thread_ts": "1789552800.000001"
+ },
+ {
+  "type": "message",
+  "user": "U04SARA",
+  "ts": "1789553160.000002",
+  "text": "Dry-run environment ready. Parity report still shows 0 matching days.",
+  "thread_ts": "1789552800.000001"
+ }
+]

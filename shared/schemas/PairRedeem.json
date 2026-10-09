@@ -1,0 +1,16 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "code": {
+      "maxLength": 16,
+      "minLength": 6,
+      "title": "Code",
+      "type": "string"
+    }
+  },
+  "required": [
+    "code"
+  ],
+  "title": "PairRedeem",
+  "type": "object"
+}

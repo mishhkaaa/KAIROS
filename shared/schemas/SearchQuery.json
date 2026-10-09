@@ -1,0 +1,81 @@
+{
+  "$defs": {
+    "SearchMode": {
+      "enum": [
+        "lexical",
+        "semantic",
+        "graph"
+      ],
+      "title": "SearchMode",
+      "type": "string"
+    },
+    "TrustLevel": {
+      "enum": [
+        "verified",
+        "trusted",
+        "unverified",
+        "untrusted"
+      ],
+      "title": "TrustLevel",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "text": {
+      "title": "Text",
+      "type": "string"
+    },
+    "scope": {
+      "items": {
+        "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+        "type": "string"
+      },
+      "title": "Scope",
+      "type": "array"
+    },
+    "modes": {
+      "items": {
+        "$ref": "#/$defs/SearchMode"
+      },
+      "title": "Modes",
+      "type": "array"
+    },
+    "types": {
+      "description": "Filter on frontmatter.type",
+      "items": {
+        "type": "string"
+      },
+      "title": "Types",
+      "type": "array"
+    },
+    "tags": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Tags",
+      "type": "array"
+    },
+    "min_trust": {
+      "$ref": "#/$defs/TrustLevel",
+      "default": "untrusted"
+    },
+    "top_k": {
+      "default": 8,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Top K",
+      "type": "integer"
+    },
+    "include_body": {
+      "default": false,
+      "title": "Include Body",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "text"
+  ],
+  "title": "SearchQuery",
+  "type": "object"
+}

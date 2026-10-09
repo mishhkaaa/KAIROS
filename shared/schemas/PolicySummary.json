@@ -1,0 +1,58 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "policy": {
+      "title": "Policy",
+      "type": "string"
+    },
+    "priority": {
+      "title": "Priority",
+      "type": "integer"
+    },
+    "agents": {
+      "description": "applies_to.agents",
+      "items": {
+        "type": "string"
+      },
+      "title": "Agents",
+      "type": "array"
+    },
+    "roles": {
+      "description": "applies_to.roles",
+      "items": {
+        "type": "string"
+      },
+      "title": "Roles",
+      "type": "array"
+    },
+    "requires_approval": {
+      "description": "Capabilities that need a human",
+      "items": {
+        "type": "string"
+      },
+      "title": "Requires Approval",
+      "type": "array"
+    },
+    "auto_approved": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Auto Approved",
+      "type": "array"
+    },
+    "denied": {
+      "description": "approval: never, plus tools.deny",
+      "items": {
+        "type": "string"
+      },
+      "title": "Denied",
+      "type": "array"
+    }
+  },
+  "required": [
+    "policy",
+    "priority"
+  ],
+  "title": "PolicySummary",
+  "type": "object"
+}

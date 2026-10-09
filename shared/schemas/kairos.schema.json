@@ -1,0 +1,5612 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "KAIROS",
+  "description": "KAIROS contracts v0.13.0",
+  "type": "object",
+  "$defs": {
+    "PrincipalKind": {
+      "enum": [
+        "user",
+        "agent",
+        "system"
+      ],
+      "title": "PrincipalKind",
+      "type": "string"
+    },
+    "PrivacyLevel": {
+      "description": "Ordered from least to most sensitive. `restricted` must never leave the box.",
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "restricted"
+      ],
+      "title": "PrivacyLevel",
+      "type": "string"
+    },
+    "Principal": {
+      "additionalProperties": false,
+      "description": "Who is asking. Agents act on behalf of a user and inherit (a subset of) their scope.",
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/PrincipalKind"
+        },
+        "org_id": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string"
+        },
+        "pid": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "agent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "roles": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "capabilities": {
+          "items": {
+            "pattern": "^(\\*|[a-z][a-z0-9_]*(\\.([a-z][a-z0-9_]*|\\*))+)$",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "data_scopes": {
+          "items": {
+            "pattern": "^/(org|workspace)(/.*)?$",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "max_privacy": {
+          "$ref": "#/$defs/PrivacyLevel",
+          "default": "internal"
+        }
+      },
+      "required": [
+        "kind",
+        "org_id",
+        "user_id"
+      ],
+      "title": "Principal",
+      "type": "object"
+    },
+    "UserPermissions": {
+      "additionalProperties": false,
+      "description": "What a user may do (0.11.0), resolved from {user, org, roles} by a PermissionsProvider. `permissions` are app\npermissions (task.create, approval.resolve, ...); `capabilities` and `data_scopes` bound every agent a task started by\nthis user creates: an agent never gets a capability or an /org scope its user lacks.",
+      "properties": {
+        "user_id": {
+          "type": "string"
+        },
+        "org_id": {
+          "type": "string"
+        },
+        "roles": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "permissions": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "capabilities": {
+          "items": {
+            "pattern": "^(\\*|[a-z][a-z0-9_]*(\\.([a-z][a-z0-9_]*|\\*))+)$",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "data_scopes": {
+          "items": {
+            "pattern": "^/(org|workspace)(/.*)?$",
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "user_id",
+        "org_id"
+      ],
+      "title": "UserPermissions",
+      "type": "object"
+    },
+    "ResourceQuota": {
+      "additionalProperties": false,
+      "properties": {
+        "max_tokens": {
+          "default": 20000,
+          "type": "integer"
+        },
+        "max_tool_calls": {
+          "default": 20,
+          "type": "integer"
+        },
+        "max_wall_seconds": {
+          "default": 600,
+          "type": "integer"
+        },
+        "max_children": {
+          "default": 8,
+          "type": "integer"
+        },
+        "cpu": {
+          "default": 1.0,
+          "type": "number"
+        },
+        "memory_mb": {
+          "default": 1024,
+          "type": "integer"
+        },
+        "gpu": {
+          "default": 0.0,
+          "description": "Fraction of the shared GPU",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        }
+      },
+      "title": "ResourceQuota",
+      "type": "object"
+    },
+    "ResourceUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "tokens_prompt": {
+          "default": 0,
+          "type": "integer"
+        },
+        "tokens_completion": {
+          "default": 0,
+          "type": "integer"
+        },
+        "tool_calls": {
+          "default": 0,
+          "type": "integer"
+        },
+        "children_spawned": {
+          "default": 0,
+          "type": "integer"
+        },
+        "wall_seconds": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "gpu_seconds": {
+          "default": 0.0,
+          "type": "number"
+        }
+      },
+      "title": "ResourceUsage",
+      "type": "object"
+    },
+    "TrustLevel": {
+      "enum": [
+        "verified",
+        "trusted",
+        "unverified",
+        "untrusted"
+      ],
+      "title": "TrustLevel",
+      "type": "string"
+    },
+    "VerificationStatus": {
+      "enum": [
+        "unverified",
+        "verified",
+        "disputed",
+        "stale"
+      ],
+      "title": "VerificationStatus",
+      "type": "string"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "description": "Answers: where did this come from, when was it verified, who/what produced it.",
+      "properties": {
+        "source": {
+          "description": "\"okf\", \"jira\", \"agent:finance\", \"tool:browser\", ...",
+          "type": "string"
+        },
+        "source_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "External id, URL or /org path"
+        },
+        "source_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "created_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "updated_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "author": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "generator": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Agent/pipeline that produced this"
+        },
+        "verification_status": {
+          "$ref": "#/$defs/VerificationStatus",
+          "default": "unverified"
+        },
+        "trust": {
+          "$ref": "#/$defs/TrustLevel",
+          "default": "unverified"
+        },
+        "related_sources": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "source"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "ErrorInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "description": "One of shared/catalogs/errors.yaml",
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "retriable": {
+          "default": false,
+          "type": "boolean"
+        },
+        "details": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "ErrorInfo",
+      "type": "object"
+    },
+    "Priority": {
+      "enum": [
+        "high",
+        "normal",
+        "background"
+      ],
+      "title": "Priority",
+      "type": "string"
+    },
+    "TaskCreate": {
+      "additionalProperties": false,
+      "description": "Body of POST /tasks. org_id/user_id come from the auth headers, not the body.",
+      "properties": {
+        "goal": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "priority": {
+          "$ref": "#/$defs/Priority",
+          "default": "normal"
+        },
+        "privacy": {
+          "$ref": "#/$defs/PrivacyLevel",
+          "default": "internal"
+        },
+        "data_scope": {
+          "items": {
+            "pattern": "^/(org|workspace)(/.*)?$",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "approval_policy": {
+          "default": "default",
+          "type": "string"
+        },
+        "quota": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ResourceQuota"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "metadata": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "required": [
+        "goal"
+      ],
+      "title": "TaskCreate",
+      "type": "object"
+    },
+    "TaskResult": {
+      "additionalProperties": false,
+      "properties": {
+        "summary": {
+          "description": "Markdown answer shown to the user",
+          "type": "string"
+        },
+        "artifacts": {
+          "items": {
+            "pattern": "^artifact://[^/]+/.+$",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "evidence": {
+          "description": "/org paths used",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "actions": {
+          "description": "syscall_ids committed",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "usage": {
+          "$ref": "#/$defs/ResourceUsage"
+        }
+      },
+      "required": [
+        "summary"
+      ],
+      "title": "TaskResult",
+      "type": "object"
+    },
+    "TaskStatus": {
+      "enum": [
+        "queued",
+        "planning",
+        "running",
+        "waiting_approval",
+        "paused",
+        "completed",
+        "failed",
+        "cancelled"
+      ],
+      "title": "TaskStatus",
+      "type": "string"
+    },
+    "Task": {
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "pattern": "^T-[A-Za-z0-9]+$",
+          "type": "string"
+        },
+        "org_id": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "goal": {
+          "type": "string"
+        },
+        "priority": {
+          "$ref": "#/$defs/Priority",
+          "default": "normal"
+        },
+        "privacy": {
+          "$ref": "#/$defs/PrivacyLevel",
+          "default": "internal"
+        },
+        "data_scope": {
+          "items": {
+            "pattern": "^/(org|workspace)(/.*)?$",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "approval_policy": {
+          "default": "default",
+          "type": "string"
+        },
+        "quota": {
+          "$ref": "#/$defs/ResourceQuota"
+        },
+        "status": {
+          "$ref": "#/$defs/TaskStatus",
+          "default": "queued"
+        },
+        "root_pid": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "result": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TaskResult"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ErrorInfo"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "metadata": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "required": [
+        "task_id",
+        "org_id",
+        "user_id",
+        "goal"
+      ],
+      "title": "Task",
+      "type": "object"
+    },
+    "AgentState": {
+      "enum": [
+        "CREATED",
+        "INITIALIZING",
+        "READY",
+        "RUNNING",
+        "WAITING",
+        "PAUSED",
+        "CHECKPOINTING",
+        "COMPLETED",
+        "FAILED",
+        "RETRYING",
+        "TERMINATED"
+      ],
+      "title": "AgentState",
+      "type": "string"
+    },
+    "AgentProcess": {
+      "additionalProperties": false,
+      "properties": {
+        "pid": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "ppid": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "task_id": {
+          "pattern": "^T-[A-Za-z0-9]+$",
+          "type": "string"
+        },
+        "owner": {
+          "description": "user_id the process acts on behalf of",
+          "type": "string"
+        },
+        "agent": {
+          "description": "Manifest name, e.g. finance-agent",
+          "type": "string"
+        },
+        "agent_version": {
+          "default": "0.1.0",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/AgentState",
+          "default": "CREATED"
+        },
+        "goal": {
+          "default": "",
+          "type": "string"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Last model the router picked for this pid"
+        },
+        "memory_mounts": {
+          "items": {
+            "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "capabilities": {
+          "items": {
+            "pattern": "^(\\*|[a-z][a-z0-9_]*(\\.([a-z][a-z0-9_]*|\\*))+)$",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "quota": {
+          "$ref": "#/$defs/ResourceQuota"
+        },
+        "usage": {
+          "$ref": "#/$defs/ResourceUsage"
+        },
+        "workspace": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Host path of the ephemeral workspace"
+        },
+        "checkpoint_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "attempt_count": {
+          "default": 0,
+          "type": "integer"
+        },
+        "last_error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ErrorInfo"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "waiting_on": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "e.g. \"approval:APR-882\", \"pid:103\", \"ipc\""
+        },
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "pid",
+        "task_id",
+        "owner",
+        "agent"
+      ],
+      "title": "AgentProcess",
+      "type": "object"
+    },
+    "ProcessTreeNode": {
+      "additionalProperties": false,
+      "properties": {
+        "pid": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "agent": {
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/AgentState"
+        },
+        "children": {
+          "items": {
+            "$ref": "#/$defs/ProcessTreeNode"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "pid",
+        "agent",
+        "state"
+      ],
+      "title": "ProcessTreeNode",
+      "type": "object"
+    },
+    "SpawnRequest": {
+      "additionalProperties": false,
+      "description": "Body of POST /agents/spawn and the argument of AgentContext.spawn().",
+      "properties": {
+        "agent": {
+          "type": "string"
+        },
+        "goal": {
+          "type": "string"
+        },
+        "task_id": {
+          "pattern": "^T-[A-Za-z0-9]+$",
+          "type": "string"
+        },
+        "ppid": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "inputs": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "capabilities": {
+          "anyOf": [
+            {
+              "items": {
+                "pattern": "^(\\*|[a-z][a-z0-9_]*(\\.([a-z][a-z0-9_]*|\\*))+)$",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional narrowing; can never exceed the child's manifest. The parent controls WHICH agents it may spawn (its manifest.capabilities.agents), not their capabilities"
+        },
+        "scope": {
+          "anyOf": [
+            {
+              "items": {
+                "pattern": "^/(org|workspace)(/.*)?$",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional narrowing of the child's /org scope (its template's memory mounts); never widens (0.11.0)"
+        },
+        "why": {
+          "anyOf": [
+            {
+              "maxLength": 240,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Why the parent creates this agent, for the audit and the UI"
+        }
+      },
+      "required": [
+        "agent",
+        "goal",
+        "task_id"
+      ],
+      "title": "SpawnRequest",
+      "type": "object"
+    },
+    "Checkpoint": {
+      "additionalProperties": false,
+      "properties": {
+        "checkpoint_id": {
+          "type": "string"
+        },
+        "pid": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "task_id": {
+          "pattern": "^T-[A-Za-z0-9]+$",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "agent_state": {
+          "additionalProperties": true,
+          "description": "Opaque, from the agent",
+          "type": "object"
+        },
+        "memory_refs": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "artifact": {
+          "anyOf": [
+            {
+              "pattern": "^artifact://[^/]+/.+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "checkpoint_id",
+        "pid",
+        "task_id"
+      ],
+      "title": "Checkpoint",
+      "type": "object"
+    },
+    "Risk": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Risk",
+      "type": "string"
+    },
+    "SyscallRequest": {
+      "additionalProperties": false,
+      "description": "What an agent asks the kernel to do to the outside world (blueprint \u00a735).\n\n`capability` is what policy checks; `tool` + `operation` is what the executor runs.",
+      "properties": {
+        "syscall_id": {
+          "description": "\"SC-...\" \u2014 assigned by the caller via new_id(\"SC\")",
+          "type": "string"
+        },
+        "task_id": {
+          "pattern": "^T-[A-Za-z0-9]+$",
+          "type": "string"
+        },
+        "pid": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "capability": {
+          "description": "e.g. jira.write",
+          "pattern": "^(\\*|[a-z][a-z0-9_]*(\\.([a-z][a-z0-9_]*|\\*))+)$",
+          "type": "string"
+        },
+        "tool": {
+          "description": "Tool name from ToolExecutor.list_tools(), e.g. jira",
+          "type": "string"
+        },
+        "operation": {
+          "description": "Operation on that tool, e.g. update_issue",
+          "type": "string"
+        },
+        "resource": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "What is touched, e.g. project/APOLLO"
+        },
+        "arguments": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "arguments_ref": {
+          "anyOf": [
+            {
+              "pattern": "^artifact://[^/]+/.+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "risk": {
+          "$ref": "#/$defs/Risk",
+          "default": "low"
+        },
+        "justification": {
+          "default": "",
+          "type": "string"
+        },
+        "evidence": {
+          "description": "/org paths supporting the action",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "idempotency_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "syscall_id",
+        "task_id",
+        "pid",
+        "capability",
+        "tool",
+        "operation"
+      ],
+      "title": "SyscallRequest",
+      "type": "object"
+    },
+    "Decision": {
+      "enum": [
+        "ALLOW",
+        "DENY",
+        "REQUIRES_APPROVAL"
+      ],
+      "title": "Decision",
+      "type": "string"
+    },
+    "PolicyDecision": {
+      "additionalProperties": false,
+      "properties": {
+        "decision": {
+          "$ref": "#/$defs/Decision"
+        },
+        "policy": {
+          "description": "Id of the policy document that decided",
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "approval_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "matched_rules": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "constraints": {
+          "additionalProperties": true,
+          "description": "Extra limits for the executor, e.g. {\"network_allow\": [...]}",
+          "type": "object"
+        }
+      },
+      "required": [
+        "decision",
+        "policy",
+        "reason"
+      ],
+      "title": "PolicyDecision",
+      "type": "object"
+    },
+    "SyscallStatus": {
+      "enum": [
+        "completed",
+        "denied",
+        "pending_approval",
+        "rejected",
+        "failed",
+        "rolled_back"
+      ],
+      "title": "SyscallStatus",
+      "type": "string"
+    },
+    "ToolResult": {
+      "additionalProperties": false,
+      "properties": {
+        "invocation_id": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/ToolResultStatus"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "artifacts": {
+          "items": {
+            "pattern": "^artifact://[^/]+/.+$",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "logs": {
+          "default": "",
+          "type": "string"
+        },
+        "rollback_token": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Opaque; pass back to ToolExecutor.rollback"
+        },
+        "started_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "finished_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ErrorInfo"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "invocation_id",
+        "status"
+      ],
+      "title": "ToolResult",
+      "type": "object"
+    },
+    "ToolResultStatus": {
+      "enum": [
+        "success",
+        "error",
+        "timeout"
+      ],
+      "title": "ToolResultStatus",
+      "type": "string"
+    },
+    "SyscallResult": {
+      "additionalProperties": false,
+      "properties": {
+        "syscall_id": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/SyscallStatus"
+        },
+        "decision": {
+          "$ref": "#/$defs/PolicyDecision"
+        },
+        "tool_result": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ToolResult"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "verified": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ErrorInfo"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "syscall_id",
+        "status",
+        "decision"
+      ],
+      "title": "SyscallResult",
+      "type": "object"
+    },
+    "ApprovalStatus": {
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "expired"
+      ],
+      "title": "ApprovalStatus",
+      "type": "string"
+    },
+    "Approval": {
+      "additionalProperties": false,
+      "properties": {
+        "approval_id": {
+          "description": "\"APR-...\"",
+          "type": "string"
+        },
+        "task_id": {
+          "pattern": "^T-[A-Za-z0-9]+$",
+          "type": "string"
+        },
+        "pid": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "agent": {
+          "type": "string"
+        },
+        "syscall": {
+          "$ref": "#/$defs/SyscallRequest"
+        },
+        "decision": {
+          "$ref": "#/$defs/PolicyDecision"
+        },
+        "status": {
+          "$ref": "#/$defs/ApprovalStatus",
+          "default": "pending"
+        },
+        "requested_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "resolved_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "resolved_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "approval_id",
+        "task_id",
+        "pid",
+        "agent",
+        "syscall",
+        "decision"
+      ],
+      "title": "Approval",
+      "type": "object"
+    },
+    "ApprovalResolution": {
+      "additionalProperties": false,
+      "description": "Body of POST /approvals/{id}/approve|reject.",
+      "properties": {
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "ApprovalResolution",
+      "type": "object"
+    },
+    "ToolOperation": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "capability": {
+          "pattern": "^(\\*|[a-z][a-z0-9_]*(\\.([a-z][a-z0-9_]*|\\*))+)$",
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "input_schema": {
+          "additionalProperties": true,
+          "description": "JSON Schema",
+          "type": "object"
+        },
+        "output_schema": {
+          "additionalProperties": true,
+          "description": "JSON Schema",
+          "type": "object"
+        },
+        "risk": {
+          "$ref": "#/$defs/Risk",
+          "default": "low"
+        },
+        "reversible": {
+          "default": false,
+          "type": "boolean"
+        },
+        "requires_sandbox": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "capability",
+        "description"
+      ],
+      "title": "ToolOperation",
+      "type": "object"
+    },
+    "ToolTransport": {
+      "enum": [
+        "native",
+        "mcp",
+        "http",
+        "browser",
+        "sandbox"
+      ],
+      "title": "ToolTransport",
+      "type": "string"
+    },
+    "ToolSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "transport": {
+          "$ref": "#/$defs/ToolTransport"
+        },
+        "operations": {
+          "items": {
+            "$ref": "#/$defs/ToolOperation"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "transport",
+        "operations"
+      ],
+      "title": "ToolSpec",
+      "type": "object"
+    },
+    "ToolInvocation": {
+      "additionalProperties": false,
+      "description": "Built by the kernel from an ALLOWED/approved SyscallRequest. Agents never create these.",
+      "properties": {
+        "invocation_id": {
+          "type": "string"
+        },
+        "syscall_id": {
+          "type": "string"
+        },
+        "task_id": {
+          "pattern": "^T-[A-Za-z0-9]+$",
+          "type": "string"
+        },
+        "pid": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "tool": {
+          "type": "string"
+        },
+        "operation": {
+          "type": "string"
+        },
+        "arguments": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "arguments_ref": {
+          "anyOf": [
+            {
+              "pattern": "^artifact://[^/]+/.+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "constraints": {
+          "additionalProperties": true,
+          "description": "From PolicyDecision.constraints",
+          "type": "object"
+        },
+        "timeout_s": {
+          "default": 120,
+          "type": "integer"
+        },
+        "dry_run": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "invocation_id",
+        "syscall_id",
+        "task_id",
+        "pid",
+        "tool",
+        "operation"
+      ],
+      "title": "ToolInvocation",
+      "type": "object"
+    },
+    "VerificationCheck": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "passed": {
+          "type": "boolean"
+        },
+        "detail": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "passed"
+      ],
+      "title": "VerificationCheck",
+      "type": "object"
+    },
+    "VerificationResult": {
+      "additionalProperties": false,
+      "properties": {
+        "invocation_id": {
+          "type": "string"
+        },
+        "passed": {
+          "type": "boolean"
+        },
+        "checks": {
+          "items": {
+            "$ref": "#/$defs/VerificationCheck"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "invocation_id",
+        "passed"
+      ],
+      "title": "VerificationResult",
+      "type": "object"
+    },
+    "Mount": {
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "description": "Host path",
+          "type": "string"
+        },
+        "target": {
+          "description": "Path inside the sandbox",
+          "type": "string"
+        },
+        "read_only": {
+          "default": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "source",
+        "target"
+      ],
+      "title": "Mount",
+      "type": "object"
+    },
+    "NetworkMode": {
+      "enum": [
+        "none",
+        "allowlist"
+      ],
+      "title": "NetworkMode",
+      "type": "string"
+    },
+    "SandboxSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "image": {
+          "default": "kairos/sandbox-base:latest",
+          "type": "string"
+        },
+        "task_id": {
+          "pattern": "^T-[A-Za-z0-9]+$",
+          "type": "string"
+        },
+        "pid": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "mounts": {
+          "items": {
+            "$ref": "#/$defs/Mount"
+          },
+          "type": "array"
+        },
+        "network": {
+          "$ref": "#/$defs/NetworkMode",
+          "default": "none"
+        },
+        "network_allow": {
+          "description": "host:port entries",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "cpu": {
+          "default": 1.0,
+          "type": "number"
+        },
+        "memory_mb": {
+          "default": 1024,
+          "type": "integer"
+        },
+        "gpu": {
+          "default": false,
+          "type": "boolean"
+        },
+        "timeout_s": {
+          "default": 300,
+          "type": "integer"
+        },
+        "env": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "display": {
+          "default": false,
+          "description": "Start a virtual display (browser / computer use)",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "task_id"
+      ],
+      "title": "SandboxSpec",
+      "type": "object"
+    },
+    "SandboxStatus": {
+      "enum": [
+        "provisioning",
+        "running",
+        "stopped",
+        "destroyed",
+        "failed"
+      ],
+      "title": "SandboxStatus",
+      "type": "string"
+    },
+    "SandboxInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "sandbox_id": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/SandboxStatus"
+        },
+        "spec": {
+          "$ref": "#/$defs/SandboxSpec"
+        },
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "live_view_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "noVNC / screenshot stream for the UI"
+        },
+        "endpoints": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Services exposed by the sandbox, e.g. {\"playwright\": \"ws://172.18.0.5:3000/\"}",
+          "type": "object"
+        }
+      },
+      "required": [
+        "sandbox_id",
+        "status",
+        "spec"
+      ],
+      "title": "SandboxInfo",
+      "type": "object"
+    },
+    "ExecRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "workdir": {
+          "default": "/workspace",
+          "type": "string"
+        },
+        "stdin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "timeout_s": {
+          "default": 120,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "command"
+      ],
+      "title": "ExecRequest",
+      "type": "object"
+    },
+    "ExecResult": {
+      "additionalProperties": false,
+      "properties": {
+        "exit_code": {
+          "type": "integer"
+        },
+        "stdout": {
+          "default": "",
+          "type": "string"
+        },
+        "stderr": {
+          "default": "",
+          "type": "string"
+        },
+        "duration_s": {
+          "default": 0.0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "exit_code"
+      ],
+      "title": "ExecResult",
+      "type": "object"
+    },
+    "BrowserPage": {
+      "additionalProperties": false,
+      "description": "What the BrowserDriver (P4) returns after every browser action.",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "title": {
+          "default": "",
+          "type": "string"
+        },
+        "text": {
+          "default": "",
+          "description": "Visible text, truncated to ~20k chars",
+          "type": "string"
+        },
+        "links": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "title": "BrowserPage",
+      "type": "object"
+    },
+    "OKFFrontmatter": {
+      "additionalProperties": true,
+      "description": "YAML frontmatter of an OKF Markdown file. Extra keys are allowed (OKF is extensible).",
+      "properties": {
+        "type": {
+          "description": "project | person | team | system | policy | decision | playbook | finance | note | index",
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "owner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "privacy": {
+          "$ref": "#/$defs/PrivacyLevel",
+          "default": "internal"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "source_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "author": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "generator": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "created_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "updated_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "verification_status": {
+          "$ref": "#/$defs/VerificationStatus",
+          "default": "unverified"
+        },
+        "trust": {
+          "$ref": "#/$defs/TrustLevel",
+          "default": "trusted"
+        },
+        "related": {
+          "description": "Relative links or /org paths",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "type",
+        "title"
+      ],
+      "title": "OKFFrontmatter",
+      "type": "object"
+    },
+    "KnowledgeObject": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+          "type": "string"
+        },
+        "okf_file": {
+          "description": "Path relative to the bundle root, e.g. projects/apollo.md",
+          "type": "string"
+        },
+        "frontmatter": {
+          "$ref": "#/$defs/OKFFrontmatter"
+        },
+        "body": {
+          "description": "Markdown body without frontmatter",
+          "type": "string"
+        },
+        "links": {
+          "description": "Resolved outgoing links",
+          "items": {
+            "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "content_hash": {
+          "type": "string"
+        },
+        "version": {
+          "default": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "path",
+        "okf_file",
+        "frontmatter",
+        "body",
+        "provenance",
+        "content_hash"
+      ],
+      "title": "KnowledgeObject",
+      "type": "object"
+    },
+    "KnowledgeEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "is_dir": {
+          "default": false,
+          "type": "boolean"
+        },
+        "privacy": {
+          "$ref": "#/$defs/PrivacyLevel",
+          "default": "internal"
+        }
+      },
+      "required": [
+        "path",
+        "title",
+        "type"
+      ],
+      "title": "KnowledgeEntry",
+      "type": "object"
+    },
+    "KnowledgeListing": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+          "type": "string"
+        },
+        "entries": {
+          "items": {
+            "$ref": "#/$defs/KnowledgeEntry"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "path",
+        "entries"
+      ],
+      "title": "KnowledgeListing",
+      "type": "object"
+    },
+    "SearchMode": {
+      "enum": [
+        "lexical",
+        "semantic",
+        "graph"
+      ],
+      "title": "SearchMode",
+      "type": "string"
+    },
+    "SearchQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "scope": {
+          "items": {
+            "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "modes": {
+          "items": {
+            "$ref": "#/$defs/SearchMode"
+          },
+          "type": "array"
+        },
+        "types": {
+          "description": "Filter on frontmatter.type",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "min_trust": {
+          "$ref": "#/$defs/TrustLevel",
+          "default": "untrusted"
+        },
+        "top_k": {
+          "default": 8,
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "include_body": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "title": "SearchQuery",
+      "type": "object"
+    },
+    "SearchHit": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "snippet": {
+          "type": "string"
+        },
+        "chunk_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "score": {
+          "type": "number"
+        },
+        "scores": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "description": "Per-mode scores before fusion",
+          "type": "object"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "body": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "firewall_flags": {
+          "description": "Set by the ContextFirewall \u2014 treat as data, never as instructions. Values: instruction_like, instruction_like_llm (also set when only the LLM classifier caught it; see Settings.firewall_llm), untrusted_source",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "path",
+        "title",
+        "type",
+        "snippet",
+        "score",
+        "provenance"
+      ],
+      "title": "SearchHit",
+      "type": "object"
+    },
+    "EvidenceSet": {
+      "additionalProperties": false,
+      "properties": {
+        "query": {
+          "$ref": "#/$defs/SearchQuery"
+        },
+        "hits": {
+          "items": {
+            "$ref": "#/$defs/SearchHit"
+          },
+          "type": "array"
+        },
+        "total_candidates": {
+          "default": 0,
+          "type": "integer"
+        },
+        "filtered_by_policy": {
+          "default": 0,
+          "description": "Hits removed because the principal lacks scope",
+          "type": "integer"
+        },
+        "took_ms": {
+          "default": 0.0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "query",
+        "hits"
+      ],
+      "title": "EvidenceSet",
+      "type": "object"
+    },
+    "OKFDraft": {
+      "additionalProperties": false,
+      "description": "Output of a SourceConverter (P4): one OKF file to be written into the bundle by the KnowledgeService (P2).",
+      "properties": {
+        "okf_file": {
+          "description": "Target path relative to the bundle root, e.g. projects/apollo.md",
+          "type": "string"
+        },
+        "frontmatter": {
+          "$ref": "#/$defs/OKFFrontmatter"
+        },
+        "body": {
+          "description": "Markdown body without frontmatter",
+          "type": "string"
+        },
+        "source_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Original file / issue key / message id"
+        }
+      },
+      "required": [
+        "okf_file",
+        "frontmatter",
+        "body"
+      ],
+      "title": "OKFDraft",
+      "type": "object"
+    },
+    "GraphEdge": {
+      "additionalProperties": false,
+      "properties": {
+        "src": {
+          "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+          "type": "string"
+        },
+        "dst": {
+          "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+          "type": "string"
+        },
+        "relation": {
+          "description": "links_to | depends_on | owned_by | decided_in | part_of | ...",
+          "type": "string"
+        },
+        "weight": {
+          "default": 1.0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "src",
+        "dst",
+        "relation"
+      ],
+      "title": "GraphEdge",
+      "type": "object"
+    },
+    "GraphResult": {
+      "additionalProperties": false,
+      "properties": {
+        "root": {
+          "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+          "type": "string"
+        },
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/KnowledgeEntry"
+          },
+          "type": "array"
+        },
+        "edges": {
+          "items": {
+            "$ref": "#/$defs/GraphEdge"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "root",
+        "nodes",
+        "edges"
+      ],
+      "title": "GraphResult",
+      "type": "object"
+    },
+    "IngestSourceType": {
+      "enum": [
+        "file",
+        "directory",
+        "url",
+        "git",
+        "api"
+      ],
+      "title": "IngestSourceType",
+      "type": "string"
+    },
+    "IngestRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "source_type": {
+          "$ref": "#/$defs/IngestSourceType"
+        },
+        "uri": {
+          "type": "string"
+        },
+        "target_path": {
+          "default": "/org",
+          "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+          "type": "string"
+        },
+        "options": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "required": [
+        "source_type",
+        "uri"
+      ],
+      "title": "IngestRequest",
+      "type": "object"
+    },
+    "IngestResult": {
+      "additionalProperties": false,
+      "properties": {
+        "created": {
+          "items": {
+            "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "updated": {
+          "items": {
+            "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "skipped": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "errors": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "title": "IngestResult",
+      "type": "object"
+    },
+    "ValidationIssue": {
+      "additionalProperties": false,
+      "properties": {
+        "okf_file": {
+          "type": "string"
+        },
+        "severity": {
+          "description": "error | warning",
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "okf_file",
+        "severity",
+        "message"
+      ],
+      "title": "ValidationIssue",
+      "type": "object"
+    },
+    "ValidationReport": {
+      "additionalProperties": false,
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        },
+        "files_checked": {
+          "type": "integer"
+        },
+        "issues": {
+          "items": {
+            "$ref": "#/$defs/ValidationIssue"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "ok",
+        "files_checked"
+      ],
+      "title": "ValidationReport",
+      "type": "object"
+    },
+    "ChangeKind": {
+      "enum": [
+        "created",
+        "updated",
+        "deleted"
+      ],
+      "title": "ChangeKind",
+      "type": "string"
+    },
+    "KnowledgeChange": {
+      "additionalProperties": false,
+      "description": "Payload of the knowledge.changed event.",
+      "properties": {
+        "path": {
+          "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+          "type": "string"
+        },
+        "change": {
+          "$ref": "#/$defs/ChangeKind"
+        },
+        "old_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "new_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "path",
+        "change"
+      ],
+      "title": "KnowledgeChange",
+      "type": "object"
+    },
+    "MemoryKind": {
+      "enum": [
+        "working",
+        "episodic",
+        "semantic"
+      ],
+      "title": "MemoryKind",
+      "type": "string"
+    },
+    "MemoryScope": {
+      "enum": [
+        "task",
+        "agent",
+        "user",
+        "org"
+      ],
+      "title": "MemoryScope",
+      "type": "string"
+    },
+    "MemoryRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "memory_id": {
+          "description": "\"MEM-...\"",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/MemoryKind"
+        },
+        "scope": {
+          "$ref": "#/$defs/MemoryScope"
+        },
+        "org_id": {
+          "type": "string"
+        },
+        "owner": {
+          "description": "agent name, user_id or org_id depending on scope",
+          "type": "string"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "pattern": "^T-[A-Za-z0-9]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "content": {
+          "type": "string"
+        },
+        "summary": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "derived_from": {
+          "description": "/org paths or MEM ids this was derived from \u2014 drives invalidation",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "importance": {
+          "default": 0.5,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "stale": {
+          "default": false,
+          "type": "boolean"
+        },
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "last_used_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "memory_id",
+        "kind",
+        "scope",
+        "org_id",
+        "owner",
+        "content"
+      ],
+      "title": "MemoryRecord",
+      "type": "object"
+    },
+    "MemoryQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "org_id": {
+          "type": "string"
+        },
+        "kinds": {
+          "items": {
+            "$ref": "#/$defs/MemoryKind"
+          },
+          "type": "array"
+        },
+        "scopes": {
+          "items": {
+            "$ref": "#/$defs/MemoryScope"
+          },
+          "type": "array"
+        },
+        "owner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "pattern": "^T-[A-Za-z0-9]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "include_stale": {
+          "default": false,
+          "type": "boolean"
+        },
+        "top_k": {
+          "default": 5,
+          "maximum": 50,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "text",
+        "org_id"
+      ],
+      "title": "MemoryQuery",
+      "type": "object"
+    },
+    "WorkingSetItem": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "description": "/org path, MEM id, artifact ref or 'inline'",
+          "type": "string"
+        },
+        "source": {
+          "description": "evidence | memory | tool_output | plan | message",
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        },
+        "tokens": {
+          "type": "integer"
+        },
+        "pinned": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "ref",
+        "source",
+        "content",
+        "tokens"
+      ],
+      "title": "WorkingSetItem",
+      "type": "object"
+    },
+    "WorkingSet": {
+      "additionalProperties": false,
+      "description": "What actually goes into the model's context for a pid. LOAD/EVICT operate on this.",
+      "properties": {
+        "pid": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "token_budget": {
+          "type": "integer"
+        },
+        "tokens_used": {
+          "default": 0,
+          "type": "integer"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/WorkingSetItem"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "pid",
+        "token_budget"
+      ],
+      "title": "WorkingSet",
+      "type": "object"
+    },
+    "InvalidationReport": {
+      "additionalProperties": false,
+      "description": "Payload of the memory.invalidated event.",
+      "properties": {
+        "source": {
+          "description": "The /org path or MEM id that changed",
+          "type": "string"
+        },
+        "invalidated": {
+          "description": "MEM ids marked stale",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "affected_agents": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "reconsolidation_queued": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "source"
+      ],
+      "title": "InvalidationReport",
+      "type": "object"
+    },
+    "ChatMessage": {
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "$ref": "#/$defs/Role"
+        },
+        "content": {
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "role",
+        "content"
+      ],
+      "title": "ChatMessage",
+      "type": "object"
+    },
+    "Latency": {
+      "enum": [
+        "critical",
+        "normal",
+        "batch"
+      ],
+      "title": "Latency",
+      "type": "string"
+    },
+    "Role": {
+      "enum": [
+        "system",
+        "user",
+        "assistant",
+        "tool"
+      ],
+      "title": "Role",
+      "type": "string"
+    },
+    "TaskClass": {
+      "enum": [
+        "planning",
+        "reasoning",
+        "extraction",
+        "summarization",
+        "classification",
+        "code",
+        "vision"
+      ],
+      "title": "TaskClass",
+      "type": "string"
+    },
+    "ModelRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "messages": {
+          "items": {
+            "$ref": "#/$defs/ChatMessage"
+          },
+          "type": "array"
+        },
+        "task_class": {
+          "$ref": "#/$defs/TaskClass",
+          "default": "reasoning"
+        },
+        "privacy": {
+          "$ref": "#/$defs/PrivacyLevel",
+          "default": "internal"
+        },
+        "latency": {
+          "$ref": "#/$defs/Latency",
+          "default": "normal"
+        },
+        "model_hint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Preferred model; router may override"
+        },
+        "max_tokens": {
+          "default": 1024,
+          "type": "integer"
+        },
+        "temperature": {
+          "default": 0.2,
+          "type": "number"
+        },
+        "json_schema": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Request structured JSON output"
+        },
+        "stop": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "pattern": "^T-[A-Za-z0-9]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "pid": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "messages"
+      ],
+      "title": "ModelRequest",
+      "type": "object"
+    },
+    "TokenUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "prompt": {
+          "default": 0,
+          "type": "integer"
+        },
+        "completion": {
+          "default": 0,
+          "type": "integer"
+        }
+      },
+      "title": "TokenUsage",
+      "type": "object"
+    },
+    "ModelResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        },
+        "parsed": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Set when json_schema was requested"
+        },
+        "usage": {
+          "$ref": "#/$defs/TokenUsage"
+        },
+        "latency_ms": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "finish_reason": {
+          "default": "stop",
+          "type": "string"
+        },
+        "local": {
+          "default": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "model",
+        "provider",
+        "content"
+      ],
+      "title": "ModelResponse",
+      "type": "object"
+    },
+    "StreamChunk": {
+      "additionalProperties": false,
+      "properties": {
+        "delta": {
+          "type": "string"
+        },
+        "done": {
+          "default": false,
+          "type": "boolean"
+        },
+        "usage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TokenUsage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "delta"
+      ],
+      "title": "StreamChunk",
+      "type": "object"
+    },
+    "EmbedRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "texts": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "model_hint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "input_type": {
+          "anyOf": [
+            {
+              "enum": [
+                "query",
+                "document"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "What the texts are: some embedding models (nomic-embed-text) are trained with a task prefix and retrieve better when queries and documents are marked; providers that don't need it ignore it"
+        }
+      },
+      "required": [
+        "texts"
+      ],
+      "title": "EmbedRequest",
+      "type": "object"
+    },
+    "EmbedResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "dim": {
+          "type": "integer"
+        },
+        "vectors": {
+          "items": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "model",
+        "dim",
+        "vectors"
+      ],
+      "title": "EmbedResponse",
+      "type": "object"
+    },
+    "ModelInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "local": {
+          "default": true,
+          "type": "boolean"
+        },
+        "context_window": {
+          "default": 8192,
+          "type": "integer"
+        },
+        "capabilities": {
+          "description": "chat | embed | vision | json | tools",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "embedding_dim": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "available": {
+          "default": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "provider"
+      ],
+      "title": "ModelInfo",
+      "type": "object"
+    },
+    "RoutingDecision": {
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "local": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "model",
+        "provider",
+        "local",
+        "reason"
+      ],
+      "title": "RoutingDecision",
+      "type": "object"
+    },
+    "AgentFramework": {
+      "enum": [
+        "custom",
+        "nooa"
+      ],
+      "title": "AgentFramework",
+      "type": "string"
+    },
+    "ManifestApproval": {
+      "additionalProperties": false,
+      "properties": {
+        "required": {
+          "items": {
+            "pattern": "^(\\*|[a-z][a-z0-9_]*(\\.([a-z][a-z0-9_]*|\\*))+)$",
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "title": "ManifestApproval",
+      "type": "object"
+    },
+    "ManifestCapabilities": {
+      "additionalProperties": false,
+      "properties": {
+        "knowledge": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "tools": {
+          "items": {
+            "pattern": "^(\\*|[a-z][a-z0-9_]*(\\.([a-z][a-z0-9_]*|\\*))+)$",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "agents": {
+          "description": "Agents this one may spawn",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "title": "ManifestCapabilities",
+      "type": "object"
+    },
+    "ManifestMemory": {
+      "additionalProperties": false,
+      "properties": {
+        "mounts": {
+          "items": {
+            "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "title": "ManifestMemory",
+      "type": "object"
+    },
+    "ManifestNetwork": {
+      "additionalProperties": false,
+      "properties": {
+        "allow": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "title": "ManifestNetwork",
+      "type": "object"
+    },
+    "ManifestResources": {
+      "additionalProperties": false,
+      "properties": {
+        "cpu": {
+          "default": 1.0,
+          "type": "number"
+        },
+        "memory": {
+          "default": "1Gi",
+          "type": "string"
+        },
+        "gpu": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "max_tokens_per_task": {
+          "default": 12000,
+          "type": "integer"
+        },
+        "max_tool_calls": {
+          "default": 20,
+          "type": "integer"
+        }
+      },
+      "title": "ManifestResources",
+      "type": "object"
+    },
+    "ManifestRuntime": {
+      "additionalProperties": false,
+      "properties": {
+        "framework": {
+          "$ref": "#/$defs/AgentFramework",
+          "default": "custom"
+        },
+        "entrypoint": {
+          "description": "\"module.path:ClassName\"",
+          "type": "string"
+        },
+        "model_policy": {
+          "$ref": "#/$defs/ModelPolicy",
+          "default": "local-preferred"
+        },
+        "model_hint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "entrypoint"
+      ],
+      "title": "ManifestRuntime",
+      "type": "object"
+    },
+    "ModelPolicy": {
+      "enum": [
+        "local-only",
+        "local-preferred",
+        "any"
+      ],
+      "title": "ModelPolicy",
+      "type": "string"
+    },
+    "AgentManifest": {
+      "additionalProperties": false,
+      "description": "agents/manifests/<name>.yaml \u2014 blueprint \u00a734.",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "default": "0.1.0",
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "handles": {
+          "description": "Skills/topics used by the planner to route subtasks",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "runtime": {
+          "$ref": "#/$defs/ManifestRuntime"
+        },
+        "memory": {
+          "$ref": "#/$defs/ManifestMemory"
+        },
+        "capabilities": {
+          "$ref": "#/$defs/ManifestCapabilities"
+        },
+        "resources": {
+          "$ref": "#/$defs/ManifestResources"
+        },
+        "network": {
+          "$ref": "#/$defs/ManifestNetwork"
+        },
+        "approval": {
+          "$ref": "#/$defs/ManifestApproval"
+        },
+        "system_prompt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The role's instructions, for template agents that run it generically"
+        },
+        "template": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The role template this manifest was generated from (None: a template)"
+        },
+        "generated": {
+          "default": false,
+          "description": "True for an ephemeral manifest the kernel generated for one task",
+          "type": "boolean"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The task a generated manifest belongs to; removed when the task ends"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "runtime"
+      ],
+      "title": "AgentManifest",
+      "type": "object"
+    },
+    "PlanStep": {
+      "additionalProperties": false,
+      "properties": {
+        "step_id": {
+          "type": "string"
+        },
+        "agent": {
+          "type": "string"
+        },
+        "goal": {
+          "type": "string"
+        },
+        "depends_on": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "inputs": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "required": [
+        "step_id",
+        "agent",
+        "goal"
+      ],
+      "title": "PlanStep",
+      "type": "object"
+    },
+    "Plan": {
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "pattern": "^T-[A-Za-z0-9]+$",
+          "type": "string"
+        },
+        "rationale": {
+          "type": "string"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/PlanStep"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "task_id",
+        "rationale",
+        "steps"
+      ],
+      "title": "Plan",
+      "type": "object"
+    },
+    "AgentResultStatus": {
+      "enum": [
+        "completed",
+        "failed",
+        "cancelled"
+      ],
+      "title": "AgentResultStatus",
+      "type": "string"
+    },
+    "AgentResult": {
+      "additionalProperties": false,
+      "properties": {
+        "pid": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "agent": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/AgentResultStatus"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "artifacts": {
+          "items": {
+            "pattern": "^artifact://[^/]+/.+$",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "evidence": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "actions": {
+          "description": "Syscalls this agent issued",
+          "items": {
+            "$ref": "#/$defs/SyscallRequest"
+          },
+          "type": "array"
+        },
+        "usage": {
+          "$ref": "#/$defs/ResourceUsage"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ErrorInfo"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "pid",
+        "agent",
+        "status",
+        "summary"
+      ],
+      "title": "AgentResult",
+      "type": "object"
+    },
+    "MessageType": {
+      "enum": [
+        "request",
+        "response",
+        "evidence",
+        "clarification",
+        "result",
+        "cancel"
+      ],
+      "title": "MessageType",
+      "type": "string"
+    },
+    "A2AMessage": {
+      "additionalProperties": false,
+      "properties": {
+        "message_id": {
+          "description": "\"MSG-...\"",
+          "type": "string"
+        },
+        "task_id": {
+          "pattern": "^T-[A-Za-z0-9]+$",
+          "type": "string"
+        },
+        "sender_pid": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "receiver_pid": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "sender": {
+          "description": "Agent name",
+          "type": "string"
+        },
+        "receiver": {
+          "description": "Agent name",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/MessageType"
+        },
+        "content": {
+          "default": "",
+          "description": "Short human-readable text; keep under ~2k chars",
+          "type": "string"
+        },
+        "payload": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "payload_ref": {
+          "anyOf": [
+            {
+              "pattern": "^artifact://[^/]+/.+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "provenance": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "trust": {
+          "$ref": "#/$defs/TrustLevel",
+          "default": "unverified"
+        },
+        "in_reply_to": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "sent_at": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "message_id",
+        "task_id",
+        "sender_pid",
+        "receiver_pid",
+        "sender",
+        "receiver",
+        "type"
+      ],
+      "title": "A2AMessage",
+      "type": "object"
+    },
+    "Event": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "type": "string"
+        },
+        "type": {
+          "description": "An EventType value; custom types must be namespaced x.<owner>.<name>",
+          "type": "string"
+        },
+        "ts": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "source": {
+          "description": "Component or \"pid:<n>\", e.g. \"kernel.scheduler\", \"knowledge.indexer\"",
+          "type": "string"
+        },
+        "org_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "pattern": "^T-[A-Za-z0-9]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "pid": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "correlation_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "e.g. syscall_id or approval_id"
+        },
+        "payload": {
+          "additionalProperties": true,
+          "description": "See events.yaml for the payload model per type",
+          "type": "object"
+        }
+      },
+      "required": [
+        "type",
+        "source"
+      ],
+      "title": "Event",
+      "type": "object"
+    },
+    "AuditKind": {
+      "enum": [
+        "task",
+        "spawn",
+        "state",
+        "model",
+        "knowledge",
+        "memory",
+        "ipc",
+        "syscall",
+        "policy",
+        "approval",
+        "tool",
+        "verify",
+        "commit",
+        "rollback"
+      ],
+      "title": "AuditKind",
+      "type": "string"
+    },
+    "AuditEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "seq": {
+          "default": 0,
+          "description": "Monotonic per task; assigned by the AuditLog",
+          "type": "integer"
+        },
+        "entry_id": {
+          "type": "string"
+        },
+        "ts": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "task_id": {
+          "pattern": "^T-[A-Za-z0-9]+$",
+          "type": "string"
+        },
+        "pid": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "actor": {
+          "description": "\"user:alice\", \"agent:finance-agent#102\", \"kernel.policy\"",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/AuditKind"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "data": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "refs": {
+          "description": "/org paths, artifact refs, syscall/approval ids",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "prev_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Hash chain for tamper evidence (stretch)"
+        },
+        "hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "entry_id",
+        "task_id",
+        "actor",
+        "kind",
+        "summary"
+      ],
+      "title": "AuditEntry",
+      "type": "object"
+    },
+    "TimelineStats": {
+      "additionalProperties": false,
+      "properties": {
+        "agents": {
+          "default": 0,
+          "type": "integer"
+        },
+        "models": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "knowledge_objects": {
+          "default": 0,
+          "type": "integer"
+        },
+        "ipc_messages": {
+          "default": 0,
+          "type": "integer"
+        },
+        "tool_calls": {
+          "default": 0,
+          "type": "integer"
+        },
+        "privileged_syscalls": {
+          "default": 0,
+          "type": "integer"
+        },
+        "approvals": {
+          "default": 0,
+          "type": "integer"
+        },
+        "rollbacks": {
+          "default": 0,
+          "type": "integer"
+        }
+      },
+      "title": "TimelineStats",
+      "type": "object"
+    },
+    "RunTimeline": {
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "pattern": "^T-[A-Za-z0-9]+$",
+          "type": "string"
+        },
+        "goal": {
+          "type": "string"
+        },
+        "entries": {
+          "items": {
+            "$ref": "#/$defs/AuditEntry"
+          },
+          "type": "array"
+        },
+        "stats": {
+          "$ref": "#/$defs/TimelineStats"
+        },
+        "chain_verified": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "True when the audit log recomputed every entry's hash and each prev_hash links to its predecessor; False when that check fails; None when the log keeps no hash chain"
+        }
+      },
+      "required": [
+        "task_id",
+        "goal",
+        "entries"
+      ],
+      "title": "RunTimeline",
+      "type": "object"
+    },
+    "AllowDeny": {
+      "additionalProperties": false,
+      "properties": {
+        "allow": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "deny": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "title": "AllowDeny",
+      "type": "object"
+    },
+    "ApprovalMode": {
+      "enum": [
+        "required",
+        "auto",
+        "never"
+      ],
+      "title": "ApprovalMode",
+      "type": "string"
+    },
+    "FilesystemRules": {
+      "additionalProperties": false,
+      "properties": {
+        "read": {
+          "items": {
+            "pattern": "^/(org|workspace)(/.*)?$",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "write": {
+          "items": {
+            "pattern": "^/(org|workspace)(/.*)?$",
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "title": "FilesystemRules",
+      "type": "object"
+    },
+    "PolicyAppliesTo": {
+      "additionalProperties": false,
+      "properties": {
+        "agents": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "roles": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "title": "PolicyAppliesTo",
+      "type": "object"
+    },
+    "PolicyDocument": {
+      "additionalProperties": false,
+      "properties": {
+        "policy": {
+          "description": "Unique id, e.g. finance-agent-v1",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "type": "string"
+        },
+        "priority": {
+          "default": 100,
+          "description": "Lower number wins when several policies match",
+          "type": "integer"
+        },
+        "applies_to": {
+          "$ref": "#/$defs/PolicyAppliesTo"
+        },
+        "knowledge": {
+          "$ref": "#/$defs/AllowDeny",
+          "description": "PathGlobs over /org"
+        },
+        "filesystem": {
+          "$ref": "#/$defs/FilesystemRules"
+        },
+        "network": {
+          "$ref": "#/$defs/AllowDeny",
+          "description": "host:port entries"
+        },
+        "tools": {
+          "$ref": "#/$defs/AllowDeny",
+          "description": "Capability globs"
+        },
+        "approval": {
+          "patternProperties": {
+            "^(\\*|[a-z][a-z0-9_]*(\\.([a-z][a-z0-9_]*|\\*))+)$": {
+              "$ref": "#/$defs/ApprovalMode"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "policy"
+      ],
+      "title": "PolicyDocument",
+      "type": "object"
+    },
+    "TaskUnderstood": {
+      "additionalProperties": false,
+      "description": "task.understood: what the planner took the goal to mean, before it assigns agents.",
+      "properties": {
+        "intent": {
+          "description": "e.g. \"investigate budget overrun and schedule slip\"",
+          "maxLength": 240,
+          "type": "string"
+        },
+        "entities": {
+          "description": "e.g. [\"Project Apollo\", \"APOLLO-12\"]",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20,
+          "type": "array"
+        },
+        "capabilities_needed": {
+          "description": "e.g. knowledge.search, jira.write",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20,
+          "type": "array"
+        },
+        "plan_summary": {
+          "maxLength": 240,
+          "type": "string"
+        }
+      },
+      "required": [
+        "intent",
+        "plan_summary"
+      ],
+      "title": "TaskUnderstood",
+      "type": "object"
+    },
+    "AgentPlanned": {
+      "additionalProperties": false,
+      "description": "agent.planned: one agent the planner decided to create, before it exists (no pid yet).",
+      "properties": {
+        "role": {
+          "description": "Role template id; the matching agent.created carries it as `template`",
+          "type": "string"
+        },
+        "why": {
+          "maxLength": 240,
+          "type": "string"
+        },
+        "scope": {
+          "description": "/org paths or globs it may read",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "capabilities": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "role",
+        "why"
+      ],
+      "title": "AgentPlanned",
+      "type": "object"
+    },
+    "AgentCreated": {
+      "additionalProperties": false,
+      "description": "agent.created: the kernel spawned an agent. `generated` is true for a manifest built for this task.",
+      "properties": {
+        "pid": {
+          "type": "integer"
+        },
+        "manifest_name": {
+          "type": "string"
+        },
+        "template": {
+          "description": "Role template id (equals agent.planned.role); the manifest name for fixed agents",
+          "type": "string"
+        },
+        "generated": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "pid",
+        "manifest_name",
+        "template"
+      ],
+      "title": "AgentCreated",
+      "type": "object"
+    },
+    "AgentThought": {
+      "additionalProperties": false,
+      "description": "agent.thought: one short visible step of an agent. `pid` is set by the kernel, not the agent.",
+      "properties": {
+        "pid": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "step": {
+          "description": "Short step label, e.g. \"search\", \"plan\", \"synthesize\"",
+          "maxLength": 40,
+          "type": "string"
+        },
+        "text": {
+          "description": "One sentence",
+          "maxLength": 240,
+          "type": "string"
+        }
+      },
+      "required": [
+        "step",
+        "text"
+      ],
+      "title": "AgentThought",
+      "type": "object"
+    },
+    "ToolQuery": {
+      "additionalProperties": false,
+      "description": "tool.query: a query a tool ran for an agent (e.g. the SQL of db.query), with its row count and duration.",
+      "properties": {
+        "pid": {
+          "type": "integer"
+        },
+        "tool": {
+          "type": "string"
+        },
+        "query": {
+          "maxLength": 4000,
+          "type": "string"
+        },
+        "rows": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "ms": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "pid",
+        "tool",
+        "query",
+        "rows",
+        "ms"
+      ],
+      "title": "ToolQuery",
+      "type": "object"
+    },
+    "TaskData": {
+      "additionalProperties": false,
+      "description": "task.data: a table of results to show. At most MAX_DATA_ROWS rows; use TaskData.capped() to truncate.",
+      "properties": {
+        "columns": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "rows": {
+          "items": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "maxItems": 200,
+          "type": "array"
+        },
+        "source": {
+          "description": "Where the rows came from, e.g. \"db.query\" or \"/org/finance/apollo-budget\"",
+          "type": "string"
+        }
+      },
+      "required": [
+        "columns",
+        "source"
+      ],
+      "title": "TaskData",
+      "type": "object"
+    },
+    "ComponentHealth": {
+      "additionalProperties": false,
+      "properties": {
+        "component": {
+          "description": "kernel | knowledge | memory | models | agents | tools | sandbox | db | redis | ollama",
+          "type": "string"
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "mode": {
+          "default": "real",
+          "description": "real | fake \u2014 which implementation is wired in",
+          "type": "string"
+        },
+        "detail": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "required": [
+        "component",
+        "ok"
+      ],
+      "title": "ComponentHealth",
+      "type": "object"
+    },
+    "GpuStatus": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "utilization": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "memory_used_mb": {
+          "type": "integer"
+        },
+        "memory_total_mb": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "utilization",
+        "memory_used_mb",
+        "memory_total_mb"
+      ],
+      "title": "GpuStatus",
+      "type": "object"
+    },
+    "ResourceSnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "ts": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "cpu_percent": {
+          "type": "number"
+        },
+        "ram_used_mb": {
+          "type": "integer"
+        },
+        "ram_total_mb": {
+          "type": "integer"
+        },
+        "gpu": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GpuStatus"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "running_processes": {
+          "default": 0,
+          "type": "integer"
+        },
+        "queued_tasks": {
+          "default": 0,
+          "type": "integer"
+        },
+        "active_sandboxes": {
+          "default": 0,
+          "type": "integer"
+        },
+        "tokens_last_minute": {
+          "default": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "cpu_percent",
+        "ram_used_mb",
+        "ram_total_mb"
+      ],
+      "title": "ResourceSnapshot",
+      "type": "object"
+    },
+    "SystemStatus": {
+      "additionalProperties": false,
+      "properties": {
+        "ready": {
+          "type": "boolean"
+        },
+        "version": {
+          "type": "string"
+        },
+        "contract_version": {
+          "type": "string"
+        },
+        "uptime_s": {
+          "type": "number"
+        },
+        "components": {
+          "items": {
+            "$ref": "#/$defs/ComponentHealth"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "ready",
+        "version",
+        "contract_version",
+        "uptime_s",
+        "components"
+      ],
+      "title": "SystemStatus",
+      "type": "object"
+    },
+    "StackComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "component": {
+          "description": "ServiceBundle attribute, e.g. knowledge, models, sandbox",
+          "type": "string"
+        },
+        "mode": {
+          "description": "real | fake | fake(fallback)",
+          "type": "string"
+        },
+        "implementation": {
+          "description": "Implementing class, e.g. kairos_knowledge.kfs.KnowledgeFS",
+          "type": "string"
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "detail": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "required": [
+        "component",
+        "mode",
+        "implementation",
+        "ok"
+      ],
+      "title": "StackComponent",
+      "type": "object"
+    },
+    "RuntimeVersions": {
+      "additionalProperties": false,
+      "properties": {
+        "kairos": {
+          "type": "string"
+        },
+        "contract": {
+          "type": "string"
+        },
+        "python": {
+          "type": "string"
+        },
+        "node": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Node.js on the server, if installed (the console build)"
+        }
+      },
+      "required": [
+        "kairos",
+        "contract",
+        "python"
+      ],
+      "title": "RuntimeVersions",
+      "type": "object"
+    },
+    "ModelRoute": {
+      "additionalProperties": false,
+      "properties": {
+        "task_class": {
+          "description": "planning | reasoning | ... | default | latency_critical | embedding",
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "local": {
+          "default": true,
+          "type": "boolean"
+        },
+        "available": {
+          "description": "The model is present in the runtime (ollama list)",
+          "type": "boolean"
+        },
+        "context_window": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "task_class",
+        "model",
+        "available"
+      ],
+      "title": "ModelRoute",
+      "type": "object"
+    },
+    "ModelsConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "config_file": {
+          "description": "Routing file in use, relative to the repo, e.g. models/models.7b-only.yaml",
+          "type": "string"
+        },
+        "default": {
+          "type": "string"
+        },
+        "embedding": {
+          "type": "string"
+        },
+        "remote_enabled": {
+          "default": false,
+          "type": "boolean"
+        },
+        "routes": {
+          "items": {
+            "$ref": "#/$defs/ModelRoute"
+          },
+          "type": "array"
+        },
+        "models": {
+          "items": {
+            "$ref": "#/$defs/ModelInfo"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "config_file",
+        "default",
+        "embedding"
+      ],
+      "title": "ModelsConfig",
+      "type": "object"
+    },
+    "PolicySummary": {
+      "additionalProperties": false,
+      "properties": {
+        "policy": {
+          "type": "string"
+        },
+        "priority": {
+          "type": "integer"
+        },
+        "agents": {
+          "description": "applies_to.agents",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "roles": {
+          "description": "applies_to.roles",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "requires_approval": {
+          "description": "Capabilities that need a human",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "auto_approved": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "denied": {
+          "description": "approval: never, plus tools.deny",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "policy",
+        "priority"
+      ],
+      "title": "PolicySummary",
+      "type": "object"
+    },
+    "FirewallConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "regex": {
+          "default": true,
+          "description": "Pattern screening; always on",
+          "type": "boolean"
+        },
+        "llm_classifier": {
+          "default": false,
+          "description": "KAIROS_FIREWALL_LLM",
+          "type": "boolean"
+        }
+      },
+      "title": "FirewallConfig",
+      "type": "object"
+    },
+    "EndpointInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "description": "gateway | database | redis | ollama | jira | ...",
+          "type": "string"
+        },
+        "url": {
+          "description": "Credentials are always redacted (user:***@host)",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "url"
+      ],
+      "title": "EndpointInfo",
+      "type": "object"
+    },
+    "SystemConfig": {
+      "additionalProperties": false,
+      "description": "GET /system/config: one read-only document describing the running system. Never contains secrets.",
+      "properties": {
+        "versions": {
+          "$ref": "#/$defs/RuntimeVersions"
+        },
+        "env": {
+          "default": "dev",
+          "type": "string"
+        },
+        "stack": {
+          "items": {
+            "$ref": "#/$defs/StackComponent"
+          },
+          "type": "array"
+        },
+        "models": {
+          "$ref": "#/$defs/ModelsConfig"
+        },
+        "agents": {
+          "items": {
+            "$ref": "#/$defs/AgentManifest"
+          },
+          "type": "array"
+        },
+        "tools": {
+          "items": {
+            "$ref": "#/$defs/ToolSpec"
+          },
+          "type": "array"
+        },
+        "policies": {
+          "items": {
+            "$ref": "#/$defs/PolicySummary"
+          },
+          "type": "array"
+        },
+        "firewall": {
+          "$ref": "#/$defs/FirewallConfig"
+        },
+        "feature_flags": {
+          "additionalProperties": {
+            "type": "boolean"
+          },
+          "type": "object"
+        },
+        "endpoints": {
+          "items": {
+            "$ref": "#/$defs/EndpointInfo"
+          },
+          "type": "array"
+        },
+        "paths": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "okf_dir, policies_dir, manifests_dir, data_dir, models_config",
+          "type": "object"
+        }
+      },
+      "required": [
+        "versions",
+        "models"
+      ],
+      "title": "SystemConfig",
+      "type": "object"
+    },
+    "OrgRole": {
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "description": "owner | admin | approver | member | viewer (policies/rbac/roles.yaml)",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "type": "string"
+        },
+        "permissions": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "role"
+      ],
+      "title": "OrgRole",
+      "type": "object"
+    },
+    "UserInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "user_id": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "name": {
+          "default": "",
+          "type": "string"
+        },
+        "avatar_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "user_id",
+        "email"
+      ],
+      "title": "UserInfo",
+      "type": "object"
+    },
+    "Org": {
+      "additionalProperties": false,
+      "properties": {
+        "org_id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "domain": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Email domain whose users may join, e.g. acme.com"
+        },
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "member_count": {
+          "default": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "org_id",
+        "name"
+      ],
+      "title": "Org",
+      "type": "object"
+    },
+    "MemberStatus": {
+      "enum": [
+        "invited",
+        "active"
+      ],
+      "title": "MemberStatus",
+      "type": "string"
+    },
+    "Member": {
+      "additionalProperties": false,
+      "properties": {
+        "user_id": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "name": {
+          "default": "",
+          "type": "string"
+        },
+        "avatar_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "role": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/MemberStatus",
+          "default": "active"
+        },
+        "joined_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "user_id",
+        "email",
+        "role"
+      ],
+      "title": "Member",
+      "type": "object"
+    },
+    "OrgCreate": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 80,
+          "minLength": 1,
+          "type": "string"
+        },
+        "domain": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "OrgCreate",
+      "type": "object"
+    },
+    "MemberInvite": {
+      "additionalProperties": false,
+      "properties": {
+        "email": {
+          "minLength": 3,
+          "type": "string"
+        },
+        "role": {
+          "default": "member",
+          "type": "string"
+        }
+      },
+      "required": [
+        "email"
+      ],
+      "title": "MemberInvite",
+      "type": "object"
+    },
+    "MemberUpdate": {
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "role"
+      ],
+      "title": "MemberUpdate",
+      "type": "object"
+    },
+    "AuthMode": {
+      "enum": [
+        "dev",
+        "google"
+      ],
+      "title": "AuthMode",
+      "type": "string"
+    },
+    "AuthConfig": {
+      "additionalProperties": false,
+      "description": "What the sign-in screen needs: which mode the gateway runs in, and the Google client id for the button.",
+      "properties": {
+        "mode": {
+          "$ref": "#/$defs/AuthMode"
+        },
+        "google_client_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "mode"
+      ],
+      "title": "AuthConfig",
+      "type": "object"
+    },
+    "GoogleLogin": {
+      "additionalProperties": false,
+      "properties": {
+        "id_token": {
+          "description": "The credential from Google Identity Services",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id_token"
+      ],
+      "title": "GoogleLogin",
+      "type": "object"
+    },
+    "DevLogin": {
+      "additionalProperties": false,
+      "properties": {
+        "email": {
+          "minLength": 3,
+          "type": "string"
+        },
+        "name": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "required": [
+        "email"
+      ],
+      "title": "DevLogin",
+      "type": "object"
+    },
+    "Me": {
+      "additionalProperties": false,
+      "description": "The signed-in user, their org (none until onboarding creates or joins one), role and permissions.",
+      "properties": {
+        "user": {
+          "$ref": "#/$defs/UserInfo"
+        },
+        "org": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Org"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "role": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "permissions": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "mode": {
+          "$ref": "#/$defs/AuthMode",
+          "default": "dev"
+        }
+      },
+      "required": [
+        "user"
+      ],
+      "title": "Me",
+      "type": "object"
+    },
+    "Session": {
+      "additionalProperties": false,
+      "properties": {
+        "token": {
+          "description": "Send as Authorization: Bearer <token>; ?token=<token> on the WebSocket",
+          "type": "string"
+        },
+        "expires_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "me": {
+          "$ref": "#/$defs/Me"
+        }
+      },
+      "required": [
+        "token",
+        "expires_at",
+        "me"
+      ],
+      "title": "Session",
+      "type": "object"
+    },
+    "PairCode": {
+      "additionalProperties": false,
+      "description": "Signs the same person in on another device: shown in the console, typed into the phone. One use, minutes long.",
+      "properties": {
+        "code": {
+          "description": "Eight characters, e.g. K7QM-4ZPD; case and the dash are ignored",
+          "type": "string"
+        },
+        "expires_at": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "expires_at"
+      ],
+      "title": "PairCode",
+      "type": "object"
+    },
+    "PairRedeem": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "maxLength": 16,
+          "minLength": 6,
+          "type": "string"
+        }
+      },
+      "required": [
+        "code"
+      ],
+      "title": "PairRedeem",
+      "type": "object"
+    },
+    "ConnectorStatus": {
+      "enum": [
+        "connected",
+        "disconnected"
+      ],
+      "title": "ConnectorStatus",
+      "type": "string"
+    },
+    "Connector": {
+      "additionalProperties": false,
+      "properties": {
+        "connector_id": {
+          "description": "github | google_calendar",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/ConnectorStatus",
+          "default": "disconnected"
+        },
+        "mode": {
+          "default": "mock",
+          "description": "mock (built-in stand-in, no account needed) | live (a real token in the vault)",
+          "type": "string"
+        },
+        "capabilities": {
+          "description": "e.g. github.read, github.write",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "scopes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "connected_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "connected_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "last_sync": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "recent_agents": {
+          "description": "Agents that used it recently (from the audit log)",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "connector_id",
+        "name"
+      ],
+      "title": "Connector",
+      "type": "object"
+    },
+    "ConnectorConnect": {
+      "additionalProperties": false,
+      "description": "A personal access token or API key. Stored encrypted in the vault; never shown again, never sent to agents.",
+      "properties": {
+        "token": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "account": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "e.g. a GitHub owner/repo to sync, a calendar id"
+        }
+      },
+      "title": "ConnectorConnect",
+      "type": "object"
+    },
+    "ConnectorSyncResult": {
+      "additionalProperties": false,
+      "properties": {
+        "created": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "updated": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "errors": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "title": "ConnectorSyncResult",
+      "type": "object"
+    },
+    "KnowledgeMount": {
+      "additionalProperties": false,
+      "description": "A folder of this computer mirrored into /org/mnt/<name>: its documents are converted, indexed and watched.",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "host_path": {
+          "type": "string"
+        },
+        "org_path": {
+          "type": "string"
+        },
+        "files": {
+          "default": 0,
+          "type": "integer"
+        },
+        "skipped": {
+          "default": 0,
+          "type": "integer"
+        },
+        "watching": {
+          "default": false,
+          "type": "boolean"
+        },
+        "synced_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "errors": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "host_path",
+        "org_path"
+      ],
+      "title": "KnowledgeMount",
+      "type": "object"
+    },
+    "KnowledgeMountCreate": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 40,
+          "minLength": 1,
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "type": "string"
+        },
+        "host_path": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "host_path"
+      ],
+      "title": "KnowledgeMountCreate",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "A2AMessage": {
+      "$ref": "#/$defs/A2AMessage"
+    },
+    "AgentCreated": {
+      "$ref": "#/$defs/AgentCreated"
+    },
+    "AgentFramework": {
+      "$ref": "#/$defs/AgentFramework"
+    },
+    "AgentManifest": {
+      "$ref": "#/$defs/AgentManifest"
+    },
+    "AgentPlanned": {
+      "$ref": "#/$defs/AgentPlanned"
+    },
+    "AgentProcess": {
+      "$ref": "#/$defs/AgentProcess"
+    },
+    "AgentResult": {
+      "$ref": "#/$defs/AgentResult"
+    },
+    "AgentResultStatus": {
+      "$ref": "#/$defs/AgentResultStatus"
+    },
+    "AgentState": {
+      "$ref": "#/$defs/AgentState"
+    },
+    "AgentThought": {
+      "$ref": "#/$defs/AgentThought"
+    },
+    "AllowDeny": {
+      "$ref": "#/$defs/AllowDeny"
+    },
+    "Approval": {
+      "$ref": "#/$defs/Approval"
+    },
+    "ApprovalMode": {
+      "$ref": "#/$defs/ApprovalMode"
+    },
+    "ApprovalResolution": {
+      "$ref": "#/$defs/ApprovalResolution"
+    },
+    "ApprovalStatus": {
+      "$ref": "#/$defs/ApprovalStatus"
+    },
+    "AuditEntry": {
+      "$ref": "#/$defs/AuditEntry"
+    },
+    "AuditKind": {
+      "$ref": "#/$defs/AuditKind"
+    },
+    "AuthConfig": {
+      "$ref": "#/$defs/AuthConfig"
+    },
+    "AuthMode": {
+      "$ref": "#/$defs/AuthMode"
+    },
+    "BrowserPage": {
+      "$ref": "#/$defs/BrowserPage"
+    },
+    "ChangeKind": {
+      "$ref": "#/$defs/ChangeKind"
+    },
+    "ChatMessage": {
+      "$ref": "#/$defs/ChatMessage"
+    },
+    "Checkpoint": {
+      "$ref": "#/$defs/Checkpoint"
+    },
+    "ComponentHealth": {
+      "$ref": "#/$defs/ComponentHealth"
+    },
+    "Connector": {
+      "$ref": "#/$defs/Connector"
+    },
+    "ConnectorConnect": {
+      "$ref": "#/$defs/ConnectorConnect"
+    },
+    "ConnectorStatus": {
+      "$ref": "#/$defs/ConnectorStatus"
+    },
+    "ConnectorSyncResult": {
+      "$ref": "#/$defs/ConnectorSyncResult"
+    },
+    "Decision": {
+      "$ref": "#/$defs/Decision"
+    },
+    "DevLogin": {
+      "$ref": "#/$defs/DevLogin"
+    },
+    "EmbedRequest": {
+      "$ref": "#/$defs/EmbedRequest"
+    },
+    "EmbedResponse": {
+      "$ref": "#/$defs/EmbedResponse"
+    },
+    "EndpointInfo": {
+      "$ref": "#/$defs/EndpointInfo"
+    },
+    "ErrorInfo": {
+      "$ref": "#/$defs/ErrorInfo"
+    },
+    "Event": {
+      "$ref": "#/$defs/Event"
+    },
+    "EvidenceSet": {
+      "$ref": "#/$defs/EvidenceSet"
+    },
+    "ExecRequest": {
+      "$ref": "#/$defs/ExecRequest"
+    },
+    "ExecResult": {
+      "$ref": "#/$defs/ExecResult"
+    },
+    "FilesystemRules": {
+      "$ref": "#/$defs/FilesystemRules"
+    },
+    "FirewallConfig": {
+      "$ref": "#/$defs/FirewallConfig"
+    },
+    "GoogleLogin": {
+      "$ref": "#/$defs/GoogleLogin"
+    },
+    "GpuStatus": {
+      "$ref": "#/$defs/GpuStatus"
+    },
+    "GraphEdge": {
+      "$ref": "#/$defs/GraphEdge"
+    },
+    "GraphResult": {
+      "$ref": "#/$defs/GraphResult"
+    },
+    "IngestRequest": {
+      "$ref": "#/$defs/IngestRequest"
+    },
+    "IngestResult": {
+      "$ref": "#/$defs/IngestResult"
+    },
+    "IngestSourceType": {
+      "$ref": "#/$defs/IngestSourceType"
+    },
+    "InvalidationReport": {
+      "$ref": "#/$defs/InvalidationReport"
+    },
+    "KnowledgeChange": {
+      "$ref": "#/$defs/KnowledgeChange"
+    },
+    "KnowledgeEntry": {
+      "$ref": "#/$defs/KnowledgeEntry"
+    },
+    "KnowledgeListing": {
+      "$ref": "#/$defs/KnowledgeListing"
+    },
+    "KnowledgeMount": {
+      "$ref": "#/$defs/KnowledgeMount"
+    },
+    "KnowledgeMountCreate": {
+      "$ref": "#/$defs/KnowledgeMountCreate"
+    },
+    "KnowledgeObject": {
+      "$ref": "#/$defs/KnowledgeObject"
+    },
+    "Latency": {
+      "$ref": "#/$defs/Latency"
+    },
+    "ManifestApproval": {
+      "$ref": "#/$defs/ManifestApproval"
+    },
+    "ManifestCapabilities": {
+      "$ref": "#/$defs/ManifestCapabilities"
+    },
+    "ManifestMemory": {
+      "$ref": "#/$defs/ManifestMemory"
+    },
+    "ManifestNetwork": {
+      "$ref": "#/$defs/ManifestNetwork"
+    },
+    "ManifestResources": {
+      "$ref": "#/$defs/ManifestResources"
+    },
+    "ManifestRuntime": {
+      "$ref": "#/$defs/ManifestRuntime"
+    },
+    "Me": {
+      "$ref": "#/$defs/Me"
+    },
+    "Member": {
+      "$ref": "#/$defs/Member"
+    },
+    "MemberInvite": {
+      "$ref": "#/$defs/MemberInvite"
+    },
+    "MemberStatus": {
+      "$ref": "#/$defs/MemberStatus"
+    },
+    "MemberUpdate": {
+      "$ref": "#/$defs/MemberUpdate"
+    },
+    "MemoryKind": {
+      "$ref": "#/$defs/MemoryKind"
+    },
+    "MemoryQuery": {
+      "$ref": "#/$defs/MemoryQuery"
+    },
+    "MemoryRecord": {
+      "$ref": "#/$defs/MemoryRecord"
+    },
+    "MemoryScope": {
+      "$ref": "#/$defs/MemoryScope"
+    },
+    "MessageType": {
+      "$ref": "#/$defs/MessageType"
+    },
+    "ModelInfo": {
+      "$ref": "#/$defs/ModelInfo"
+    },
+    "ModelPolicy": {
+      "$ref": "#/$defs/ModelPolicy"
+    },
+    "ModelRequest": {
+      "$ref": "#/$defs/ModelRequest"
+    },
+    "ModelResponse": {
+      "$ref": "#/$defs/ModelResponse"
+    },
+    "ModelRoute": {
+      "$ref": "#/$defs/ModelRoute"
+    },
+    "ModelsConfig": {
+      "$ref": "#/$defs/ModelsConfig"
+    },
+    "Mount": {
+      "$ref": "#/$defs/Mount"
+    },
+    "NetworkMode": {
+      "$ref": "#/$defs/NetworkMode"
+    },
+    "OKFDraft": {
+      "$ref": "#/$defs/OKFDraft"
+    },
+    "OKFFrontmatter": {
+      "$ref": "#/$defs/OKFFrontmatter"
+    },
+    "Org": {
+      "$ref": "#/$defs/Org"
+    },
+    "OrgCreate": {
+      "$ref": "#/$defs/OrgCreate"
+    },
+    "OrgRole": {
+      "$ref": "#/$defs/OrgRole"
+    },
+    "PairCode": {
+      "$ref": "#/$defs/PairCode"
+    },
+    "PairRedeem": {
+      "$ref": "#/$defs/PairRedeem"
+    },
+    "Plan": {
+      "$ref": "#/$defs/Plan"
+    },
+    "PlanStep": {
+      "$ref": "#/$defs/PlanStep"
+    },
+    "PolicyAppliesTo": {
+      "$ref": "#/$defs/PolicyAppliesTo"
+    },
+    "PolicyDecision": {
+      "$ref": "#/$defs/PolicyDecision"
+    },
+    "PolicyDocument": {
+      "$ref": "#/$defs/PolicyDocument"
+    },
+    "PolicySummary": {
+      "$ref": "#/$defs/PolicySummary"
+    },
+    "Principal": {
+      "$ref": "#/$defs/Principal"
+    },
+    "PrincipalKind": {
+      "$ref": "#/$defs/PrincipalKind"
+    },
+    "Priority": {
+      "$ref": "#/$defs/Priority"
+    },
+    "PrivacyLevel": {
+      "$ref": "#/$defs/PrivacyLevel"
+    },
+    "ProcessTreeNode": {
+      "$ref": "#/$defs/ProcessTreeNode"
+    },
+    "Provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "ResourceQuota": {
+      "$ref": "#/$defs/ResourceQuota"
+    },
+    "ResourceSnapshot": {
+      "$ref": "#/$defs/ResourceSnapshot"
+    },
+    "ResourceUsage": {
+      "$ref": "#/$defs/ResourceUsage"
+    },
+    "Risk": {
+      "$ref": "#/$defs/Risk"
+    },
+    "Role": {
+      "$ref": "#/$defs/Role"
+    },
+    "RoutingDecision": {
+      "$ref": "#/$defs/RoutingDecision"
+    },
+    "RunTimeline": {
+      "$ref": "#/$defs/RunTimeline"
+    },
+    "RuntimeVersions": {
+      "$ref": "#/$defs/RuntimeVersions"
+    },
+    "SandboxInfo": {
+      "$ref": "#/$defs/SandboxInfo"
+    },
+    "SandboxSpec": {
+      "$ref": "#/$defs/SandboxSpec"
+    },
+    "SandboxStatus": {
+      "$ref": "#/$defs/SandboxStatus"
+    },
+    "SearchHit": {
+      "$ref": "#/$defs/SearchHit"
+    },
+    "SearchMode": {
+      "$ref": "#/$defs/SearchMode"
+    },
+    "SearchQuery": {
+      "$ref": "#/$defs/SearchQuery"
+    },
+    "Session": {
+      "$ref": "#/$defs/Session"
+    },
+    "SpawnRequest": {
+      "$ref": "#/$defs/SpawnRequest"
+    },
+    "StackComponent": {
+      "$ref": "#/$defs/StackComponent"
+    },
+    "StreamChunk": {
+      "$ref": "#/$defs/StreamChunk"
+    },
+    "SyscallRequest": {
+      "$ref": "#/$defs/SyscallRequest"
+    },
+    "SyscallResult": {
+      "$ref": "#/$defs/SyscallResult"
+    },
+    "SyscallStatus": {
+      "$ref": "#/$defs/SyscallStatus"
+    },
+    "SystemConfig": {
+      "$ref": "#/$defs/SystemConfig"
+    },
+    "SystemStatus": {
+      "$ref": "#/$defs/SystemStatus"
+    },
+    "Task": {
+      "$ref": "#/$defs/Task"
+    },
+    "TaskClass": {
+      "$ref": "#/$defs/TaskClass"
+    },
+    "TaskCreate": {
+      "$ref": "#/$defs/TaskCreate"
+    },
+    "TaskData": {
+      "$ref": "#/$defs/TaskData"
+    },
+    "TaskResult": {
+      "$ref": "#/$defs/TaskResult"
+    },
+    "TaskStatus": {
+      "$ref": "#/$defs/TaskStatus"
+    },
+    "TaskUnderstood": {
+      "$ref": "#/$defs/TaskUnderstood"
+    },
+    "TimelineStats": {
+      "$ref": "#/$defs/TimelineStats"
+    },
+    "TokenUsage": {
+      "$ref": "#/$defs/TokenUsage"
+    },
+    "ToolInvocation": {
+      "$ref": "#/$defs/ToolInvocation"
+    },
+    "ToolOperation": {
+      "$ref": "#/$defs/ToolOperation"
+    },
+    "ToolQuery": {
+      "$ref": "#/$defs/ToolQuery"
+    },
+    "ToolResult": {
+      "$ref": "#/$defs/ToolResult"
+    },
+    "ToolResultStatus": {
+      "$ref": "#/$defs/ToolResultStatus"
+    },
+    "ToolSpec": {
+      "$ref": "#/$defs/ToolSpec"
+    },
+    "ToolTransport": {
+      "$ref": "#/$defs/ToolTransport"
+    },
+    "TrustLevel": {
+      "$ref": "#/$defs/TrustLevel"
+    },
+    "UserInfo": {
+      "$ref": "#/$defs/UserInfo"
+    },
+    "UserPermissions": {
+      "$ref": "#/$defs/UserPermissions"
+    },
+    "ValidationIssue": {
+      "$ref": "#/$defs/ValidationIssue"
+    },
+    "ValidationReport": {
+      "$ref": "#/$defs/ValidationReport"
+    },
+    "VerificationCheck": {
+      "$ref": "#/$defs/VerificationCheck"
+    },
+    "VerificationResult": {
+      "$ref": "#/$defs/VerificationResult"
+    },
+    "VerificationStatus": {
+      "$ref": "#/$defs/VerificationStatus"
+    },
+    "WorkingSet": {
+      "$ref": "#/$defs/WorkingSet"
+    },
+    "WorkingSetItem": {
+      "$ref": "#/$defs/WorkingSetItem"
+    }
+  }
+}

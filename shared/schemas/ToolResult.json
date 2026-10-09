@@ -1,0 +1,111 @@
+{
+  "$defs": {
+    "ErrorInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "description": "One of shared/catalogs/errors.yaml",
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "retriable": {
+          "default": false,
+          "title": "Retriable",
+          "type": "boolean"
+        },
+        "details": {
+          "additionalProperties": true,
+          "title": "Details",
+          "type": "object"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "ErrorInfo",
+      "type": "object"
+    },
+    "ToolResultStatus": {
+      "enum": [
+        "success",
+        "error",
+        "timeout"
+      ],
+      "title": "ToolResultStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "invocation_id": {
+      "title": "Invocation Id",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/ToolResultStatus"
+    },
+    "output": {
+      "additionalProperties": true,
+      "title": "Output",
+      "type": "object"
+    },
+    "artifacts": {
+      "items": {
+        "pattern": "^artifact://[^/]+/.+$",
+        "type": "string"
+      },
+      "title": "Artifacts",
+      "type": "array"
+    },
+    "logs": {
+      "default": "",
+      "title": "Logs",
+      "type": "string"
+    },
+    "rollback_token": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Opaque; pass back to ToolExecutor.rollback",
+      "title": "Rollback Token"
+    },
+    "started_at": {
+      "format": "date-time",
+      "title": "Started At",
+      "type": "string"
+    },
+    "finished_at": {
+      "format": "date-time",
+      "title": "Finished At",
+      "type": "string"
+    },
+    "error": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ErrorInfo"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "invocation_id",
+    "status"
+  ],
+  "title": "ToolResult",
+  "type": "object"
+}

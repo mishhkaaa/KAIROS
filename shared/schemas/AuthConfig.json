@@ -1,0 +1,36 @@
+{
+  "$defs": {
+    "AuthMode": {
+      "enum": [
+        "dev",
+        "google"
+      ],
+      "title": "AuthMode",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "What the sign-in screen needs: which mode the gateway runs in, and the Google client id for the button.",
+  "properties": {
+    "mode": {
+      "$ref": "#/$defs/AuthMode"
+    },
+    "google_client_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Google Client Id"
+    }
+  },
+  "required": [
+    "mode"
+  ],
+  "title": "AuthConfig",
+  "type": "object"
+}

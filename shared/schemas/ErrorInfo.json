@@ -1,0 +1,30 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "code": {
+      "description": "One of shared/catalogs/errors.yaml",
+      "title": "Code",
+      "type": "string"
+    },
+    "message": {
+      "title": "Message",
+      "type": "string"
+    },
+    "retriable": {
+      "default": false,
+      "title": "Retriable",
+      "type": "boolean"
+    },
+    "details": {
+      "additionalProperties": true,
+      "title": "Details",
+      "type": "object"
+    }
+  },
+  "required": [
+    "code",
+    "message"
+  ],
+  "title": "ErrorInfo",
+  "type": "object"
+}

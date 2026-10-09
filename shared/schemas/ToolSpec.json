@@ -1,0 +1,105 @@
+{
+  "$defs": {
+    "Risk": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Risk",
+      "type": "string"
+    },
+    "ToolOperation": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "capability": {
+          "pattern": "^(\\*|[a-z][a-z0-9_]*(\\.([a-z][a-z0-9_]*|\\*))+)$",
+          "title": "Capability",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "input_schema": {
+          "additionalProperties": true,
+          "description": "JSON Schema",
+          "title": "Input Schema",
+          "type": "object"
+        },
+        "output_schema": {
+          "additionalProperties": true,
+          "description": "JSON Schema",
+          "title": "Output Schema",
+          "type": "object"
+        },
+        "risk": {
+          "$ref": "#/$defs/Risk",
+          "default": "low"
+        },
+        "reversible": {
+          "default": false,
+          "title": "Reversible",
+          "type": "boolean"
+        },
+        "requires_sandbox": {
+          "default": false,
+          "title": "Requires Sandbox",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "capability",
+        "description"
+      ],
+      "title": "ToolOperation",
+      "type": "object"
+    },
+    "ToolTransport": {
+      "enum": [
+        "native",
+        "mcp",
+        "http",
+        "browser",
+        "sandbox"
+      ],
+      "title": "ToolTransport",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "description": {
+      "title": "Description",
+      "type": "string"
+    },
+    "transport": {
+      "$ref": "#/$defs/ToolTransport"
+    },
+    "operations": {
+      "items": {
+        "$ref": "#/$defs/ToolOperation"
+      },
+      "title": "Operations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "name",
+    "description",
+    "transport",
+    "operations"
+  ],
+  "title": "ToolSpec",
+  "type": "object"
+}

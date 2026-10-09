@@ -1,0 +1,29 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "exit_code": {
+      "title": "Exit Code",
+      "type": "integer"
+    },
+    "stdout": {
+      "default": "",
+      "title": "Stdout",
+      "type": "string"
+    },
+    "stderr": {
+      "default": "",
+      "title": "Stderr",
+      "type": "string"
+    },
+    "duration_s": {
+      "default": 0.0,
+      "title": "Duration S",
+      "type": "number"
+    }
+  },
+  "required": [
+    "exit_code"
+  ],
+  "title": "ExecResult",
+  "type": "object"
+}

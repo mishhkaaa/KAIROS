@@ -1,0 +1,42 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "org_id": {
+      "title": "Org Id",
+      "type": "string"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "domain": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Email domain whose users may join, e.g. acme.com",
+      "title": "Domain"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "member_count": {
+      "default": 0,
+      "title": "Member Count",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "org_id",
+    "name"
+  ],
+  "title": "Org",
+  "type": "object"
+}

@@ -1,0 +1,50 @@
+{
+  "additionalProperties": false,
+  "description": "What a user may do (0.11.0), resolved from {user, org, roles} by a PermissionsProvider. `permissions` are app\npermissions (task.create, approval.resolve, ...); `capabilities` and `data_scopes` bound every agent a task started by\nthis user creates: an agent never gets a capability or an /org scope its user lacks.",
+  "properties": {
+    "user_id": {
+      "title": "User Id",
+      "type": "string"
+    },
+    "org_id": {
+      "title": "Org Id",
+      "type": "string"
+    },
+    "roles": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Roles",
+      "type": "array"
+    },
+    "permissions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Permissions",
+      "type": "array"
+    },
+    "capabilities": {
+      "items": {
+        "pattern": "^(\\*|[a-z][a-z0-9_]*(\\.([a-z][a-z0-9_]*|\\*))+)$",
+        "type": "string"
+      },
+      "title": "Capabilities",
+      "type": "array"
+    },
+    "data_scopes": {
+      "items": {
+        "pattern": "^/(org|workspace)(/.*)?$",
+        "type": "string"
+      },
+      "title": "Data Scopes",
+      "type": "array"
+    }
+  },
+  "required": [
+    "user_id",
+    "org_id"
+  ],
+  "title": "UserPermissions",
+  "type": "object"
+}

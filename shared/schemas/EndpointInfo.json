@@ -1,0 +1,21 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "description": "gateway | database | redis | ollama | jira | ...",
+      "title": "Name",
+      "type": "string"
+    },
+    "url": {
+      "description": "Credentials are always redacted (user:***@host)",
+      "title": "Url",
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "url"
+  ],
+  "title": "EndpointInfo",
+  "type": "object"
+}

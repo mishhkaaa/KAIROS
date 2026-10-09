@@ -1,0 +1,98 @@
+{
+  "$defs": {
+    "PrincipalKind": {
+      "enum": [
+        "user",
+        "agent",
+        "system"
+      ],
+      "title": "PrincipalKind",
+      "type": "string"
+    },
+    "PrivacyLevel": {
+      "description": "Ordered from least to most sensitive. `restricted` must never leave the box.",
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "restricted"
+      ],
+      "title": "PrivacyLevel",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Who is asking. Agents act on behalf of a user and inherit (a subset of) their scope.",
+  "properties": {
+    "kind": {
+      "$ref": "#/$defs/PrincipalKind"
+    },
+    "org_id": {
+      "title": "Org Id",
+      "type": "string"
+    },
+    "user_id": {
+      "title": "User Id",
+      "type": "string"
+    },
+    "pid": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pid"
+    },
+    "agent": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Agent"
+    },
+    "roles": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Roles",
+      "type": "array"
+    },
+    "capabilities": {
+      "items": {
+        "pattern": "^(\\*|[a-z][a-z0-9_]*(\\.([a-z][a-z0-9_]*|\\*))+)$",
+        "type": "string"
+      },
+      "title": "Capabilities",
+      "type": "array"
+    },
+    "data_scopes": {
+      "items": {
+        "pattern": "^/(org|workspace)(/.*)?$",
+        "type": "string"
+      },
+      "title": "Data Scopes",
+      "type": "array"
+    },
+    "max_privacy": {
+      "$ref": "#/$defs/PrivacyLevel",
+      "default": "internal"
+    }
+  },
+  "required": [
+    "kind",
+    "org_id",
+    "user_id"
+  ],
+  "title": "Principal",
+  "type": "object"
+}

@@ -1,0 +1,130 @@
+{
+  "$defs": {
+    "MemoryKind": {
+      "enum": [
+        "working",
+        "episodic",
+        "semantic"
+      ],
+      "title": "MemoryKind",
+      "type": "string"
+    },
+    "MemoryScope": {
+      "enum": [
+        "task",
+        "agent",
+        "user",
+        "org"
+      ],
+      "title": "MemoryScope",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "memory_id": {
+      "description": "\"MEM-...\"",
+      "title": "Memory Id",
+      "type": "string"
+    },
+    "kind": {
+      "$ref": "#/$defs/MemoryKind"
+    },
+    "scope": {
+      "$ref": "#/$defs/MemoryScope"
+    },
+    "org_id": {
+      "title": "Org Id",
+      "type": "string"
+    },
+    "owner": {
+      "description": "agent name, user_id or org_id depending on scope",
+      "title": "Owner",
+      "type": "string"
+    },
+    "task_id": {
+      "anyOf": [
+        {
+          "pattern": "^T-[A-Za-z0-9]+$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Task Id"
+    },
+    "content": {
+      "title": "Content",
+      "type": "string"
+    },
+    "summary": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Summary"
+    },
+    "derived_from": {
+      "description": "/org paths or MEM ids this was derived from \u2014 drives invalidation",
+      "items": {
+        "type": "string"
+      },
+      "title": "Derived From",
+      "type": "array"
+    },
+    "tags": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Tags",
+      "type": "array"
+    },
+    "importance": {
+      "default": 0.5,
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Importance",
+      "type": "number"
+    },
+    "stale": {
+      "default": false,
+      "title": "Stale",
+      "type": "boolean"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "last_used_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Last Used At"
+    }
+  },
+  "required": [
+    "memory_id",
+    "kind",
+    "scope",
+    "org_id",
+    "owner",
+    "content"
+  ],
+  "title": "MemoryRecord",
+  "type": "object"
+}

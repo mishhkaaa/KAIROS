@@ -1,0 +1,129 @@
+{
+  "$defs": {
+    "TrustLevel": {
+      "enum": [
+        "verified",
+        "trusted",
+        "unverified",
+        "untrusted"
+      ],
+      "title": "TrustLevel",
+      "type": "string"
+    },
+    "VerificationStatus": {
+      "enum": [
+        "unverified",
+        "verified",
+        "disputed",
+        "stale"
+      ],
+      "title": "VerificationStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Answers: where did this come from, when was it verified, who/what produced it.",
+  "properties": {
+    "source": {
+      "description": "\"okf\", \"jira\", \"agent:finance\", \"tool:browser\", ...",
+      "title": "Source",
+      "type": "string"
+    },
+    "source_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "External id, URL or /org path",
+      "title": "Source Ref"
+    },
+    "source_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Version"
+    },
+    "created_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Created At"
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Updated At"
+    },
+    "author": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Author"
+    },
+    "generator": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Agent/pipeline that produced this",
+      "title": "Generator"
+    },
+    "verification_status": {
+      "$ref": "#/$defs/VerificationStatus",
+      "default": "unverified"
+    },
+    "trust": {
+      "$ref": "#/$defs/TrustLevel",
+      "default": "unverified"
+    },
+    "related_sources": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Related Sources",
+      "type": "array"
+    }
+  },
+  "required": [
+    "source"
+  ],
+  "title": "Provenance",
+  "type": "object"
+}

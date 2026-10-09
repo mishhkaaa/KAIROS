@@ -1,0 +1,33 @@
+{
+  "additionalProperties": false,
+  "description": "A personal access token or API key. Stored encrypted in the vault; never shown again, never sent to agents.",
+  "properties": {
+    "token": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Token"
+    },
+    "account": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "e.g. a GitHub owner/repo to sync, a calendar id",
+      "title": "Account"
+    }
+  },
+  "title": "ConnectorConnect",
+  "type": "object"
+}

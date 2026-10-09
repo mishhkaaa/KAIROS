@@ -1,0 +1,31 @@
+{
+  "additionalProperties": false,
+  "description": "agent.created: the kernel spawned an agent. `generated` is true for a manifest built for this task.",
+  "properties": {
+    "pid": {
+      "title": "Pid",
+      "type": "integer"
+    },
+    "manifest_name": {
+      "title": "Manifest Name",
+      "type": "string"
+    },
+    "template": {
+      "description": "Role template id (equals agent.planned.role); the manifest name for fixed agents",
+      "title": "Template",
+      "type": "string"
+    },
+    "generated": {
+      "default": false,
+      "title": "Generated",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "pid",
+    "manifest_name",
+    "template"
+  ],
+  "title": "AgentCreated",
+  "type": "object"
+}

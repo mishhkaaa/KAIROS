@@ -1,0 +1,37 @@
+{
+  "additionalProperties": false,
+  "description": "agent.planned: one agent the planner decided to create, before it exists (no pid yet).",
+  "properties": {
+    "role": {
+      "description": "Role template id; the matching agent.created carries it as `template`",
+      "title": "Role",
+      "type": "string"
+    },
+    "why": {
+      "maxLength": 240,
+      "title": "Why",
+      "type": "string"
+    },
+    "scope": {
+      "description": "/org paths or globs it may read",
+      "items": {
+        "type": "string"
+      },
+      "title": "Scope",
+      "type": "array"
+    },
+    "capabilities": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Capabilities",
+      "type": "array"
+    }
+  },
+  "required": [
+    "role",
+    "why"
+  ],
+  "title": "AgentPlanned",
+  "type": "object"
+}

@@ -1,0 +1,46 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "texts": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Texts",
+      "type": "array"
+    },
+    "model_hint": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Hint"
+    },
+    "input_type": {
+      "anyOf": [
+        {
+          "enum": [
+            "query",
+            "document"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "What the texts are: some embedding models (nomic-embed-text) are trained with a task prefix and retrieve better when queries and documents are marked; providers that don't need it ignore it",
+      "title": "Input Type"
+    }
+  },
+  "required": [
+    "texts"
+  ],
+  "title": "EmbedRequest",
+  "type": "object"
+}

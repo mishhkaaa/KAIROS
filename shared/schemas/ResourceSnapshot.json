@@ -1,0 +1,93 @@
+{
+  "$defs": {
+    "GpuStatus": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "utilization": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Utilization",
+          "type": "number"
+        },
+        "memory_used_mb": {
+          "title": "Memory Used Mb",
+          "type": "integer"
+        },
+        "memory_total_mb": {
+          "title": "Memory Total Mb",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "utilization",
+        "memory_used_mb",
+        "memory_total_mb"
+      ],
+      "title": "GpuStatus",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "ts": {
+      "format": "date-time",
+      "title": "Ts",
+      "type": "string"
+    },
+    "cpu_percent": {
+      "title": "Cpu Percent",
+      "type": "number"
+    },
+    "ram_used_mb": {
+      "title": "Ram Used Mb",
+      "type": "integer"
+    },
+    "ram_total_mb": {
+      "title": "Ram Total Mb",
+      "type": "integer"
+    },
+    "gpu": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/GpuStatus"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "running_processes": {
+      "default": 0,
+      "title": "Running Processes",
+      "type": "integer"
+    },
+    "queued_tasks": {
+      "default": 0,
+      "title": "Queued Tasks",
+      "type": "integer"
+    },
+    "active_sandboxes": {
+      "default": 0,
+      "title": "Active Sandboxes",
+      "type": "integer"
+    },
+    "tokens_last_minute": {
+      "default": 0,
+      "title": "Tokens Last Minute",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "cpu_percent",
+    "ram_used_mb",
+    "ram_total_mb"
+  ],
+  "title": "ResourceSnapshot",
+  "type": "object"
+}

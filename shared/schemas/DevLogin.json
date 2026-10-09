@@ -1,0 +1,20 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "email": {
+      "minLength": 3,
+      "title": "Email",
+      "type": "string"
+    },
+    "name": {
+      "default": "",
+      "title": "Name",
+      "type": "string"
+    }
+  },
+  "required": [
+    "email"
+  ],
+  "title": "DevLogin",
+  "type": "object"
+}

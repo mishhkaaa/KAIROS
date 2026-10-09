@@ -1,0 +1,136 @@
+{
+  "$defs": {
+    "AuthMode": {
+      "enum": [
+        "dev",
+        "google"
+      ],
+      "title": "AuthMode",
+      "type": "string"
+    },
+    "Org": {
+      "additionalProperties": false,
+      "properties": {
+        "org_id": {
+          "title": "Org Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "domain": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Email domain whose users may join, e.g. acme.com",
+          "title": "Domain"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "member_count": {
+          "default": 0,
+          "title": "Member Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "org_id",
+        "name"
+      ],
+      "title": "Org",
+      "type": "object"
+    },
+    "UserInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "user_id": {
+          "title": "User Id",
+          "type": "string"
+        },
+        "email": {
+          "title": "Email",
+          "type": "string"
+        },
+        "name": {
+          "default": "",
+          "title": "Name",
+          "type": "string"
+        },
+        "avatar_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Avatar Url"
+        }
+      },
+      "required": [
+        "user_id",
+        "email"
+      ],
+      "title": "UserInfo",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "The signed-in user, their org (none until onboarding creates or joins one), role and permissions.",
+  "properties": {
+    "user": {
+      "$ref": "#/$defs/UserInfo"
+    },
+    "org": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Org"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "role": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Role"
+    },
+    "permissions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Permissions",
+      "type": "array"
+    },
+    "mode": {
+      "$ref": "#/$defs/AuthMode",
+      "default": "dev"
+    }
+  },
+  "required": [
+    "user"
+  ],
+  "title": "Me",
+  "type": "object"
+}

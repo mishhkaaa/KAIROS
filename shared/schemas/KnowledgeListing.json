@@ -1,0 +1,70 @@
+{
+  "$defs": {
+    "KnowledgeEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+          "title": "Path",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "type": {
+          "title": "Type",
+          "type": "string"
+        },
+        "is_dir": {
+          "default": false,
+          "title": "Is Dir",
+          "type": "boolean"
+        },
+        "privacy": {
+          "$ref": "#/$defs/PrivacyLevel",
+          "default": "internal"
+        }
+      },
+      "required": [
+        "path",
+        "title",
+        "type"
+      ],
+      "title": "KnowledgeEntry",
+      "type": "object"
+    },
+    "PrivacyLevel": {
+      "description": "Ordered from least to most sensitive. `restricted` must never leave the box.",
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "restricted"
+      ],
+      "title": "PrivacyLevel",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "path": {
+      "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+      "title": "Path",
+      "type": "string"
+    },
+    "entries": {
+      "items": {
+        "$ref": "#/$defs/KnowledgeEntry"
+      },
+      "title": "Entries",
+      "type": "array"
+    }
+  },
+  "required": [
+    "path",
+    "entries"
+  ],
+  "title": "KnowledgeListing",
+  "type": "object"
+}

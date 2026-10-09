@@ -1,0 +1,39 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "command": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Command",
+      "type": "array"
+    },
+    "workdir": {
+      "default": "/workspace",
+      "title": "Workdir",
+      "type": "string"
+    },
+    "stdin": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Stdin"
+    },
+    "timeout_s": {
+      "default": 120,
+      "title": "Timeout S",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "command"
+  ],
+  "title": "ExecRequest",
+  "type": "object"
+}

@@ -1,0 +1,33 @@
+{
+  "additionalProperties": false,
+  "description": "What the BrowserDriver (P4) returns after every browser action.",
+  "properties": {
+    "url": {
+      "title": "Url",
+      "type": "string"
+    },
+    "title": {
+      "default": "",
+      "title": "Title",
+      "type": "string"
+    },
+    "text": {
+      "default": "",
+      "description": "Visible text, truncated to ~20k chars",
+      "title": "Text",
+      "type": "string"
+    },
+    "links": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Links",
+      "type": "array"
+    }
+  },
+  "required": [
+    "url"
+  ],
+  "title": "BrowserPage",
+  "type": "object"
+}

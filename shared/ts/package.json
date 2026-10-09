@@ -1,0 +1,14 @@
+{
+  "name": "@kairos/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TypeScript types generated from KAIROS JSON Schemas (shared/schemas). Do not edit src/kairos.d.ts by hand.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "generate": "json2ts -i ../schemas/kairos.schema.json -o src/kairos.d.ts --unreachableDefinitions --no-additionalProperties --bannerComment \"/* GENERATED from shared/schemas/kairos.schema.json. Do not edit. */\""
+  },
+  "devDependencies": {
+    "json-schema-to-typescript": "^15.0.0"
+  }
+}

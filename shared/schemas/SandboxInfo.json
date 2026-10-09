@@ -1,0 +1,180 @@
+{
+  "$defs": {
+    "Mount": {
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "description": "Host path",
+          "title": "Source",
+          "type": "string"
+        },
+        "target": {
+          "description": "Path inside the sandbox",
+          "title": "Target",
+          "type": "string"
+        },
+        "read_only": {
+          "default": true,
+          "title": "Read Only",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "source",
+        "target"
+      ],
+      "title": "Mount",
+      "type": "object"
+    },
+    "NetworkMode": {
+      "enum": [
+        "none",
+        "allowlist"
+      ],
+      "title": "NetworkMode",
+      "type": "string"
+    },
+    "SandboxSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "image": {
+          "default": "kairos/sandbox-base:latest",
+          "title": "Image",
+          "type": "string"
+        },
+        "task_id": {
+          "pattern": "^T-[A-Za-z0-9]+$",
+          "title": "Task Id",
+          "type": "string"
+        },
+        "pid": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pid"
+        },
+        "mounts": {
+          "items": {
+            "$ref": "#/$defs/Mount"
+          },
+          "title": "Mounts",
+          "type": "array"
+        },
+        "network": {
+          "$ref": "#/$defs/NetworkMode",
+          "default": "none"
+        },
+        "network_allow": {
+          "description": "host:port entries",
+          "items": {
+            "type": "string"
+          },
+          "title": "Network Allow",
+          "type": "array"
+        },
+        "cpu": {
+          "default": 1.0,
+          "title": "Cpu",
+          "type": "number"
+        },
+        "memory_mb": {
+          "default": 1024,
+          "title": "Memory Mb",
+          "type": "integer"
+        },
+        "gpu": {
+          "default": false,
+          "title": "Gpu",
+          "type": "boolean"
+        },
+        "timeout_s": {
+          "default": 300,
+          "title": "Timeout S",
+          "type": "integer"
+        },
+        "env": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Env",
+          "type": "object"
+        },
+        "display": {
+          "default": false,
+          "description": "Start a virtual display (browser / computer use)",
+          "title": "Display",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "task_id"
+      ],
+      "title": "SandboxSpec",
+      "type": "object"
+    },
+    "SandboxStatus": {
+      "enum": [
+        "provisioning",
+        "running",
+        "stopped",
+        "destroyed",
+        "failed"
+      ],
+      "title": "SandboxStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "sandbox_id": {
+      "title": "Sandbox Id",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/SandboxStatus"
+    },
+    "spec": {
+      "$ref": "#/$defs/SandboxSpec"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "live_view_url": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "noVNC / screenshot stream for the UI",
+      "title": "Live View Url"
+    },
+    "endpoints": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Services exposed by the sandbox, e.g. {\"playwright\": \"ws://172.18.0.5:3000/\"}",
+      "title": "Endpoints",
+      "type": "object"
+    }
+  },
+  "required": [
+    "sandbox_id",
+    "status",
+    "spec"
+  ],
+  "title": "SandboxInfo",
+  "type": "object"
+}

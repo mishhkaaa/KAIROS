@@ -1,0 +1,23 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "maxLength": 40,
+      "minLength": 1,
+      "pattern": "^[a-z0-9][a-z0-9-]*$",
+      "title": "Name",
+      "type": "string"
+    },
+    "host_path": {
+      "minLength": 1,
+      "title": "Host Path",
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "host_path"
+  ],
+  "title": "KnowledgeMountCreate",
+  "type": "object"
+}

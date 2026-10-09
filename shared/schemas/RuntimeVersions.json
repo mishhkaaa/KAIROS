@@ -1,0 +1,37 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "kairos": {
+      "title": "Kairos",
+      "type": "string"
+    },
+    "contract": {
+      "title": "Contract",
+      "type": "string"
+    },
+    "python": {
+      "title": "Python",
+      "type": "string"
+    },
+    "node": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Node.js on the server, if installed (the console build)",
+      "title": "Node"
+    }
+  },
+  "required": [
+    "kairos",
+    "contract",
+    "python"
+  ],
+  "title": "RuntimeVersions",
+  "type": "object"
+}

@@ -1,0 +1,257 @@
+{
+  "$defs": {
+    "AgentFramework": {
+      "enum": [
+        "custom",
+        "nooa"
+      ],
+      "title": "AgentFramework",
+      "type": "string"
+    },
+    "ManifestApproval": {
+      "additionalProperties": false,
+      "properties": {
+        "required": {
+          "items": {
+            "pattern": "^(\\*|[a-z][a-z0-9_]*(\\.([a-z][a-z0-9_]*|\\*))+)$",
+            "type": "string"
+          },
+          "title": "Required",
+          "type": "array"
+        }
+      },
+      "title": "ManifestApproval",
+      "type": "object"
+    },
+    "ManifestCapabilities": {
+      "additionalProperties": false,
+      "properties": {
+        "knowledge": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Knowledge",
+          "type": "array"
+        },
+        "tools": {
+          "items": {
+            "pattern": "^(\\*|[a-z][a-z0-9_]*(\\.([a-z][a-z0-9_]*|\\*))+)$",
+            "type": "string"
+          },
+          "title": "Tools",
+          "type": "array"
+        },
+        "agents": {
+          "description": "Agents this one may spawn",
+          "items": {
+            "type": "string"
+          },
+          "title": "Agents",
+          "type": "array"
+        }
+      },
+      "title": "ManifestCapabilities",
+      "type": "object"
+    },
+    "ManifestMemory": {
+      "additionalProperties": false,
+      "properties": {
+        "mounts": {
+          "items": {
+            "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+            "type": "string"
+          },
+          "title": "Mounts",
+          "type": "array"
+        }
+      },
+      "title": "ManifestMemory",
+      "type": "object"
+    },
+    "ManifestNetwork": {
+      "additionalProperties": false,
+      "properties": {
+        "allow": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Allow",
+          "type": "array"
+        }
+      },
+      "title": "ManifestNetwork",
+      "type": "object"
+    },
+    "ManifestResources": {
+      "additionalProperties": false,
+      "properties": {
+        "cpu": {
+          "default": 1.0,
+          "title": "Cpu",
+          "type": "number"
+        },
+        "memory": {
+          "default": "1Gi",
+          "title": "Memory",
+          "type": "string"
+        },
+        "gpu": {
+          "default": 0.0,
+          "title": "Gpu",
+          "type": "number"
+        },
+        "max_tokens_per_task": {
+          "default": 12000,
+          "title": "Max Tokens Per Task",
+          "type": "integer"
+        },
+        "max_tool_calls": {
+          "default": 20,
+          "title": "Max Tool Calls",
+          "type": "integer"
+        }
+      },
+      "title": "ManifestResources",
+      "type": "object"
+    },
+    "ManifestRuntime": {
+      "additionalProperties": false,
+      "properties": {
+        "framework": {
+          "$ref": "#/$defs/AgentFramework",
+          "default": "custom"
+        },
+        "entrypoint": {
+          "description": "\"module.path:ClassName\"",
+          "title": "Entrypoint",
+          "type": "string"
+        },
+        "model_policy": {
+          "$ref": "#/$defs/ModelPolicy",
+          "default": "local-preferred"
+        },
+        "model_hint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Hint"
+        }
+      },
+      "required": [
+        "entrypoint"
+      ],
+      "title": "ManifestRuntime",
+      "type": "object"
+    },
+    "ModelPolicy": {
+      "enum": [
+        "local-only",
+        "local-preferred",
+        "any"
+      ],
+      "title": "ModelPolicy",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "agents/manifests/<name>.yaml \u2014 blueprint \u00a734.",
+  "properties": {
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "version": {
+      "default": "0.1.0",
+      "title": "Version",
+      "type": "string"
+    },
+    "description": {
+      "title": "Description",
+      "type": "string"
+    },
+    "handles": {
+      "description": "Skills/topics used by the planner to route subtasks",
+      "items": {
+        "type": "string"
+      },
+      "title": "Handles",
+      "type": "array"
+    },
+    "runtime": {
+      "$ref": "#/$defs/ManifestRuntime"
+    },
+    "memory": {
+      "$ref": "#/$defs/ManifestMemory"
+    },
+    "capabilities": {
+      "$ref": "#/$defs/ManifestCapabilities"
+    },
+    "resources": {
+      "$ref": "#/$defs/ManifestResources"
+    },
+    "network": {
+      "$ref": "#/$defs/ManifestNetwork"
+    },
+    "approval": {
+      "$ref": "#/$defs/ManifestApproval"
+    },
+    "system_prompt": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "The role's instructions, for template agents that run it generically",
+      "title": "System Prompt"
+    },
+    "template": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "The role template this manifest was generated from (None: a template)",
+      "title": "Template"
+    },
+    "generated": {
+      "default": false,
+      "description": "True for an ephemeral manifest the kernel generated for one task",
+      "title": "Generated",
+      "type": "boolean"
+    },
+    "task_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "The task a generated manifest belongs to; removed when the task ends",
+      "title": "Task Id"
+    }
+  },
+  "required": [
+    "name",
+    "description",
+    "runtime"
+  ],
+  "title": "AgentManifest",
+  "type": "object"
+}

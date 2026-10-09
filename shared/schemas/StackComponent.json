@@ -1,0 +1,37 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "component": {
+      "description": "ServiceBundle attribute, e.g. knowledge, models, sandbox",
+      "title": "Component",
+      "type": "string"
+    },
+    "mode": {
+      "description": "real | fake | fake(fallback)",
+      "title": "Mode",
+      "type": "string"
+    },
+    "implementation": {
+      "description": "Implementing class, e.g. kairos_knowledge.kfs.KnowledgeFS",
+      "title": "Implementation",
+      "type": "string"
+    },
+    "ok": {
+      "title": "Ok",
+      "type": "boolean"
+    },
+    "detail": {
+      "default": "",
+      "title": "Detail",
+      "type": "string"
+    }
+  },
+  "required": [
+    "component",
+    "mode",
+    "implementation",
+    "ok"
+  ],
+  "title": "StackComponent",
+  "type": "object"
+}

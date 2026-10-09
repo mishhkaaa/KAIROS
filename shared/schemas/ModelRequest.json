@@ -1,0 +1,174 @@
+{
+  "$defs": {
+    "ChatMessage": {
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "$ref": "#/$defs/Role"
+        },
+        "content": {
+          "title": "Content",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        }
+      },
+      "required": [
+        "role",
+        "content"
+      ],
+      "title": "ChatMessage",
+      "type": "object"
+    },
+    "Latency": {
+      "enum": [
+        "critical",
+        "normal",
+        "batch"
+      ],
+      "title": "Latency",
+      "type": "string"
+    },
+    "PrivacyLevel": {
+      "description": "Ordered from least to most sensitive. `restricted` must never leave the box.",
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "restricted"
+      ],
+      "title": "PrivacyLevel",
+      "type": "string"
+    },
+    "Role": {
+      "enum": [
+        "system",
+        "user",
+        "assistant",
+        "tool"
+      ],
+      "title": "Role",
+      "type": "string"
+    },
+    "TaskClass": {
+      "enum": [
+        "planning",
+        "reasoning",
+        "extraction",
+        "summarization",
+        "classification",
+        "code",
+        "vision"
+      ],
+      "title": "TaskClass",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "messages": {
+      "items": {
+        "$ref": "#/$defs/ChatMessage"
+      },
+      "title": "Messages",
+      "type": "array"
+    },
+    "task_class": {
+      "$ref": "#/$defs/TaskClass",
+      "default": "reasoning"
+    },
+    "privacy": {
+      "$ref": "#/$defs/PrivacyLevel",
+      "default": "internal"
+    },
+    "latency": {
+      "$ref": "#/$defs/Latency",
+      "default": "normal"
+    },
+    "model_hint": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Preferred model; router may override",
+      "title": "Model Hint"
+    },
+    "max_tokens": {
+      "default": 1024,
+      "title": "Max Tokens",
+      "type": "integer"
+    },
+    "temperature": {
+      "default": 0.2,
+      "title": "Temperature",
+      "type": "number"
+    },
+    "json_schema": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Request structured JSON output",
+      "title": "Json Schema"
+    },
+    "stop": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Stop",
+      "type": "array"
+    },
+    "task_id": {
+      "anyOf": [
+        {
+          "pattern": "^T-[A-Za-z0-9]+$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Task Id"
+    },
+    "pid": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pid"
+    }
+  },
+  "required": [
+    "messages"
+  ],
+  "title": "ModelRequest",
+  "type": "object"
+}

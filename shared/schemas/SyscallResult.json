@@ -1,0 +1,237 @@
+{
+  "$defs": {
+    "Decision": {
+      "enum": [
+        "ALLOW",
+        "DENY",
+        "REQUIRES_APPROVAL"
+      ],
+      "title": "Decision",
+      "type": "string"
+    },
+    "ErrorInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "description": "One of shared/catalogs/errors.yaml",
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "retriable": {
+          "default": false,
+          "title": "Retriable",
+          "type": "boolean"
+        },
+        "details": {
+          "additionalProperties": true,
+          "title": "Details",
+          "type": "object"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "ErrorInfo",
+      "type": "object"
+    },
+    "PolicyDecision": {
+      "additionalProperties": false,
+      "properties": {
+        "decision": {
+          "$ref": "#/$defs/Decision"
+        },
+        "policy": {
+          "description": "Id of the policy document that decided",
+          "title": "Policy",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "approval_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Approval Id"
+        },
+        "matched_rules": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Matched Rules",
+          "type": "array"
+        },
+        "constraints": {
+          "additionalProperties": true,
+          "description": "Extra limits for the executor, e.g. {\"network_allow\": [...]}",
+          "title": "Constraints",
+          "type": "object"
+        }
+      },
+      "required": [
+        "decision",
+        "policy",
+        "reason"
+      ],
+      "title": "PolicyDecision",
+      "type": "object"
+    },
+    "SyscallStatus": {
+      "enum": [
+        "completed",
+        "denied",
+        "pending_approval",
+        "rejected",
+        "failed",
+        "rolled_back"
+      ],
+      "title": "SyscallStatus",
+      "type": "string"
+    },
+    "ToolResult": {
+      "additionalProperties": false,
+      "properties": {
+        "invocation_id": {
+          "title": "Invocation Id",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/ToolResultStatus"
+        },
+        "output": {
+          "additionalProperties": true,
+          "title": "Output",
+          "type": "object"
+        },
+        "artifacts": {
+          "items": {
+            "pattern": "^artifact://[^/]+/.+$",
+            "type": "string"
+          },
+          "title": "Artifacts",
+          "type": "array"
+        },
+        "logs": {
+          "default": "",
+          "title": "Logs",
+          "type": "string"
+        },
+        "rollback_token": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Opaque; pass back to ToolExecutor.rollback",
+          "title": "Rollback Token"
+        },
+        "started_at": {
+          "format": "date-time",
+          "title": "Started At",
+          "type": "string"
+        },
+        "finished_at": {
+          "format": "date-time",
+          "title": "Finished At",
+          "type": "string"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ErrorInfo"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "invocation_id",
+        "status"
+      ],
+      "title": "ToolResult",
+      "type": "object"
+    },
+    "ToolResultStatus": {
+      "enum": [
+        "success",
+        "error",
+        "timeout"
+      ],
+      "title": "ToolResultStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "syscall_id": {
+      "title": "Syscall Id",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/SyscallStatus"
+    },
+    "decision": {
+      "$ref": "#/$defs/PolicyDecision"
+    },
+    "tool_result": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ToolResult"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "verified": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Verified"
+    },
+    "error": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ErrorInfo"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "syscall_id",
+    "status",
+    "decision"
+  ],
+  "title": "SyscallResult",
+  "type": "object"
+}

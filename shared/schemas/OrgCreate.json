@@ -1,0 +1,28 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "domain": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Domain"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "title": "OrgCreate",
+  "type": "object"
+}

@@ -1,0 +1,68 @@
+{
+  "$defs": {
+    "MemberStatus": {
+      "enum": [
+        "invited",
+        "active"
+      ],
+      "title": "MemberStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "user_id": {
+      "title": "User Id",
+      "type": "string"
+    },
+    "email": {
+      "title": "Email",
+      "type": "string"
+    },
+    "name": {
+      "default": "",
+      "title": "Name",
+      "type": "string"
+    },
+    "avatar_url": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Avatar Url"
+    },
+    "role": {
+      "title": "Role",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/MemberStatus",
+      "default": "active"
+    },
+    "joined_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Joined At"
+    }
+  },
+  "required": [
+    "user_id",
+    "email",
+    "role"
+  ],
+  "title": "Member",
+  "type": "object"
+}

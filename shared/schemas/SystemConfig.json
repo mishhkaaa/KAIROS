@@ -1,0 +1,749 @@
+{
+  "$defs": {
+    "AgentFramework": {
+      "enum": [
+        "custom",
+        "nooa"
+      ],
+      "title": "AgentFramework",
+      "type": "string"
+    },
+    "AgentManifest": {
+      "additionalProperties": false,
+      "description": "agents/manifests/<name>.yaml \u2014 blueprint \u00a734.",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "default": "0.1.0",
+          "title": "Version",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "handles": {
+          "description": "Skills/topics used by the planner to route subtasks",
+          "items": {
+            "type": "string"
+          },
+          "title": "Handles",
+          "type": "array"
+        },
+        "runtime": {
+          "$ref": "#/$defs/ManifestRuntime"
+        },
+        "memory": {
+          "$ref": "#/$defs/ManifestMemory"
+        },
+        "capabilities": {
+          "$ref": "#/$defs/ManifestCapabilities"
+        },
+        "resources": {
+          "$ref": "#/$defs/ManifestResources"
+        },
+        "network": {
+          "$ref": "#/$defs/ManifestNetwork"
+        },
+        "approval": {
+          "$ref": "#/$defs/ManifestApproval"
+        },
+        "system_prompt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The role's instructions, for template agents that run it generically",
+          "title": "System Prompt"
+        },
+        "template": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The role template this manifest was generated from (None: a template)",
+          "title": "Template"
+        },
+        "generated": {
+          "default": false,
+          "description": "True for an ephemeral manifest the kernel generated for one task",
+          "title": "Generated",
+          "type": "boolean"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The task a generated manifest belongs to; removed when the task ends",
+          "title": "Task Id"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "runtime"
+      ],
+      "title": "AgentManifest",
+      "type": "object"
+    },
+    "EndpointInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "description": "gateway | database | redis | ollama | jira | ...",
+          "title": "Name",
+          "type": "string"
+        },
+        "url": {
+          "description": "Credentials are always redacted (user:***@host)",
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "url"
+      ],
+      "title": "EndpointInfo",
+      "type": "object"
+    },
+    "FirewallConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "regex": {
+          "default": true,
+          "description": "Pattern screening; always on",
+          "title": "Regex",
+          "type": "boolean"
+        },
+        "llm_classifier": {
+          "default": false,
+          "description": "KAIROS_FIREWALL_LLM",
+          "title": "Llm Classifier",
+          "type": "boolean"
+        }
+      },
+      "title": "FirewallConfig",
+      "type": "object"
+    },
+    "ManifestApproval": {
+      "additionalProperties": false,
+      "properties": {
+        "required": {
+          "items": {
+            "pattern": "^(\\*|[a-z][a-z0-9_]*(\\.([a-z][a-z0-9_]*|\\*))+)$",
+            "type": "string"
+          },
+          "title": "Required",
+          "type": "array"
+        }
+      },
+      "title": "ManifestApproval",
+      "type": "object"
+    },
+    "ManifestCapabilities": {
+      "additionalProperties": false,
+      "properties": {
+        "knowledge": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Knowledge",
+          "type": "array"
+        },
+        "tools": {
+          "items": {
+            "pattern": "^(\\*|[a-z][a-z0-9_]*(\\.([a-z][a-z0-9_]*|\\*))+)$",
+            "type": "string"
+          },
+          "title": "Tools",
+          "type": "array"
+        },
+        "agents": {
+          "description": "Agents this one may spawn",
+          "items": {
+            "type": "string"
+          },
+          "title": "Agents",
+          "type": "array"
+        }
+      },
+      "title": "ManifestCapabilities",
+      "type": "object"
+    },
+    "ManifestMemory": {
+      "additionalProperties": false,
+      "properties": {
+        "mounts": {
+          "items": {
+            "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+            "type": "string"
+          },
+          "title": "Mounts",
+          "type": "array"
+        }
+      },
+      "title": "ManifestMemory",
+      "type": "object"
+    },
+    "ManifestNetwork": {
+      "additionalProperties": false,
+      "properties": {
+        "allow": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Allow",
+          "type": "array"
+        }
+      },
+      "title": "ManifestNetwork",
+      "type": "object"
+    },
+    "ManifestResources": {
+      "additionalProperties": false,
+      "properties": {
+        "cpu": {
+          "default": 1.0,
+          "title": "Cpu",
+          "type": "number"
+        },
+        "memory": {
+          "default": "1Gi",
+          "title": "Memory",
+          "type": "string"
+        },
+        "gpu": {
+          "default": 0.0,
+          "title": "Gpu",
+          "type": "number"
+        },
+        "max_tokens_per_task": {
+          "default": 12000,
+          "title": "Max Tokens Per Task",
+          "type": "integer"
+        },
+        "max_tool_calls": {
+          "default": 20,
+          "title": "Max Tool Calls",
+          "type": "integer"
+        }
+      },
+      "title": "ManifestResources",
+      "type": "object"
+    },
+    "ManifestRuntime": {
+      "additionalProperties": false,
+      "properties": {
+        "framework": {
+          "$ref": "#/$defs/AgentFramework",
+          "default": "custom"
+        },
+        "entrypoint": {
+          "description": "\"module.path:ClassName\"",
+          "title": "Entrypoint",
+          "type": "string"
+        },
+        "model_policy": {
+          "$ref": "#/$defs/ModelPolicy",
+          "default": "local-preferred"
+        },
+        "model_hint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Hint"
+        }
+      },
+      "required": [
+        "entrypoint"
+      ],
+      "title": "ManifestRuntime",
+      "type": "object"
+    },
+    "ModelInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "local": {
+          "default": true,
+          "title": "Local",
+          "type": "boolean"
+        },
+        "context_window": {
+          "default": 8192,
+          "title": "Context Window",
+          "type": "integer"
+        },
+        "capabilities": {
+          "description": "chat | embed | vision | json | tools",
+          "items": {
+            "type": "string"
+          },
+          "title": "Capabilities",
+          "type": "array"
+        },
+        "embedding_dim": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Embedding Dim"
+        },
+        "available": {
+          "default": true,
+          "title": "Available",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "provider"
+      ],
+      "title": "ModelInfo",
+      "type": "object"
+    },
+    "ModelPolicy": {
+      "enum": [
+        "local-only",
+        "local-preferred",
+        "any"
+      ],
+      "title": "ModelPolicy",
+      "type": "string"
+    },
+    "ModelRoute": {
+      "additionalProperties": false,
+      "properties": {
+        "task_class": {
+          "description": "planning | reasoning | ... | default | latency_critical | embedding",
+          "title": "Task Class",
+          "type": "string"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "local": {
+          "default": true,
+          "title": "Local",
+          "type": "boolean"
+        },
+        "available": {
+          "description": "The model is present in the runtime (ollama list)",
+          "title": "Available",
+          "type": "boolean"
+        },
+        "context_window": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Context Window"
+        }
+      },
+      "required": [
+        "task_class",
+        "model",
+        "available"
+      ],
+      "title": "ModelRoute",
+      "type": "object"
+    },
+    "ModelsConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "config_file": {
+          "description": "Routing file in use, relative to the repo, e.g. models/models.7b-only.yaml",
+          "title": "Config File",
+          "type": "string"
+        },
+        "default": {
+          "type": "string",
+          "title": "Default"
+        },
+        "embedding": {
+          "title": "Embedding",
+          "type": "string"
+        },
+        "remote_enabled": {
+          "default": false,
+          "title": "Remote Enabled",
+          "type": "boolean"
+        },
+        "routes": {
+          "items": {
+            "$ref": "#/$defs/ModelRoute"
+          },
+          "title": "Routes",
+          "type": "array"
+        },
+        "models": {
+          "items": {
+            "$ref": "#/$defs/ModelInfo"
+          },
+          "title": "Models",
+          "type": "array"
+        }
+      },
+      "required": [
+        "config_file",
+        "default",
+        "embedding"
+      ],
+      "title": "ModelsConfig",
+      "type": "object"
+    },
+    "PolicySummary": {
+      "additionalProperties": false,
+      "properties": {
+        "policy": {
+          "title": "Policy",
+          "type": "string"
+        },
+        "priority": {
+          "title": "Priority",
+          "type": "integer"
+        },
+        "agents": {
+          "description": "applies_to.agents",
+          "items": {
+            "type": "string"
+          },
+          "title": "Agents",
+          "type": "array"
+        },
+        "roles": {
+          "description": "applies_to.roles",
+          "items": {
+            "type": "string"
+          },
+          "title": "Roles",
+          "type": "array"
+        },
+        "requires_approval": {
+          "description": "Capabilities that need a human",
+          "items": {
+            "type": "string"
+          },
+          "title": "Requires Approval",
+          "type": "array"
+        },
+        "auto_approved": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Auto Approved",
+          "type": "array"
+        },
+        "denied": {
+          "description": "approval: never, plus tools.deny",
+          "items": {
+            "type": "string"
+          },
+          "title": "Denied",
+          "type": "array"
+        }
+      },
+      "required": [
+        "policy",
+        "priority"
+      ],
+      "title": "PolicySummary",
+      "type": "object"
+    },
+    "Risk": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Risk",
+      "type": "string"
+    },
+    "RuntimeVersions": {
+      "additionalProperties": false,
+      "properties": {
+        "kairos": {
+          "title": "Kairos",
+          "type": "string"
+        },
+        "contract": {
+          "title": "Contract",
+          "type": "string"
+        },
+        "python": {
+          "title": "Python",
+          "type": "string"
+        },
+        "node": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Node.js on the server, if installed (the console build)",
+          "title": "Node"
+        }
+      },
+      "required": [
+        "kairos",
+        "contract",
+        "python"
+      ],
+      "title": "RuntimeVersions",
+      "type": "object"
+    },
+    "StackComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "component": {
+          "description": "ServiceBundle attribute, e.g. knowledge, models, sandbox",
+          "title": "Component",
+          "type": "string"
+        },
+        "mode": {
+          "description": "real | fake | fake(fallback)",
+          "title": "Mode",
+          "type": "string"
+        },
+        "implementation": {
+          "description": "Implementing class, e.g. kairos_knowledge.kfs.KnowledgeFS",
+          "title": "Implementation",
+          "type": "string"
+        },
+        "ok": {
+          "title": "Ok",
+          "type": "boolean"
+        },
+        "detail": {
+          "default": "",
+          "title": "Detail",
+          "type": "string"
+        }
+      },
+      "required": [
+        "component",
+        "mode",
+        "implementation",
+        "ok"
+      ],
+      "title": "StackComponent",
+      "type": "object"
+    },
+    "ToolOperation": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "capability": {
+          "pattern": "^(\\*|[a-z][a-z0-9_]*(\\.([a-z][a-z0-9_]*|\\*))+)$",
+          "title": "Capability",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "input_schema": {
+          "additionalProperties": true,
+          "description": "JSON Schema",
+          "title": "Input Schema",
+          "type": "object"
+        },
+        "output_schema": {
+          "additionalProperties": true,
+          "description": "JSON Schema",
+          "title": "Output Schema",
+          "type": "object"
+        },
+        "risk": {
+          "$ref": "#/$defs/Risk",
+          "default": "low"
+        },
+        "reversible": {
+          "default": false,
+          "title": "Reversible",
+          "type": "boolean"
+        },
+        "requires_sandbox": {
+          "default": false,
+          "title": "Requires Sandbox",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "capability",
+        "description"
+      ],
+      "title": "ToolOperation",
+      "type": "object"
+    },
+    "ToolSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "transport": {
+          "$ref": "#/$defs/ToolTransport"
+        },
+        "operations": {
+          "items": {
+            "$ref": "#/$defs/ToolOperation"
+          },
+          "title": "Operations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "transport",
+        "operations"
+      ],
+      "title": "ToolSpec",
+      "type": "object"
+    },
+    "ToolTransport": {
+      "enum": [
+        "native",
+        "mcp",
+        "http",
+        "browser",
+        "sandbox"
+      ],
+      "title": "ToolTransport",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "GET /system/config: one read-only document describing the running system. Never contains secrets.",
+  "properties": {
+    "versions": {
+      "$ref": "#/$defs/RuntimeVersions"
+    },
+    "env": {
+      "default": "dev",
+      "title": "Env",
+      "type": "string"
+    },
+    "stack": {
+      "items": {
+        "$ref": "#/$defs/StackComponent"
+      },
+      "title": "Stack",
+      "type": "array"
+    },
+    "models": {
+      "$ref": "#/$defs/ModelsConfig"
+    },
+    "agents": {
+      "items": {
+        "$ref": "#/$defs/AgentManifest"
+      },
+      "title": "Agents",
+      "type": "array"
+    },
+    "tools": {
+      "items": {
+        "$ref": "#/$defs/ToolSpec"
+      },
+      "title": "Tools",
+      "type": "array"
+    },
+    "policies": {
+      "items": {
+        "$ref": "#/$defs/PolicySummary"
+      },
+      "title": "Policies",
+      "type": "array"
+    },
+    "firewall": {
+      "$ref": "#/$defs/FirewallConfig"
+    },
+    "feature_flags": {
+      "additionalProperties": {
+        "type": "boolean"
+      },
+      "title": "Feature Flags",
+      "type": "object"
+    },
+    "endpoints": {
+      "items": {
+        "$ref": "#/$defs/EndpointInfo"
+      },
+      "title": "Endpoints",
+      "type": "array"
+    },
+    "paths": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "okf_dir, policies_dir, manifests_dir, data_dir, models_config",
+      "title": "Paths",
+      "type": "object"
+    }
+  },
+  "required": [
+    "versions",
+    "models"
+  ],
+  "title": "SystemConfig",
+  "type": "object"
+}

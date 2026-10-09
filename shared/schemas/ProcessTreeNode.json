@@ -1,0 +1,53 @@
+{
+  "$defs": {
+    "AgentState": {
+      "enum": [
+        "CREATED",
+        "INITIALIZING",
+        "READY",
+        "RUNNING",
+        "WAITING",
+        "PAUSED",
+        "CHECKPOINTING",
+        "COMPLETED",
+        "FAILED",
+        "RETRYING",
+        "TERMINATED"
+      ],
+      "title": "AgentState",
+      "type": "string"
+    },
+    "ProcessTreeNode": {
+      "additionalProperties": false,
+      "properties": {
+        "pid": {
+          "minimum": 1,
+          "title": "Pid",
+          "type": "integer"
+        },
+        "agent": {
+          "title": "Agent",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/AgentState"
+        },
+        "children": {
+          "items": {
+            "$ref": "#/$defs/ProcessTreeNode"
+          },
+          "title": "Children",
+          "type": "array"
+        }
+      },
+      "required": [
+        "pid",
+        "agent",
+        "state"
+      ],
+      "title": "ProcessTreeNode",
+      "type": "object"
+    }
+  },
+  "$ref": "#/$defs/ProcessTreeNode"
+}

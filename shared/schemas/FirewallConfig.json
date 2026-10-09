@@ -1,0 +1,19 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "regex": {
+      "default": true,
+      "description": "Pattern screening; always on",
+      "title": "Regex",
+      "type": "boolean"
+    },
+    "llm_classifier": {
+      "default": false,
+      "description": "KAIROS_FIREWALL_LLM",
+      "title": "Llm Classifier",
+      "type": "boolean"
+    }
+  },
+  "title": "FirewallConfig",
+  "type": "object"
+}

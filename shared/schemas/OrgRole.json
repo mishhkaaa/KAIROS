@@ -1,0 +1,27 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "role": {
+      "description": "owner | admin | approver | member | viewer (policies/rbac/roles.yaml)",
+      "title": "Role",
+      "type": "string"
+    },
+    "description": {
+      "default": "",
+      "title": "Description",
+      "type": "string"
+    },
+    "permissions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Permissions",
+      "type": "array"
+    }
+  },
+  "required": [
+    "role"
+  ],
+  "title": "OrgRole",
+  "type": "object"
+}

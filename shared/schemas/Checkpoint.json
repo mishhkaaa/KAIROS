@@ -1,0 +1,57 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "checkpoint_id": {
+      "title": "Checkpoint Id",
+      "type": "string"
+    },
+    "pid": {
+      "minimum": 1,
+      "title": "Pid",
+      "type": "integer"
+    },
+    "task_id": {
+      "pattern": "^T-[A-Za-z0-9]+$",
+      "title": "Task Id",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "agent_state": {
+      "additionalProperties": true,
+      "description": "Opaque, from the agent",
+      "title": "Agent State",
+      "type": "object"
+    },
+    "memory_refs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Memory Refs",
+      "type": "array"
+    },
+    "artifact": {
+      "anyOf": [
+        {
+          "pattern": "^artifact://[^/]+/.+$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Artifact"
+    }
+  },
+  "required": [
+    "checkpoint_id",
+    "pid",
+    "task_id"
+  ],
+  "title": "Checkpoint",
+  "type": "object"
+}

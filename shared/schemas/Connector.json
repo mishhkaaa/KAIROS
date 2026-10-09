@@ -1,0 +1,101 @@
+{
+  "$defs": {
+    "ConnectorStatus": {
+      "enum": [
+        "connected",
+        "disconnected"
+      ],
+      "title": "ConnectorStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "connector_id": {
+      "description": "github | google_calendar",
+      "title": "Connector Id",
+      "type": "string"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/ConnectorStatus",
+      "default": "disconnected"
+    },
+    "mode": {
+      "default": "mock",
+      "description": "mock (built-in stand-in, no account needed) | live (a real token in the vault)",
+      "title": "Mode",
+      "type": "string"
+    },
+    "capabilities": {
+      "description": "e.g. github.read, github.write",
+      "items": {
+        "type": "string"
+      },
+      "title": "Capabilities",
+      "type": "array"
+    },
+    "scopes": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Scopes",
+      "type": "array"
+    },
+    "connected_by": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Connected By"
+    },
+    "connected_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Connected At"
+    },
+    "last_sync": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Last Sync"
+    },
+    "recent_agents": {
+      "description": "Agents that used it recently (from the audit log)",
+      "items": {
+        "type": "string"
+      },
+      "title": "Recent Agents",
+      "type": "array"
+    }
+  },
+  "required": [
+    "connector_id",
+    "name"
+  ],
+  "title": "Connector",
+  "type": "object"
+}

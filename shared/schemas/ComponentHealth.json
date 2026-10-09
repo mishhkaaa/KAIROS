@@ -1,0 +1,31 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "component": {
+      "description": "kernel | knowledge | memory | models | agents | tools | sandbox | db | redis | ollama",
+      "title": "Component",
+      "type": "string"
+    },
+    "ok": {
+      "title": "Ok",
+      "type": "boolean"
+    },
+    "mode": {
+      "default": "real",
+      "description": "real | fake \u2014 which implementation is wired in",
+      "title": "Mode",
+      "type": "string"
+    },
+    "detail": {
+      "default": "",
+      "title": "Detail",
+      "type": "string"
+    }
+  },
+  "required": [
+    "component",
+    "ok"
+  ],
+  "title": "ComponentHealth",
+  "type": "object"
+}

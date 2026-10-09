@@ -1,0 +1,20 @@
+name: planner-agent
+version: 0.1.0
+description: Decomposes a user goal into subtasks, delegates to specialist agents and synthesizes the final answer.
+handles: [planning, decomposition, synthesis, recovery plan]
+runtime:
+  framework: custom
+  entrypoint: kairos_agents.library.planner:PlannerAgent
+  model_policy: local-preferred
+memory:
+  mounts: [/org]
+capabilities:
+  knowledge: [read, search]
+  tools: []
+  agents: [finance-agent, engineering-agent, research-agent, action-agent, analyst, data-engineer, writer, web-researcher]
+resources:
+  cpu: 1
+  memory: 1Gi
+  gpu: 0
+  max_tokens_per_task: 16000
+  max_tool_calls: 0

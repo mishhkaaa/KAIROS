@@ -1,0 +1,21 @@
+name: research-agent
+version: 0.1.0
+description: Gathers supporting evidence from the knowledge base and (sandboxed) web pages.
+handles: [research, evidence, vendor, background, web]
+runtime:
+  framework: custom
+  entrypoint: kairos_agents.library.research:ResearchAgent
+  model_policy: local-preferred
+memory:
+  mounts: [/org]
+capabilities:
+  knowledge: [read, search]
+  tools: [browser.open]
+resources:
+  cpu: 1
+  memory: 1Gi
+  gpu: 0
+  max_tokens_per_task: 12000
+  max_tool_calls: 5
+network:
+  allow: ["vendor-docs:80"]

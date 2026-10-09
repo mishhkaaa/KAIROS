@@ -1,0 +1,14 @@
+# Model routing config (P3). Names must exist in the local runtime (ollama list).
+embedding: nomic-embed-text
+default: qwen2.5:7b-instruct
+by_task_class:
+  planning: qwen2.5:7b-instruct
+  reasoning: qwen2.5:7b-instruct
+  extraction: qwen2.5:7b-instruct
+  summarization: llama3.2:3b
+  classification: llama3.2:3b
+  code: qwen2.5-coder:7b
+  vision: llava:7b
+latency_critical: llama3.2:3b
+remote:
+  enabled: false          # approved remote models only; never for privacy=restricted

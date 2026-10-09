@@ -1,0 +1,78 @@
+# KAIROS appliance services. File owned by P4 (platform); each block lists who owns the service logic.
+#   docker compose -f infra/compose/docker-compose.yml up -d postgres redis ollama mock-jira vendor-docs
+#   + GPU (RTX node / any host with the NVIDIA Container Toolkit): add  -f infra/compose/docker-compose.gpu.yml
+#   (kairosd runs on the host: `uv run kairosd` in dev, kairosd.service on the appliance)
+# Published ports bind to 127.0.0.1 only: Docker-published ports bypass ufw, so nothing here is exposed on the LAN.
+name: kairos
+
+
+services:
+  postgres:            # P2 — OKF indexes (pgvector + FTS), graph edges, memories
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: kairos
+      POSTGRES_PASSWORD: kairos
+      POSTGRES_DB: kairos
+    ports: ["127.0.0.1:${KAIROS_PG_PORT:-5432}:5432"]         # a native Postgres on 5432? KAIROS_PG_PORT=5434 docker compose ...
+    volumes: [pg-data:/var/lib/postgresql/data]
+    healthcheck: {test: ["CMD-SHELL", "pg_isready -U kairos"], interval: 5s, retries: 10}
+    restart: unless-stopped
+
+  redis:               # P1 — event bus durability (Redis Streams), short-lived state
+    image: redis:7-alpine
+    ports: ["127.0.0.1:${KAIROS_REDIS_PORT:-6379}:6379"]      # Redis already running (e.g. in WSL)? KAIROS_REDIS_PORT=6380
+    volumes: [redis-data:/data]
+    healthcheck: {test: ["CMD", "redis-cli", "ping"], interval: 5s, retries: 10}
+    restart: unless-stopped
+
+  ollama:              # P4 — local model runtime (P3 chooses the models). GPU via docker-compose.gpu.yml
+    image: ollama/ollama:${OLLAMA_VERSION:-latest}   # appliance: OLLAMA_VERSION in /opt/kairos/.env (kairosd.service exports it)
+    ports: ["127.0.0.1:11434:11434"]
+    volumes: [ollama-models:/root/.ollama]
+    environment:
+      OLLAMA_KEEP_ALIVE: "-1"            # keep models resident: no cold loads mid-demo
+      OLLAMA_CONTEXT_LENGTH: "8192"
+      OLLAMA_NUM_PARALLEL: "2"           # parallel specialist agents
+      OLLAMA_MAX_LOADED_MODELS: "2"      # 8 GB VRAM: one 7B chat model + the embedding model
+      OLLAMA_FLASH_ATTENTION: "1"
+      OLLAMA_KV_CACHE_TYPE: "q8_0"       # halves KV-cache VRAM
+    healthcheck: {test: ["CMD", "ollama", "list"], interval: 10s, retries: 12}
+    restart: unless-stopped
+
+  mock-jira:           # P1 — demo tracker behind the jira.* tools
+    build: {context: ../../, dockerfile: infra/compose/mock-jira.Dockerfile}
+    ports: ["127.0.0.1:8090:8090"]
+    networks: [default, sandbox]
+    restart: unless-stopped
+
+  vendor-docs:         # P4 — offline "vendor website" the research agent browses from inside its sandbox
+    image: nginx:alpine
+    volumes: [./vendor-docs:/usr/share/nginx/html:ro]
+    networks: [sandbox]  # internal only: reachable from sandboxes, not from the LAN or the internet
+    restart: unless-stopped
+
+  kairosd:             # P1 — the kernel/gateway (profile: appliance). The RTX node runs kairosd on the host instead
+    profiles: [appliance]
+    build: {context: ../../, dockerfile: infra/compose/kairosd.Dockerfile}
+    env_file: [../../.env]
+    environment:
+      KAIROS_DATA_DIR: /sovereign-data
+      KAIROS_DATABASE_URL: postgresql+psycopg://kairos:kairos@postgres:5432/kairos
+      KAIROS_REDIS_URL: redis://redis:6379/0
+      KAIROS_OLLAMA_URL: http://ollama:11434
+      KAIROS_GATEWAY_PORT: "8080"     # fixed inside the container; pick the host side with KAIROS_HOST_PORT
+    # loopback like everything else; expose via `tailscale serve`. Port 8080 taken? KAIROS_HOST_PORT=8088 docker compose ...
+    ports: ["127.0.0.1:${KAIROS_HOST_PORT:-8080}:8080"]
+    volumes:
+      - ${KAIROS_DATA_DIR:-../../.data}:/sovereign-data
+      - /var/run/docker.sock:/var/run/docker.sock   # sandbox manager (P1) — appliance only
+    depends_on: [postgres, redis, ollama]
+
+networks:
+  sandbox:             # P1 — task sandboxes attach here (docker name: kairos_sandbox); no route to the internet
+    internal: true
+
+volumes:
+  pg-data:
+  redis-data:
+  ollama-models:

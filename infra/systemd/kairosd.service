@@ -1,0 +1,27 @@
+# /etc/systemd/system/kairosd.service on the appliance (P4 installs, P1 owns the process).
+# kairosd runs on the HOST (not in compose): it needs the Docker socket, nvidia-smi (resource probe)
+# and a route to sandbox container IPs on the internal kairos_sandbox network.
+[Unit]
+Description=KAIROS AI kernel and gateway
+After=network-online.target docker.service sovereign-data.mount
+Wants=network-online.target
+Requires=docker.service sovereign-data.mount
+
+[Service]
+Type=simple
+User=kairos
+Group=kairos
+SupplementaryGroups=docker
+WorkingDirectory=/opt/kairos
+EnvironmentFile=/opt/kairos/.env
+Environment=KAIROS_DATA_DIR=/sovereign-data
+Environment=PYTHONUNBUFFERED=1
+# --wait blocks until every service is healthy, so kairosd never races Postgres/Ollama. First boot may pull images.
+ExecStartPre=/usr/bin/docker compose -f /opt/kairos/infra/compose/docker-compose.yml -f /opt/kairos/infra/compose/docker-compose.gpu.yml up -d --wait postgres redis ollama mock-jira vendor-docs
+ExecStart=/opt/kairos/.venv/bin/kairosd
+TimeoutStartSec=300
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

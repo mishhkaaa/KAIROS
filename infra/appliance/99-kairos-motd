@@ -1,0 +1,12 @@
+#!/bin/sh
+# /etc/update-motd.d/99-kairos (P4): gateway URLs and health at every login.
+TS_IP=$(tailscale ip -4 2>/dev/null | head -n1)
+TS_NAME=$(tailscale status --json 2>/dev/null | python3 -c 'import json,sys; print(json.load(sys.stdin)["Self"]["DNSName"].rstrip("."))' 2>/dev/null)
+READY=$(curl -fsS -m 2 http://127.0.0.1:8080/system/status 2>/dev/null | python3 -c 'import json,sys; print(json.load(sys.stdin).get("ready"))' 2>/dev/null)
+echo
+echo "  KAIROS node"
+echo "    kairosd:  $(systemctl is-active kairosd 2>/dev/null)   ready: ${READY:-unknown}"
+echo "    console:  http://${TS_NAME:-${TS_IP:-<no tailscale>}}:3000"
+echo "    gateway:  http://${TS_NAME:-${TS_IP:-<no tailscale>}}:8080"
+echo "    try:      ai-ps · ai-tree · ai-top"
+echo

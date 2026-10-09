@@ -22,7 +22,9 @@ from typing import Any
 from kairos_contracts.errors import KairosError
 from kairos_contracts.schema import AgentPlanned, AgentResult, AgentResultStatus, ErrorInfo, TaskUnderstood
 
+from kairos_agents import routing
 from kairos_agents.prompts import AnswerOut, PlanOut, PlanStep, RootCausesOut, SynthesisOut
+from kairos_agents.routing import RouteDecision
 from kairos_agents.sdk import (
     DEFAULT_PROJECT,
     KairosAgent,
@@ -149,9 +151,24 @@ def execution_order(steps: list[PlanStep]) -> list[PlanStep]:
     return order
 
 
-def planned(step: PlanStep) -> AgentPlanned:
+def planned(step: PlanStep, route: RouteDecision | None = None) -> AgentPlanned:
     why, scope, caps = SPECIALIST_ROLES.get(step.agent, (f"Assigned by the plan as step {step.step_id}", [], []))
-    return AgentPlanned(role=step.agent, why=why, scope=scope, capabilities=caps)
+    score = route.scores.get(step.agent) if route else None
+    return AgentPlanned(role=step.agent, why=why, scope=scope, capabilities=caps, score=score)
+
+
+def routed(event: TaskUnderstood, goal_type: str, route: RouteDecision | None) -> TaskUnderstood:
+    """task.understood with the routing decision: Jev's probabilities, or "rules" when Jev did not decide."""
+    return event.model_copy(update={"goal_type": goal_type, "router": "jev" if route else "rules",
+                                    "route_scores": dict(route.scores) if route else {},
+                                    "route_ms": route.ms if route else None})
+
+
+def route_summary(route: RouteDecision, goal_type: str) -> str:
+    top = sorted(route.scores.items(), key=lambda kv: -kv[1])[:4]
+    picked = ", ".join(f"{r.replace('-agent', '')} {p:.2f}" for r, p in top)
+    return (f"Jev routed this locally in {route.ms:.0f} ms: {'an' if goal_type[0] in 'aeiou' else 'a'} {goal_type} "
+            f"({route.goal_type_p:.2f}); {picked}.")
 
 
 # A data question that also asks for a vendor's web page: the data path adds the research agent (browser + knowledge).
@@ -276,10 +293,21 @@ class PlannerAgent(KairosAgent):
 
     async def run(self, goal: str, ctx: Any) -> AgentResult:
         await ctx.log("planner: starting", data={"goal": goal[:200]})
-        if is_data_question(goal, list(ctx.manifest.capabilities.agents)):
-            return await self._run_data(goal, ctx)
-        if not is_investigation(goal, await self._projects(ctx)):
-            return await self._run_question(goal, ctx)
+        allowed_all = list(ctx.manifest.capabilities.agents)
+        projects = await self._projects(ctx)
+        route = await routing.decide(goal, [a for a in allowed_all if a in routing.ROLE_QUESTIONS])
+        goal_type = self._goal_type(goal, allowed_all, projects, route)
+        if route:
+            await ctx.log(f"planner: Jev routed the goal as {route.goal_type} ({route.goal_type_p:.2f}) in {route.ms:.0f} ms",
+                          data={"jev": {"goal_type": route.goal_type, "p": route.goal_type_p, "scores": route.scores,
+                                         "wants_change": route.wants_change, "wants_web": route.wants_web, "ms": route.ms}})
+            await think(ctx, "route", route_summary(route, goal_type))
+        else:
+            await ctx.log("planner: the Jev router is not installed; the rules route this goal")
+        if goal_type == "data":
+            return await self._run_data(goal, ctx, route)
+        if goal_type == "question":
+            return await self._run_question(goal, ctx, route)
         project = project_of(goal, getattr(ctx, "inputs", None))
         await think(ctx, "search", f"Searching /org for evidence on Project {project}.")
 
@@ -323,7 +351,8 @@ class PlannerAgent(KairosAgent):
         # before the action step; whether there is an action step at all stays the model's call.
         if not _COMPREHENSIVE.search(goal):
             # A focused question: only the specialists it is about (the model tends to plan every agent it is shown).
-            wanted = relevant_specialists(goal)
+            wanted = (route.wanted(("finance-agent", "engineering-agent", "research-agent")) if route else []) \
+                or relevant_specialists(goal)
             if wanted:
                 kept = [s for s in steps if s.agent in wanted or s.agent == ACTION_AGENT]
                 for agent in wanted:
@@ -333,7 +362,7 @@ class PlannerAgent(KairosAgent):
                     await ctx.log(f"planner: a focused question: keeping {', '.join(dict.fromkeys(s.agent for s in kept))}")
                     await think(ctx, "plan", f"A focused question: only {_and(list(dict.fromkeys(s.agent for s in kept if s.agent != ACTION_AGENT)))} needed.")
                 steps = await self._validate_steps(ctx, kept, allowed)
-        if not _WANTS_CHANGE.search(goal) and any(s.agent == ACTION_AGENT for s in steps):
+        if not self._wants_change(goal, route) and any(s.agent == ACTION_AGENT for s in steps):
             await ctx.log("planner: the goal asks for no change: no action step, nothing is written")
             steps = [s for s in steps if s.agent != ACTION_AGENT]
         present = {s.agent for s in steps}
@@ -358,9 +387,9 @@ class PlannerAgent(KairosAgent):
                     s.goal = f"Project {project}: {s.goal}"
 
         await ctx.log(f"planner: executing {len(steps)} steps")
-        await narrate(ctx, understood(goal, project, steps))
+        await narrate(ctx, routed(understood(goal, project, steps), "investigation", route))
         for s in execution_order(steps):  # the order the kernel will create them in
-            await narrate(ctx, planned(s))
+            await narrate(ctx, planned(s, route))
 
         # 5 & 6. Execute steps respecting depends_on (parallel where possible)
         upstream: dict[str, Any] = {}
@@ -448,7 +477,8 @@ class PlannerAgent(KairosAgent):
         )
 
         partial = f"Partial: {', '.join(incomplete)} failed; tracker not updated." if incomplete else None
-        synthesis = await self._ask(ctx, partial, SYNTHESIS_SYSTEM, synthesis_prompt, SynthesisOut, max_tokens=2000)
+        # Gemma 4 thinks before it synthesizes (other models ignore the flag)
+        synthesis = await self._ask(ctx, partial, SYNTHESIS_SYSTEM, synthesis_prompt, SynthesisOut, max_tokens=2000, think=True)
         synthesis = synthesis or SynthesisOut()
         synthesis.root_causes = await self._backed(ctx, synthesis.root_causes, retrieved)
         if not synthesis.root_causes:
@@ -527,6 +557,31 @@ class PlannerAgent(KairosAgent):
             artifacts=[artifact_ref],
         )
 
+    @staticmethod
+    def _goal_type(goal: str, allowed: list[str], projects: set[str], route: RouteDecision | None) -> str:
+        """question, data or investigation: Jev's answer when it is confident and the path can run, else the rules.
+        An investigation needs a project of the organization (its tracker is where findings are recorded); a data
+        question needs the data-engineer role."""
+        rules = "data" if is_data_question(goal, allowed) else "investigation" if is_investigation(goal, projects) else "question"
+        if not route or not route.confident():
+            return rules
+        kind = route.goal_type or rules
+        if kind == "data" and "data-engineer" not in allowed:
+            return rules
+        if kind == "investigation" and not (re.search(r"\bProject\s+[A-Z]", goal)
+                                            or set(re.findall(r"[a-z0-9]+", goal.lower())) & projects):
+            return "question"  # an investigation with no project to record it on: answered with sources instead
+        if rules == "data" and kind != "data":
+            return rules  # a database question named outright (SQL, invoices, payments) stays one
+        return kind
+
+    @staticmethod
+    def _wants_change(goal: str, route: RouteDecision | None) -> bool:
+        """Whether the goal asks for a change (the action agent and its approved write)."""
+        if route is not None:
+            return route.wants_change >= routing.THRESHOLD or bool(_WANTS_CHANGE.search(goal))
+        return bool(_WANTS_CHANGE.search(goal))
+
     async def _projects(self, ctx: Any) -> set[str]:
         """The organization's projects, from /org/projects (not a fixed list); the tracked ones if it cannot be read."""
         names = {"apollo", "zeus"}
@@ -575,13 +630,13 @@ class PlannerAgent(KairosAgent):
                               "Answer as JSON: answer (string), answered (true or false), sources (list of /org paths "
                               "and URLs from the evidence).", AnswerOut, max_tokens=1000)
 
-    async def _run_question(self, goal: str, ctx: Any) -> AgentResult:
+    async def _run_question(self, goal: str, ctx: Any, route: RouteDecision | None = None) -> AgentResult:
         """A plain question: search /org and read the best documents whole; if they do not answer it (or the question
         asks for the web), a web researcher searches the public web. No other agents, and nothing is changed."""
         allowed = list(ctx.manifest.capabilities.agents)
         can_web = "web-researcher" in allowed
-        wants_web = can_web and bool(_WANTS_WEB.search(goal))
-        await narrate(ctx, question_understood(goal, web=wants_web))
+        wants_web = can_web and (bool(_WANTS_WEB.search(goal)) or bool(route and route.wants_web >= routing.THRESHOLD))
+        await narrate(ctx, routed(question_understood(goal, web=wants_web), "question", route))
         await think(ctx, "plan", "A question, not an investigation: answering it from /org" +
                     (" and the public web." if wants_web else ", with no specialists."))
         evidence = await gather_evidence(ctx, goal, scope=["/org"], top_k=8)
@@ -595,9 +650,9 @@ class PlannerAgent(KairosAgent):
         if can_web and (wants_web or out is None or not out.answered or not out.answer.strip()):
             if not wants_web:
                 await think(ctx, "plan", "/org does not answer this: asking a web researcher to search the public web.")
-                await narrate(ctx, question_understood(goal, web=True))
+                await narrate(ctx, routed(question_understood(goal, web=True), "question", route))
             step = PlanStep(step_id="w1", agent="web-researcher", goal=goal)
-            await narrate(ctx, planned(step))
+            await narrate(ctx, planned(step, route))
             bounds = planned(step)
             try:
                 pid = await ctx.spawn("web-researcher", goal, {"query": goal}, capabilities=bounds.capabilities or None,
@@ -627,10 +682,13 @@ class PlannerAgent(KairosAgent):
                                    "urls_opened": web.get("urls_opened") or []},
                            evidence=sources, artifacts=[artifact])
 
-    async def _run_data(self, goal: str, ctx: Any) -> AgentResult:
+    async def _run_data(self, goal: str, ctx: Any, route: RouteDecision | None = None) -> AgentResult:
         """A question the company database answers: data-engineer queries it, writer drafts and files the note. The
         same rules as an investigation: nothing is filed from incomplete findings, and the task then fails."""
         allowed = offered_roles(goal, list(ctx.manifest.capabilities.agents))
+        if route:  # what Jev thinks the goal needs is offered too, even when no keyword names it
+            allowed += [a for a in route.wanted(("writer", "research-agent")) if a in ctx.manifest.capabilities.agents
+                        and a not in allowed]
         steps = [PlanStep(step_id="s1", agent="data-engineer", goal=goal)]
         if "research-agent" in allowed and WEB_WORDS.search(goal):  # a multi-tool task: the vendor's page too
             steps.append(PlanStep(step_id="r1", agent="research-agent", goal=goal))
@@ -639,9 +697,9 @@ class PlannerAgent(KairosAgent):
                                   depends_on=[s.step_id for s in steps]))
         await think(ctx, "plan", f"A data question: {_and([s.agent for s in steps])} will answer it from the company database"
                                  + (" and the vendor's page." if any(s.agent == "research-agent" for s in steps) else "."))
-        await narrate(ctx, data_understood(goal, steps))
+        await narrate(ctx, routed(data_understood(goal, steps), "data", route))
         for s in steps:
-            await narrate(ctx, planned(s))
+            await narrate(ctx, planned(s, route))
 
         upstream: dict[str, Any] = {}
         results: dict[str, AgentResult] = {}

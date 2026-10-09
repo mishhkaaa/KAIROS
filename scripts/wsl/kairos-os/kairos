@@ -1,0 +1,258 @@
+#!/usr/bin/env python3
+"""kairos: the KAIROS OS command. Talks to the gateway on Windows; see /opt/kairos/kairosos.py.
+
+  kairos                      who, where, and the state of the system
+  kairos login [CODE]         sign in with a code from the console (user menu > Sign in on your phone)
+  kairos login --as EMAIL     dev sign-in (demo accounts: alice, priya, sam @acme.example)
+  kairos logout | whoami
+  kairos ask "GOAL"           start a task and watch it run, step by step
+  kairos tasks | ps           recent tasks | agent processes
+  kairos approvals            what is waiting for a person
+  kairos approve|reject ID [-m COMMENT]
+  kairos search "WORDS"       hybrid search over /org
+  kairos mount DIR [NAME]     keep a folder of this machine in /org/mnt/NAME (watched, read-only mirror)
+  kairos mounts | unmount NAME
+  kairos upload FILE... [--to /org/uploads]
+"""
+from __future__ import annotations
+
+import json
+import os
+import re
+import sys
+import time
+from pathlib import Path
+
+sys.path.insert(0, "/opt/kairos")
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import kairosos as m  # noqa: E402
+
+TTY = sys.stdout.isatty() and os.environ.get("NO_COLOR") is None
+
+
+def c(code: str, s: str) -> str:
+    return f"\033[{code}m{s}\033[0m" if TTY else s
+
+
+TEAL, AMBER, RED, GREEN, DIM, BOLD, BLUE = "38;5;30", "38;5;172", "38;5;160", "38;5;35", "2", "1", "38;5;33"
+KIND = {"spawn": BLUE, "model": "38;5;98", "knowledge": "38;5;37", "syscall": TEAL, "policy": AMBER, "approval": AMBER,
+        "tool": TEAL, "commit": GREEN, "rollback": RED, "memory": "38;5;98", "ipc": BLUE, "task": DIM}
+STATUS = {"completed": GREEN, "failed": RED, "waiting_approval": AMBER, "running": TEAL, "planning": BLUE}
+
+
+def die(msg: str, code: int = 1) -> None:
+    print(c(RED, msg), file=sys.stderr)
+    raise SystemExit(code)
+
+
+def api(method: str, path: str, body=None, **kw):
+    try:
+        return m.call(method, path, body, **kw)
+    except m.GatewayError as e:
+        if e.status == 401:
+            die(f"{e.message}\n  sign in: kairos login <code from the console>")
+        die(f"{e.code}: {e.message}" if e.status else e.message)
+
+
+MARK = ["\033[38;5;30m██\033[38;5;73m██\033[0m", "\033[38;5;73m██\033[38;5;236m██\033[0m"]
+
+
+def banner() -> None:
+    try:
+        status = m.call("GET", "/system/status", timeout=3)
+        me = m.call("GET", "/auth/me", timeout=3)
+    except m.GatewayError as e:
+        print(c(AMBER, f"KAIROS OS · gateway not reachable at {m.gateway_url()}") + c(DIM, f"  ({e.message})"))
+        print(c(DIM, "  start it on Windows: scripts\\win\\start-kairosd.ps1, then run `kairos`"))
+        return
+    org = (me.get("org") or {}).get("name", "no org")
+    who = me["user"].get("name") or me["user"]["email"]
+    mark = MARK if TTY else ["[]", "[]"]
+    lines = [
+        c(BOLD, "KAIROS OS") + c(DIM, f"  kernel {status['version']} · contract {status['contract_version']}"),
+        f"{who} · {c(TEAL, me.get('role') or 'no role')} · {org}" + c(DIM, "  (signed in)" if m.session() else "  (dev headers)"),
+        c(DIM, f"gateway {m.gateway_url()} · /org is your organization's knowledge · `kairos help`"),
+    ]
+    for i, line in enumerate(lines):
+        print(f" {mark[i] if i < 2 else '    '}  {line}")
+
+
+def cmd_login(args: list[str]) -> None:
+    if args[:1] == ["--as"] and len(args) > 1:
+        s = api("POST", "/auth/dev", {"email": args[1], "name": ""})
+    else:
+        code = args[0] if args else input("Code from the console (user menu > Sign in on your phone): ")
+        s = api("POST", "/auth/pair/redeem", {"code": code})
+    m.save_session(s)
+    me = s["me"]
+    print(c(GREEN, f"signed in as {me['user']['email']}") + f" · {me.get('role') or 'no role'} of {(me.get('org') or {}).get('name', 'no org')}")
+
+
+def cmd_whoami(_: list[str]) -> None:
+    me = api("GET", "/auth/me")
+    print(json.dumps(me, indent=2) if "--json" in _ else f"{me['user']['email']} · {me.get('role')} · {(me.get('org') or {}).get('name')}\n"
+          + c(DIM, "can: " + ", ".join(me.get("permissions") or [])))
+
+
+def cmd_logout(_: list[str]) -> None:
+    try:
+        m.call("POST", "/auth/logout")
+    except m.GatewayError:
+        pass
+    m.save_session(None)
+    print("signed out")
+
+
+def _line(e: dict) -> str:
+    return f"  {c(KIND.get(e['kind'], DIM), '●')} {e['summary']}  {c(DIM, e['actor'])}"
+
+
+def cmd_ask(args: list[str]) -> None:
+    goal = " ".join(a for a in args if not a.startswith("--")) or die("usage: kairos ask \"GOAL\"")
+    t = api("POST", "/tasks", {"goal": goal, "priority": "high" if "--high" in args else "normal"})
+    tid = t["task_id"]
+    print(c(BOLD, f"{tid}") + c(DIM, f"  {goal}"))
+    seen: set[str] = set()
+    asked: set[str] = set()
+    spin = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
+    i = 0
+    try:
+        while True:
+            story = api("GET", f"/audit/{tid}")
+            for e in story.get("entries", []):
+                if e["entry_id"] in seen or e["kind"] in ("state", "verify"):
+                    seen.add(e["entry_id"])
+                    continue
+                seen.add(e["entry_id"])
+                print("\r\033[K" + _line(e) if TTY else _line(e))
+            for a in api("GET", "/approvals?status=pending"):
+                if a["task_id"] == tid and a["approval_id"] not in asked:
+                    asked.add(a["approval_id"])
+                    sc = a["syscall"]
+                    print(c(AMBER, f"  ⏸ {a['agent']} wants {sc['capability']} ({sc.get('risk', 'medium')} risk): {a['approval_id']}"))
+                    print(c(DIM, f"    decide: kairos approve {a['approval_id']}   or in the console / on the phone"))
+            t = api("GET", f"/tasks/{tid}")
+            if t["status"] in ("completed", "failed", "cancelled"):
+                break
+            if TTY:
+                sys.stdout.write(f"\r  {c(TEAL, spin[i % len(spin)])} {c(DIM, t['status'])}")
+                sys.stdout.flush()
+            i += 1
+            time.sleep(1.2)
+    except KeyboardInterrupt:
+        print(c(DIM, f"\n  left it running: kairos tasks, or the console at /tasks/{tid}"))
+        return
+    print("\r\033[K" if TTY else "", end="")
+    colour = STATUS.get(t["status"], DIM)
+    print(c(colour, f"  {t['status']}"))
+    res = t.get("result") or {}
+    if res.get("summary"):
+        print()
+        print(re.sub(r"\*\*", "", res["summary"]))
+    if res.get("evidence"):
+        print(c(DIM, "\n  evidence: ") + ", ".join(res["evidence"][:8]))
+
+
+def cmd_tasks(_: list[str]) -> None:
+    rows = sorted(api("GET", "/tasks"), key=lambda t: t.get("created_at") or "", reverse=True)[:15]
+    for t in rows:
+        st = t.get("status", "")
+        print(f"{c(DIM, t['task_id'])}  {c(STATUS.get(st, DIM), f'{st:<16}')} {t['goal'][:90]}")
+
+
+def cmd_ps(_: list[str]) -> None:
+    rows = api("GET", "/agents")
+    print(c(DIM, f"{'PID':>6}  {'STATE':<11} {'TASK':<14} AGENT"))
+    for p in rows[-40:]:
+        state = p.get("state", "")
+        colour = GREEN if state == "RUNNING" else AMBER if state == "WAITING" else DIM
+        print(f"{p['pid']:>6}  {c(colour, f'{state:<11}')} {p['task_id']:<14} {p['agent']}")
+
+
+def cmd_approvals(_: list[str]) -> None:
+    rows = api("GET", "/approvals?status=pending")
+    if not rows:
+        print("nothing is waiting")
+    for a in rows:
+        sc = a["syscall"]
+        print(f"{c(AMBER, a['approval_id'])}  {a['agent']} wants {c(BOLD, sc['capability'])} · {sc.get('risk', 'medium')} risk · {a['task_id']}")
+        if sc.get("justification"):
+            print(c(DIM, f"    {sc['justification'][:160]}"))
+
+
+def _resolve(args: list[str], verb: str) -> None:
+    if not args:
+        die(f"usage: kairos {verb} APPROVAL_ID [-m COMMENT]")
+    comment = args[args.index("-m") + 1] if "-m" in args and args.index("-m") + 1 < len(args) else None
+    a = api("POST", f"/approvals/{args[0]}/{verb}", {"comment": comment})
+    print(c(GREEN if verb == "approve" else AMBER, f"{a['approval_id']} {a['status']}"))
+
+
+def cmd_search(args: list[str]) -> None:
+    text = " ".join(args) or die("usage: kairos search WORDS")
+    res = api("GET", "/knowledge/search" + m.q(q=text, top_k=8))
+    for h in res.get("hits", []):
+        flag = c(RED, " ⚑ firewall") if h.get("firewall_flags") else ""
+        print(f"{c(TEAL, f'{h['score']:.2f}')}  {c(BOLD, h['title'])}{flag}\n      {c(DIM, '/org' + h['path'][4:] + '.md')}  {h['snippet'][:120]}")
+
+
+def cmd_mount(args: list[str]) -> None:
+    if not args:
+        die("usage: kairos mount DIR [NAME]")
+    folder = Path(args[0]).expanduser().resolve()
+    if not folder.is_dir():
+        die(f"no such folder: {folder}")
+    name = args[1] if len(args) > 1 else re.sub(r"[^a-z0-9-]+", "-", folder.name.lower()).strip("-") or "folder"
+    mnt = api("POST", "/knowledge/mounts", {"name": name, "host_path": m.windows_path(str(folder))}, timeout=300)
+    print(c(GREEN, f"{folder} -> {mnt['org_path']}") + f"  {mnt.get('files', 0)} files, watched")
+
+
+def cmd_mounts(_: list[str]) -> None:
+    for x in api("GET", "/knowledge/mounts"):
+        print(f"{c(TEAL, x['org_path']):<40} {x['host_path']}  {c(DIM, str(x.get('files', 0)) + ' files')}{c(GREEN, ' watching') if x.get('watching') else ''}")
+
+
+def cmd_unmount(args: list[str]) -> None:
+    api("DELETE", f"/knowledge/mounts/{args[0] if args else die('usage: kairos unmount NAME')}")
+    print("unmounted (the folder itself is untouched)")
+
+
+def cmd_upload(args: list[str]) -> None:
+    target = args[args.index("--to") + 1] if "--to" in args else "/org/uploads"
+    files = [a for i, a in enumerate(args) if a != "--to" and (i == 0 or args[i - 1] != "--to")]
+    if not files:
+        die("usage: kairos upload FILE... [--to /org/uploads]")
+    try:
+        res = m.upload([(Path(f).name, Path(f).read_bytes()) for f in files], target)
+    except m.GatewayError as e:
+        die(e.message)
+    for p in res.get("created", []) + res.get("updated", []):
+        print(c(GREEN, "added ") + p)
+    for s in res.get("skipped", []) + res.get("errors", []):
+        print(c(AMBER, "skipped ") + s)
+
+
+COMMANDS = {
+    "login": cmd_login, "logout": cmd_logout, "whoami": cmd_whoami, "ask": cmd_ask, "tasks": cmd_tasks, "ps": cmd_ps,
+    "approvals": cmd_approvals, "approve": lambda a: _resolve(a, "approve"), "reject": lambda a: _resolve(a, "reject"),
+    "search": cmd_search, "mount": cmd_mount, "mounts": cmd_mounts, "unmount": cmd_unmount, "upload": cmd_upload,
+    "banner": lambda _: banner(),
+}
+
+
+def main() -> None:
+    args = sys.argv[1:]
+    if not args:
+        banner()
+        return
+    if args[0] in ("help", "-h", "--help"):
+        print(__doc__)
+        return
+    fn = COMMANDS.get(args[0])
+    if not fn:
+        die(f"unknown command {args[0]!r}; try `kairos help`", 2)
+    fn(args[1:])
+
+
+if __name__ == "__main__":
+    main()

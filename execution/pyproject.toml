@@ -1,0 +1,28 @@
+[project]
+name = "kairos-execution"
+version = "0.1.0"
+description = "KAIROS execution layer: Docker sandboxes, Playwright browser, file ops, MCP connectors, mock Jira, artifacts"
+requires-python = ">=3.12"
+dependencies = [
+    "kairos-contracts",
+    "docker>=7",
+    "httpx>=0.27",
+    "psycopg[binary]>=3.2",
+    "playwright>=1.45",
+    "mcp>=1.0",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+]
+
+[project.scripts]
+kairos-mock-jira = "kairos_execution.connectors.jira_mock:main"
+
+[tool.uv.sources]
+kairos-contracts = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["kairos_execution"]

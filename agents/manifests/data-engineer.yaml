@@ -1,0 +1,22 @@
+name: data-engineer
+version: 0.1.0
+description: Data engineer role template. Answers a data question with one checked SQL query on the company database.
+handles: [sql, database, query, invoice, invoices, paid, payments, vendors, spreadsheet]
+system_prompt: |
+  You are a Data Engineer agent in KAIROS. You answer questions about the company's vendors, contracts, invoices,
+  cloud costs, headcount and tickets with SQL on its database. You never estimate a number the data does not state.
+runtime:
+  framework: custom
+  entrypoint: kairos_agents.library.data_engineer:DataEngineerAgent
+  model_policy: local-only
+memory:
+  mounts: [/org/finance, /org/projects]
+capabilities:
+  knowledge: [read, search]
+  tools: [db.query]
+resources:
+  cpu: 1
+  memory: 1Gi
+  gpu: 0
+  max_tokens_per_task: 12000
+  max_tool_calls: 10

@@ -29,9 +29,24 @@ def main() -> None:
     if args.print_wiring:
         return
 
+    import threading
+
     import uvicorn
 
+    threading.Thread(target=_warm_router, name="jev-warmup", daemon=True).start()
     uvicorn.run(build_app(bundle), host=settings.gateway_host, port=settings.gateway_port)
+
+
+def _warm_router() -> None:
+    """Load the local Jev decision model while the gateway starts, so the first goal is routed in milliseconds."""
+    try:
+        from kairos_agents import routing
+
+        if routing.enabled():
+            routing.decide_sync("warm up", ["finance-agent"])
+            logging.getLogger("kairosd").info("Jev router ready (local)")
+    except Exception as e:  # noqa: BLE001 — the planner falls back to its rules
+        logging.getLogger("kairosd").warning("Jev router not ready: %s", e)
 
 
 if __name__ == "__main__":

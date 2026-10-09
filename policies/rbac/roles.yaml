@@ -1,0 +1,70 @@
+# Role → permission table for KAIROS RBAC.
+# Loaded at startup by kernel/kairos_kernel/identity (not a policy document, so it lives outside policies/*.yaml)
+# and exposed via GET /orgs/{id}/roles.
+# An admin can adjust grants here without a code change.
+#
+# Roles in ascending privilege order:
+#   viewer < member < approver < admin < owner
+#
+# Permissions catalogue:
+#   task.create       – submit a new task
+#   task.cancel       – cancel a running task
+#   approval.resolve  – approve or reject a pending syscall
+#   knowledge.read    – read /org knowledge objects
+#   knowledge.ingest  – upload or ingest new knowledge
+#   connectors.manage – connect / disconnect / configure integrations
+#   config.read       – read system settings and policies
+#   config.manage     – write system settings and policies
+#   members.manage    – invite, remove, or change roles of members
+
+roles:
+
+  viewer:
+    description: "Read-only access to tasks and knowledge."
+    permissions:
+      - knowledge.read
+
+  member:
+    description: "Can submit tasks and read knowledge."
+    permissions:
+      - task.create
+      - knowledge.read
+
+  approver:
+    description: "Can resolve approval requests in addition to member permissions."
+    permissions:
+      - task.create
+      - knowledge.read
+      - approval.resolve
+
+  admin:
+    description: "Full operational access; cannot change billing or transfer ownership."
+    permissions:
+      - task.create
+      - task.cancel
+      - approval.resolve
+      - knowledge.read
+      - knowledge.ingest
+      - connectors.manage
+      - config.read
+      - members.manage
+
+  owner:
+    description: "Unrestricted access including configuration and ownership transfer."
+    permissions:
+      - task.create
+      - task.cancel
+      - approval.resolve
+      - knowledge.read
+      - knowledge.ingest
+      - connectors.manage
+      - config.read
+      - config.manage
+      - members.manage
+
+# Policy engine hook: a syscall that requires approval must be resolved by
+# a principal whose roles include at least one of the roles listed here.
+approval_required_roles:
+  - approver
+  - admin
+  - owner

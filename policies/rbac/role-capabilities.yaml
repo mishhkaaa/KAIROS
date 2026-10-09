@@ -1,0 +1,33 @@
+# What the agents of a task may do, by the role of the user who started it (contract 0.11.0, UserPermissions).
+# (In a subfolder because the policy engine loads every policies/*.yaml as a PolicyDocument.)
+# The role comes from the identity service (kernel/kairos_kernel/identity: the caller's role in the org, recorded on the
+# task as metadata.roles); what people may ask of KAIROS (task.create, approval.resolve, ...) is policies/rbac/roles.yaml.
+#
+# Every agent a task creates gets at most these capabilities and /org scopes (intersected with its role template,
+# the planner's request and org policy). Writes still need approval: that comes from policy, not from this file.
+
+default_role: member          # users with no roles and no entry below
+
+users:                        # roles for a user when the task records none (tasks made before identity existed)
+  alice: [owner]
+
+roles:
+  owner:
+    capabilities: ["knowledge.*", "memory.*", "agent.*", "jira.*", "fs.*", "browser.*", "db.*", "postgres.*",
+                   "database.*", "external.*", "mcp.*", "sandbox.*", "github.*", "calendar.*"]
+    data_scopes: ["/org/**"]
+  admin:
+    capabilities: ["knowledge.*", "memory.*", "agent.*", "jira.*", "fs.*", "browser.*", "db.*", "postgres.*",
+                   "database.*", "external.*", "mcp.*", "github.*", "calendar.*"]
+    data_scopes: ["/org/**"]
+  approver:
+    capabilities: ["knowledge.*", "memory.*", "agent.*", "jira.*", "fs.*", "browser.open", "db.query", "postgres.read",
+                   "github.*", "calendar.*"]
+    data_scopes: ["/org/**"]
+  member:
+    capabilities: ["knowledge.*", "memory.*", "agent.*", "jira.*", "fs.*", "browser.open", "db.query", "postgres.read",
+                   "github.*", "calendar.*"]
+    data_scopes: ["/org/**"]
+  viewer:
+    capabilities: ["knowledge.read", "knowledge.search", "memory.write", "agent.spawn", "agent.message"]
+    data_scopes: ["/org/projects/**", "/org/engineering/**"]

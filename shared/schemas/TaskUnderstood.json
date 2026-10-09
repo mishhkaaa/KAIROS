@@ -54,14 +54,14 @@
         }
       ],
       "default": null,
-      "description": "What chose the agents: \"laya\" (the decision model) or \"rules\"",
+      "description": "What chose the agents: \"jev\" (the decision model) or \"rules\"",
       "title": "Router"
     },
     "route_scores": {
       "additionalProperties": {
         "type": "number"
       },
-      "description": "Laya's probability that each role is needed",
+      "description": "Jev's probability that each role is needed",
       "title": "Route Scores",
       "type": "object"
     },

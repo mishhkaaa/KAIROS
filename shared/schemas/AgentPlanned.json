@@ -39,7 +39,7 @@
         }
       ],
       "default": null,
-      "description": "Laya's probability that this role is needed",
+      "description": "Jev's probability that this role is needed",
       "title": "Score"
     }
   },

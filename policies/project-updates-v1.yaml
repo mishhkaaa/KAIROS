@@ -1,0 +1,17 @@
+# The policy the demo's privileged syscall hits (APR-882 in shared/fixtures/json/approval.json).
+policy: project-updates-v1
+priority: 10
+applies_to:
+  agents: [action-agent]
+knowledge:
+  allow: ["/org/projects/**"]
+filesystem:
+  read: ["/workspace/**"]
+  write: ["/workspace/reports/**"]
+network:
+  allow: ["jira.company.internal:443", "mock-jira:8090"]
+tools:
+  allow: [jira.read, jira.write, fs.write]
+approval:
+  jira.write: required
+  fs.write: auto

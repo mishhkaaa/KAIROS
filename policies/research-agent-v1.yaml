@@ -1,0 +1,13 @@
+# Research agent may browse ONLY the offline vendor docs site (P4's vendor-docs service on the sandbox network).
+policy: research-agent-v1
+priority: 10
+applies_to:
+  agents: [research-agent]
+knowledge:
+  allow: ["/org/**"]
+network:
+  allow: ["vendor-docs:80"]
+tools:
+  allow: [browser.open]
+approval:
+  browser.open: auto

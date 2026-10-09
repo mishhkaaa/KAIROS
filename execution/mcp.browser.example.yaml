@@ -1,0 +1,14 @@
+# The browser tool through the Playwright MCP server (B4). Off by default: point KAIROS_MCP_CONFIG at this file (or a
+# copy) before starting kairosd, after building the image once:
+#   docker build -t kairos/sandbox-browser-mcp:latest execution/images/sandbox-browser-mcp
+# Agents keep calling browser.open / browser.click / browser.type; policies and approvals are unchanged.
+# The sandbox: the internal kairos_sandbox network (it reaches only vendor-docs), a read-only root, uid 10001, no
+# capabilities; the server itself refuses any origin outside --allowed-origins.
+servers:
+  - name: playwright
+    browser: true
+    command: docker
+    args: [run, -i, --rm, --network, kairos_sandbox, --read-only, --tmpfs, "/tmp:rw,size=256m", --user, "10001:10001",
+           --cap-drop, ALL, --security-opt, no-new-privileges, --memory, 1g,
+           "kairos/sandbox-browser-mcp:latest", --allowed-origins, "http://vendor-docs"]
+    timeout_s: 60

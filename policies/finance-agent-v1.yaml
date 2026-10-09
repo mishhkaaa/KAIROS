@@ -1,0 +1,18 @@
+# Blueprint §46.
+policy: finance-agent-v1
+priority: 10
+applies_to:
+  agents: [finance-agent]
+knowledge:
+  allow: ["/org/finance/**", "/org/projects/**", "/org/decisions/**", "/org/policies/**"]
+filesystem:
+  read: ["/workspace/**"]
+  write: ["/workspace/reports/**"]
+network:
+  allow: ["jira.company.internal:443"]
+tools:
+  allow: [postgres.read, jira.read, jira.write]
+approval:
+  jira.write: required
+  database.write: required
+  external.email: required

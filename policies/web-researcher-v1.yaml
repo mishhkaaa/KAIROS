@@ -1,0 +1,14 @@
+# The web researcher may open public internet pages, and only those (the kernel refuses private and local addresses),
+# in a browser sandbox on its own network with no route to the organization's internal services.
+policy: web-researcher-v1
+priority: 10
+applies_to:
+  agents: [web-researcher]
+knowledge:
+  allow: ["/org/**"]
+network:
+  allow: ["*"]
+tools:
+  allow: [browser.open]
+approval:
+  browser.open: auto

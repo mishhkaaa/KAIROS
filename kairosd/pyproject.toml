@@ -1,0 +1,31 @@
+[project]
+name = "kairosd"
+version = "0.1.0"
+description = "KAIROS server process: composition root that wires all work splits together"
+requires-python = ">=3.12"
+dependencies = [
+    "kairos-contracts[api]",
+    "kairos-kernel",
+    "kairos-knowledge",
+    "kairos-agents",
+    "kairos-models",
+    "kairos-execution",
+]
+
+[project.scripts]
+kairosd = "kairosd.main:main"
+
+[tool.uv.sources]
+kairos-contracts = { workspace = true }
+kairos-kernel = { workspace = true }
+kairos-knowledge = { workspace = true }
+kairos-agents = { workspace = true }
+kairos-models = { workspace = true }
+kairos-execution = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["kairosd"]

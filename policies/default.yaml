@@ -1,0 +1,27 @@
+# Baseline policy (P1). Applies to every agent unless a more specific (lower priority number) policy matches.
+# Schema: kairos_contracts.schema.PolicyDocument
+policy: default-v1
+description: Deny by default; read-only knowledge access; every external write needs a human.
+priority: 1000
+applies_to:
+  agents: ["*"]
+knowledge:
+  allow: ["/org/**"]
+  deny: []
+filesystem:
+  read: ["/workspace/**"]
+  write: []
+network:
+  allow: []
+tools:
+  allow: ["knowledge.*", "jira.read", "fs.read", "github.read", "calendar.read"]
+approval:
+  jira.write: required
+  github.write: required
+  calendar.write: required
+  fs.write: auto
+  browser.open: auto
+  database.write: required
+  db.query: auto           # one read-only SELECT, checked by the kernel (0.12.0)
+  db.write: required
+  external.email: required

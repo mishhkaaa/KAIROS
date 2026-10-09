@@ -1,0 +1,16 @@
+[Unit]
+Description=KAIROS /org: the organization's knowledge as a filesystem
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Environment=KAIROS_CONFIG_DIR=/home/kairos/.config/kairos
+Environment=ORGFS_OWNER=kairos
+ExecStartPre=-/bin/umount -l /org
+ExecStart=/usr/bin/python3 /opt/kairos/orgfs.py /org
+ExecStopPost=-/bin/umount -l /org
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

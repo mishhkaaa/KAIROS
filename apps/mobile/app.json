@@ -1,0 +1,57 @@
+{
+  "expo": {
+    "name": "KAIROS",
+    "slug": "kairos-mobile",
+    "version": "1.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#eef1f6",
+    "scheme": "kairos",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#eef1f6"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "ai.kairos.phone"
+    },
+    "android": {
+      "package": "ai.kairos.phone",
+      "versionCode": 2,
+      "adaptiveIcon": {
+        "backgroundColor": "#eef1f6",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": [
+        "POST_NOTIFICATIONS",
+        "VIBRATE"
+      ],
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#0b6b60"
+        }
+      ],
+      "@react-native-google-signin/google-signin"
+    ]
+  }
+}

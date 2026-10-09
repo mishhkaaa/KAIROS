@@ -1,0 +1,19 @@
+name: finance-agent
+version: 0.1.0
+description: Analyzes budgets, costs and variance using permitted finance and project knowledge.
+handles: [finance, budget, cost, variance, spend, overrun]
+runtime:
+  framework: nooa
+  entrypoint: kairos_agents.library.finance:FinanceAgent
+  model_policy: local-only
+memory:
+  mounts: [/org/finance, /org/projects]
+capabilities:
+  knowledge: [read, search]
+  tools: [jira.read]
+resources:
+  cpu: 1
+  memory: 1Gi
+  gpu: 0
+  max_tokens_per_task: 12000
+  max_tool_calls: 5

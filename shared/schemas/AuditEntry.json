@@ -1,0 +1,119 @@
+{
+  "$defs": {
+    "AuditKind": {
+      "enum": [
+        "task",
+        "spawn",
+        "state",
+        "model",
+        "knowledge",
+        "memory",
+        "ipc",
+        "syscall",
+        "policy",
+        "approval",
+        "tool",
+        "verify",
+        "commit",
+        "rollback"
+      ],
+      "title": "AuditKind",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "seq": {
+      "default": 0,
+      "description": "Monotonic per task; assigned by the AuditLog",
+      "title": "Seq",
+      "type": "integer"
+    },
+    "entry_id": {
+      "title": "Entry Id",
+      "type": "string"
+    },
+    "ts": {
+      "format": "date-time",
+      "title": "Ts",
+      "type": "string"
+    },
+    "task_id": {
+      "pattern": "^T-[A-Za-z0-9]+$",
+      "title": "Task Id",
+      "type": "string"
+    },
+    "pid": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pid"
+    },
+    "actor": {
+      "description": "\"user:alice\", \"agent:finance-agent#102\", \"kernel.policy\"",
+      "title": "Actor",
+      "type": "string"
+    },
+    "kind": {
+      "$ref": "#/$defs/AuditKind"
+    },
+    "summary": {
+      "title": "Summary",
+      "type": "string"
+    },
+    "data": {
+      "additionalProperties": true,
+      "title": "Data",
+      "type": "object"
+    },
+    "refs": {
+      "description": "/org paths, artifact refs, syscall/approval ids",
+      "items": {
+        "type": "string"
+      },
+      "title": "Refs",
+      "type": "array"
+    },
+    "prev_hash": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Hash chain for tamper evidence (stretch)",
+      "title": "Prev Hash"
+    },
+    "hash": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Hash"
+    }
+  },
+  "required": [
+    "entry_id",
+    "task_id",
+    "actor",
+    "kind",
+    "summary"
+  ],
+  "title": "AuditEntry",
+  "type": "object"
+}

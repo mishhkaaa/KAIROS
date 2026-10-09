@@ -1,0 +1,41 @@
+{
+  "additionalProperties": false,
+  "description": "task.understood: what the planner took the goal to mean, before it assigns agents.",
+  "properties": {
+    "intent": {
+      "description": "e.g. \"investigate budget overrun and schedule slip\"",
+      "maxLength": 240,
+      "title": "Intent",
+      "type": "string"
+    },
+    "entities": {
+      "description": "e.g. [\"Project Apollo\", \"APOLLO-12\"]",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 20,
+      "title": "Entities",
+      "type": "array"
+    },
+    "capabilities_needed": {
+      "description": "e.g. knowledge.search, jira.write",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 20,
+      "title": "Capabilities Needed",
+      "type": "array"
+    },
+    "plan_summary": {
+      "maxLength": 240,
+      "title": "Plan Summary",
+      "type": "string"
+    }
+  },
+  "required": [
+    "intent",
+    "plan_summary"
+  ],
+  "title": "TaskUnderstood",
+  "type": "object"
+}

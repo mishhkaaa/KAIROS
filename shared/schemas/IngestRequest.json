@@ -1,0 +1,42 @@
+{
+  "$defs": {
+    "IngestSourceType": {
+      "enum": [
+        "file",
+        "directory",
+        "url",
+        "git",
+        "api"
+      ],
+      "title": "IngestSourceType",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "source_type": {
+      "$ref": "#/$defs/IngestSourceType"
+    },
+    "uri": {
+      "title": "Uri",
+      "type": "string"
+    },
+    "target_path": {
+      "default": "/org",
+      "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+      "title": "Target Path",
+      "type": "string"
+    },
+    "options": {
+      "additionalProperties": true,
+      "title": "Options",
+      "type": "object"
+    }
+  },
+  "required": [
+    "source_type",
+    "uri"
+  ],
+  "title": "IngestRequest",
+  "type": "object"
+}

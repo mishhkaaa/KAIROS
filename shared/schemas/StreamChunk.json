@@ -1,0 +1,49 @@
+{
+  "$defs": {
+    "TokenUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "prompt": {
+          "default": 0,
+          "title": "Prompt",
+          "type": "integer"
+        },
+        "completion": {
+          "default": 0,
+          "title": "Completion",
+          "type": "integer"
+        }
+      },
+      "title": "TokenUsage",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "delta": {
+      "title": "Delta",
+      "type": "string"
+    },
+    "done": {
+      "default": false,
+      "title": "Done",
+      "type": "boolean"
+    },
+    "usage": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TokenUsage"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "delta"
+  ],
+  "title": "StreamChunk",
+  "type": "object"
+}

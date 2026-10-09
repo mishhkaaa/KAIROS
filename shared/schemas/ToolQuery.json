@@ -1,0 +1,38 @@
+{
+  "additionalProperties": false,
+  "description": "tool.query: a query a tool ran for an agent (e.g. the SQL of db.query), with its row count and duration.",
+  "properties": {
+    "pid": {
+      "title": "Pid",
+      "type": "integer"
+    },
+    "tool": {
+      "title": "Tool",
+      "type": "string"
+    },
+    "query": {
+      "maxLength": 4000,
+      "title": "Query",
+      "type": "string"
+    },
+    "rows": {
+      "minimum": 0,
+      "title": "Rows",
+      "type": "integer"
+    },
+    "ms": {
+      "minimum": 0,
+      "title": "Ms",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "pid",
+    "tool",
+    "query",
+    "rows",
+    "ms"
+  ],
+  "title": "ToolQuery",
+  "type": "object"
+}

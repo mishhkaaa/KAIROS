@@ -1,0 +1,310 @@
+{
+  "$defs": {
+    "ErrorInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "description": "One of shared/catalogs/errors.yaml",
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "retriable": {
+          "default": false,
+          "title": "Retriable",
+          "type": "boolean"
+        },
+        "details": {
+          "additionalProperties": true,
+          "title": "Details",
+          "type": "object"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "ErrorInfo",
+      "type": "object"
+    },
+    "Priority": {
+      "enum": [
+        "high",
+        "normal",
+        "background"
+      ],
+      "title": "Priority",
+      "type": "string"
+    },
+    "PrivacyLevel": {
+      "description": "Ordered from least to most sensitive. `restricted` must never leave the box.",
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "restricted"
+      ],
+      "title": "PrivacyLevel",
+      "type": "string"
+    },
+    "ResourceQuota": {
+      "additionalProperties": false,
+      "properties": {
+        "max_tokens": {
+          "default": 20000,
+          "title": "Max Tokens",
+          "type": "integer"
+        },
+        "max_tool_calls": {
+          "default": 20,
+          "title": "Max Tool Calls",
+          "type": "integer"
+        },
+        "max_wall_seconds": {
+          "default": 600,
+          "title": "Max Wall Seconds",
+          "type": "integer"
+        },
+        "max_children": {
+          "default": 8,
+          "title": "Max Children",
+          "type": "integer"
+        },
+        "cpu": {
+          "default": 1.0,
+          "title": "Cpu",
+          "type": "number"
+        },
+        "memory_mb": {
+          "default": 1024,
+          "title": "Memory Mb",
+          "type": "integer"
+        },
+        "gpu": {
+          "default": 0.0,
+          "description": "Fraction of the shared GPU",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Gpu",
+          "type": "number"
+        }
+      },
+      "title": "ResourceQuota",
+      "type": "object"
+    },
+    "ResourceUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "tokens_prompt": {
+          "default": 0,
+          "title": "Tokens Prompt",
+          "type": "integer"
+        },
+        "tokens_completion": {
+          "default": 0,
+          "title": "Tokens Completion",
+          "type": "integer"
+        },
+        "tool_calls": {
+          "default": 0,
+          "title": "Tool Calls",
+          "type": "integer"
+        },
+        "children_spawned": {
+          "default": 0,
+          "title": "Children Spawned",
+          "type": "integer"
+        },
+        "wall_seconds": {
+          "default": 0.0,
+          "title": "Wall Seconds",
+          "type": "number"
+        },
+        "gpu_seconds": {
+          "default": 0.0,
+          "title": "Gpu Seconds",
+          "type": "number"
+        }
+      },
+      "title": "ResourceUsage",
+      "type": "object"
+    },
+    "TaskResult": {
+      "additionalProperties": false,
+      "properties": {
+        "summary": {
+          "description": "Markdown answer shown to the user",
+          "title": "Summary",
+          "type": "string"
+        },
+        "artifacts": {
+          "items": {
+            "pattern": "^artifact://[^/]+/.+$",
+            "type": "string"
+          },
+          "title": "Artifacts",
+          "type": "array"
+        },
+        "evidence": {
+          "description": "/org paths used",
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "actions": {
+          "description": "syscall_ids committed",
+          "items": {
+            "type": "string"
+          },
+          "title": "Actions",
+          "type": "array"
+        },
+        "usage": {
+          "$ref": "#/$defs/ResourceUsage"
+        }
+      },
+      "required": [
+        "summary"
+      ],
+      "title": "TaskResult",
+      "type": "object"
+    },
+    "TaskStatus": {
+      "enum": [
+        "queued",
+        "planning",
+        "running",
+        "waiting_approval",
+        "paused",
+        "completed",
+        "failed",
+        "cancelled"
+      ],
+      "title": "TaskStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "task_id": {
+      "pattern": "^T-[A-Za-z0-9]+$",
+      "title": "Task Id",
+      "type": "string"
+    },
+    "org_id": {
+      "title": "Org Id",
+      "type": "string"
+    },
+    "user_id": {
+      "title": "User Id",
+      "type": "string"
+    },
+    "session_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Session Id"
+    },
+    "goal": {
+      "title": "Goal",
+      "type": "string"
+    },
+    "priority": {
+      "$ref": "#/$defs/Priority",
+      "default": "normal"
+    },
+    "privacy": {
+      "$ref": "#/$defs/PrivacyLevel",
+      "default": "internal"
+    },
+    "data_scope": {
+      "items": {
+        "pattern": "^/(org|workspace)(/.*)?$",
+        "type": "string"
+      },
+      "title": "Data Scope",
+      "type": "array"
+    },
+    "approval_policy": {
+      "default": "default",
+      "title": "Approval Policy",
+      "type": "string"
+    },
+    "quota": {
+      "$ref": "#/$defs/ResourceQuota"
+    },
+    "status": {
+      "$ref": "#/$defs/TaskStatus",
+      "default": "queued"
+    },
+    "root_pid": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Root Pid"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    },
+    "result": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TaskResult"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "error": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ErrorInfo"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "metadata": {
+      "additionalProperties": true,
+      "title": "Metadata",
+      "type": "object"
+    }
+  },
+  "required": [
+    "task_id",
+    "org_id",
+    "user_id",
+    "goal"
+  ],
+  "title": "Task",
+  "type": "object"
+}

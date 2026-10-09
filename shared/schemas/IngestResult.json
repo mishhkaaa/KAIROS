@@ -1,0 +1,37 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "created": {
+      "items": {
+        "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+        "type": "string"
+      },
+      "title": "Created",
+      "type": "array"
+    },
+    "updated": {
+      "items": {
+        "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+        "type": "string"
+      },
+      "title": "Updated",
+      "type": "array"
+    },
+    "skipped": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Skipped",
+      "type": "array"
+    },
+    "errors": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Errors",
+      "type": "array"
+    }
+  },
+  "title": "IngestResult",
+  "type": "object"
+}

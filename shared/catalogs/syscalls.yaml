@@ -1,0 +1,22 @@
+# Blueprint §25 syscall verbs -> how they are expressed in KAIROS.
+# Knowledge/memory/process verbs are AgentContext methods (governed by the kernel, audited, but not "tool" syscalls).
+# World-mutating verbs are SyscallRequest{capability, tool, operation} -> policy -> (approval) -> transaction -> ToolExecutor.
+
+READ:             {via: "ctx.read(path)",                    capability: knowledge.read}
+SEARCH:           {via: "ctx.search(SearchQuery)",           capability: knowledge.search}
+LIST:             {via: "ctx.list(path)",                    capability: knowledge.read}
+TRAVERSE:         {via: "gateway /knowledge/graph (agents: ctx.search with modes=[graph])", capability: knowledge.read}
+DELEGATE:         {via: "ctx.spawn(agent, goal) + ctx.wait(pid)", capability: agent.spawn}
+SEND:             {via: "ctx.send(A2AMessage)  (agent-to-agent) | syscall external.email (outside world)", capability: "agent.message | external.email"}
+REQUEST_APPROVAL: {via: "implicit — kernel creates Approval when policy says REQUIRES_APPROVAL", capability: null}
+SCHEDULE:         {via: "stretch — cron jobs in kernel scheduler", capability: agent.spawn}
+WRITE:            {via: "ctx.syscall(tool=fs, operation=write_file)",   capability: fs.write}
+EXEC:             {via: "ctx.syscall(tool=sandbox, operation=exec)",    capability: sandbox.exec}
+QUERY_DB:         {via: "ctx.syscall(tool=postgres, operation=query)",  capability: postgres.read}
+OPEN_BROWSER:     {via: "ctx.syscall(tool=browser, operation=open)",    capability: browser.open}
+CLICK:            {via: "ctx.syscall(tool=browser, operation=click)",   capability: browser.click}
+TYPE:             {via: "ctx.syscall(tool=browser, operation=type)",    capability: browser.type}
+DOWNLOAD:         {via: "ctx.syscall(tool=browser, operation=download)", capability: browser.open}
+UPLOAD:           {via: "ctx.syscall(tool=<connector>, operation=upload)", capability: "<tool>.write"}
+CREATE:           {via: "ctx.syscall(tool=jira, operation=create_issue)", capability: jira.write}
+UPDATE:           {via: "ctx.syscall(tool=jira, operation=update_issue)", capability: jira.write}

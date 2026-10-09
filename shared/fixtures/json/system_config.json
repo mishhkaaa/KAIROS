@@ -1,0 +1,699 @@
+{
+  "versions": {
+    "kairos": "0.1.0",
+    "contract": "0.13.0",
+    "python": "3.12.10",
+    "node": "24.18.0"
+  },
+  "env": "dev",
+  "stack": [
+    {
+      "component": "event_bus",
+      "mode": "real",
+      "implementation": "kairos_kernel.events.bus.RedisEventBus",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "component": "policy",
+      "mode": "real",
+      "implementation": "kairos_kernel.policy.engine.YamlPolicyEngine",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "component": "models",
+      "mode": "real",
+      "implementation": "kairos_models.router.router.PolicyRouter",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "component": "knowledge",
+      "mode": "real",
+      "implementation": "kairos_knowledge.kfs.KnowledgeFS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "component": "firewall",
+      "mode": "real",
+      "implementation": "kairos_knowledge.firewall.ContextFirewall",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "component": "memory",
+      "mode": "real",
+      "implementation": "kairos_knowledge.memory.MemoryManager",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "component": "agent_runtime",
+      "mode": "real",
+      "implementation": "kairos_agents.runtime.Runtime",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "component": "tools",
+      "mode": "real",
+      "implementation": "kairos_execution.tools.Executor",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "component": "sandbox",
+      "mode": "real",
+      "implementation": "kairos_execution.sandbox.DockerSandboxManager",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "component": "browser",
+      "mode": "real",
+      "implementation": "kairos_execution.browser.driver.PlaywrightDriver",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "component": "probe",
+      "mode": "real",
+      "implementation": "kairos_models.gpu.probe.HostProbe",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "models": {
+    "config_file": "models/models.7b-only.yaml",
+    "default": "qwen2.5:7b-instruct",
+    "embedding": "nomic-embed-text",
+    "remote_enabled": false,
+    "routes": [
+      {
+        "task_class": "planning",
+        "model": "qwen2.5:7b-instruct",
+        "local": true,
+        "available": true,
+        "context_window": 32768
+      },
+      {
+        "task_class": "reasoning",
+        "model": "qwen2.5:7b-instruct",
+        "local": true,
+        "available": true,
+        "context_window": 32768
+      },
+      {
+        "task_class": "summarization",
+        "model": "qwen2.5:7b-instruct",
+        "local": true,
+        "available": true,
+        "context_window": 32768
+      },
+      {
+        "task_class": "default",
+        "model": "qwen2.5:7b-instruct",
+        "local": true,
+        "available": true,
+        "context_window": 32768
+      },
+      {
+        "task_class": "latency_critical",
+        "model": "qwen2.5:7b-instruct",
+        "local": true,
+        "available": true,
+        "context_window": 32768
+      },
+      {
+        "task_class": "embedding",
+        "model": "nomic-embed-text",
+        "local": true,
+        "available": true,
+        "context_window": null
+      }
+    ],
+    "models": [
+      {
+        "name": "qwen2.5:7b-instruct",
+        "provider": "ollama",
+        "local": true,
+        "context_window": 32768,
+        "capabilities": [
+          "chat",
+          "json"
+        ],
+        "embedding_dim": null,
+        "available": true
+      },
+      {
+        "name": "nomic-embed-text",
+        "provider": "ollama",
+        "local": true,
+        "context_window": 8192,
+        "capabilities": [
+          "embed"
+        ],
+        "embedding_dim": 768,
+        "available": true
+      }
+    ]
+  },
+  "agents": [
+    {
+      "name": "action-agent",
+      "version": "0.1.0",
+      "description": "Turns an approved plan into concrete tool actions (tracker updates, reports) through governed syscalls.",
+      "handles": [
+        "action",
+        "update tracker",
+        "jira",
+        "write report"
+      ],
+      "runtime": {
+        "framework": "custom",
+        "entrypoint": "kairos_agents.library.action:ActionAgent",
+        "model_policy": "local-preferred",
+        "model_hint": null
+      },
+      "memory": {
+        "mounts": [
+          "/org/projects"
+        ]
+      },
+      "capabilities": {
+        "knowledge": [
+          "read",
+          "search"
+        ],
+        "tools": [
+          "jira.read",
+          "jira.write",
+          "fs.write"
+        ],
+        "agents": []
+      },
+      "resources": {
+        "cpu": 1.0,
+        "memory": "1Gi",
+        "gpu": 0.0,
+        "max_tokens_per_task": 8000,
+        "max_tool_calls": 10
+      },
+      "network": {
+        "allow": [
+          "jira.company.internal:443"
+        ]
+      },
+      "approval": {
+        "required": [
+          "jira.write"
+        ]
+      },
+      "system_prompt": null,
+      "template": null,
+      "generated": false,
+      "task_id": null
+    },
+    {
+      "name": "engineering-agent",
+      "version": "0.1.0",
+      "description": "Identifies engineering blockers, schedule slips and technical root causes.",
+      "handles": [
+        "engineering",
+        "schedule",
+        "delay",
+        "blocker",
+        "migration",
+        "deployment"
+      ],
+      "runtime": {
+        "framework": "custom",
+        "entrypoint": "kairos_agents.library.engineering:EngineeringAgent",
+        "model_policy": "local-preferred",
+        "model_hint": null
+      },
+      "memory": {
+        "mounts": [
+          "/org/engineering",
+          "/org/projects",
+          "/org/systems",
+          "/org/decisions"
+        ]
+      },
+      "capabilities": {
+        "knowledge": [
+          "read",
+          "search"
+        ],
+        "tools": [
+          "jira.read"
+        ],
+        "agents": []
+      },
+      "resources": {
+        "cpu": 1.0,
+        "memory": "1Gi",
+        "gpu": 0.0,
+        "max_tokens_per_task": 12000,
+        "max_tool_calls": 5
+      },
+      "network": {
+        "allow": []
+      },
+      "approval": {
+        "required": []
+      },
+      "system_prompt": null,
+      "template": null,
+      "generated": false,
+      "task_id": null
+    },
+    {
+      "name": "finance-agent",
+      "version": "0.1.0",
+      "description": "Analyzes budgets, costs and variance using permitted finance and project knowledge.",
+      "handles": [
+        "finance",
+        "budget",
+        "cost",
+        "variance",
+        "spend",
+        "overrun"
+      ],
+      "runtime": {
+        "framework": "nooa",
+        "entrypoint": "kairos_agents.library.finance:FinanceAgent",
+        "model_policy": "local-only",
+        "model_hint": null
+      },
+      "memory": {
+        "mounts": [
+          "/org/finance",
+          "/org/projects"
+        ]
+      },
+      "capabilities": {
+        "knowledge": [
+          "read",
+          "search"
+        ],
+        "tools": [
+          "jira.read"
+        ],
+        "agents": []
+      },
+      "resources": {
+        "cpu": 1.0,
+        "memory": "1Gi",
+        "gpu": 0.0,
+        "max_tokens_per_task": 12000,
+        "max_tool_calls": 5
+      },
+      "network": {
+        "allow": []
+      },
+      "approval": {
+        "required": []
+      },
+      "system_prompt": null,
+      "template": null,
+      "generated": false,
+      "task_id": null
+    },
+    {
+      "name": "planner-agent",
+      "version": "0.1.0",
+      "description": "Decomposes a user goal into subtasks, delegates to specialist agents and synthesizes the final answer.",
+      "handles": [
+        "planning",
+        "decomposition",
+        "synthesis",
+        "recovery plan"
+      ],
+      "runtime": {
+        "framework": "custom",
+        "entrypoint": "kairos_agents.library.planner:PlannerAgent",
+        "model_policy": "local-preferred",
+        "model_hint": null
+      },
+      "memory": {
+        "mounts": [
+          "/org"
+        ]
+      },
+      "capabilities": {
+        "knowledge": [
+          "read",
+          "search"
+        ],
+        "tools": [],
+        "agents": [
+          "finance-agent",
+          "engineering-agent",
+          "research-agent",
+          "action-agent"
+        ]
+      },
+      "resources": {
+        "cpu": 1.0,
+        "memory": "1Gi",
+        "gpu": 0.0,
+        "max_tokens_per_task": 16000,
+        "max_tool_calls": 0
+      },
+      "network": {
+        "allow": []
+      },
+      "approval": {
+        "required": []
+      },
+      "system_prompt": null,
+      "template": null,
+      "generated": false,
+      "task_id": null
+    },
+    {
+      "name": "research-agent",
+      "version": "0.1.0",
+      "description": "Gathers supporting evidence from the knowledge base and (sandboxed) web pages.",
+      "handles": [
+        "research",
+        "evidence",
+        "vendor",
+        "background",
+        "web"
+      ],
+      "runtime": {
+        "framework": "custom",
+        "entrypoint": "kairos_agents.library.research:ResearchAgent",
+        "model_policy": "local-preferred",
+        "model_hint": null
+      },
+      "memory": {
+        "mounts": [
+          "/org"
+        ]
+      },
+      "capabilities": {
+        "knowledge": [
+          "read",
+          "search"
+        ],
+        "tools": [
+          "browser.open"
+        ],
+        "agents": []
+      },
+      "resources": {
+        "cpu": 1.0,
+        "memory": "1Gi",
+        "gpu": 0.0,
+        "max_tokens_per_task": 12000,
+        "max_tool_calls": 5
+      },
+      "network": {
+        "allow": [
+          "vendor-docs:80"
+        ]
+      },
+      "approval": {
+        "required": []
+      },
+      "system_prompt": null,
+      "template": null,
+      "generated": false,
+      "task_id": null
+    }
+  ],
+  "tools": [
+    {
+      "name": "jira",
+      "description": "Issue tracker (mock)",
+      "transport": "native",
+      "operations": [
+        {
+          "name": "get_issue",
+          "capability": "jira.read",
+          "description": "Read an issue by key",
+          "input_schema": {
+            "type": "object",
+            "required": [
+              "key"
+            ],
+            "properties": {
+              "key": {
+                "type": "string"
+              }
+            }
+          },
+          "output_schema": {},
+          "risk": "low",
+          "reversible": false,
+          "requires_sandbox": false
+        },
+        {
+          "name": "search_issues",
+          "capability": "jira.read",
+          "description": "Search issues by project",
+          "input_schema": {
+            "type": "object",
+            "properties": {
+              "project": {
+                "type": "string"
+              }
+            }
+          },
+          "output_schema": {},
+          "risk": "low",
+          "reversible": false,
+          "requires_sandbox": false
+        },
+        {
+          "name": "update_issue",
+          "capability": "jira.write",
+          "description": "Update fields / add a comment",
+          "input_schema": {
+            "type": "object",
+            "required": [
+              "key"
+            ],
+            "properties": {
+              "key": {
+                "type": "string"
+              },
+              "fields": {
+                "type": "object"
+              },
+              "comment": {
+                "type": "string"
+              }
+            }
+          },
+          "output_schema": {},
+          "risk": "medium",
+          "reversible": true,
+          "requires_sandbox": false
+        }
+      ]
+    },
+    {
+      "name": "fs",
+      "description": "Workspace file operations",
+      "transport": "native",
+      "operations": [
+        {
+          "name": "read_file",
+          "capability": "fs.read",
+          "description": "Read a workspace file",
+          "input_schema": {
+            "type": "object",
+            "required": [
+              "path"
+            ],
+            "properties": {
+              "path": {
+                "type": "string"
+              }
+            }
+          },
+          "output_schema": {},
+          "risk": "low",
+          "reversible": false,
+          "requires_sandbox": false
+        },
+        {
+          "name": "write_file",
+          "capability": "fs.write",
+          "description": "Write a workspace file",
+          "input_schema": {
+            "type": "object",
+            "required": [
+              "path",
+              "content"
+            ],
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "content": {
+                "type": "string"
+              }
+            }
+          },
+          "output_schema": {},
+          "risk": "low",
+          "reversible": true,
+          "requires_sandbox": false
+        }
+      ]
+    },
+    {
+      "name": "db",
+      "description": "Demo company database (read-only queries; writes need approval)",
+      "transport": "native",
+      "operations": [
+        {
+          "name": "schema",
+          "capability": "db.query",
+          "description": "Tables, columns and notes of the database",
+          "input_schema": {
+            "type": "object",
+            "properties": {}
+          },
+          "output_schema": {},
+          "risk": "low",
+          "reversible": false,
+          "requires_sandbox": false
+        },
+        {
+          "name": "query",
+          "capability": "db.query",
+          "description": "Run one read-only SELECT (LIMIT <= 200)",
+          "input_schema": {
+            "type": "object",
+            "required": [
+              "sql"
+            ],
+            "properties": {
+              "sql": {
+                "type": "string"
+              }
+            }
+          },
+          "output_schema": {},
+          "risk": "low",
+          "reversible": false,
+          "requires_sandbox": false
+        },
+        {
+          "name": "write",
+          "capability": "db.write",
+          "description": "Run one INSERT/UPDATE/DELETE with parameters",
+          "input_schema": {
+            "type": "object",
+            "required": [
+              "sql"
+            ],
+            "properties": {
+              "sql": {
+                "type": "string"
+              },
+              "params": {
+                "type": "array"
+              }
+            }
+          },
+          "output_schema": {},
+          "risk": "high",
+          "reversible": false,
+          "requires_sandbox": false
+        }
+      ]
+    },
+    {
+      "name": "browser",
+      "description": "Isolated browser (Playwright)",
+      "transport": "browser",
+      "operations": [
+        {
+          "name": "open",
+          "capability": "browser.open",
+          "description": "Open a URL and return title + text",
+          "input_schema": {
+            "type": "object",
+            "required": [
+              "url"
+            ],
+            "properties": {
+              "url": {
+                "type": "string"
+              }
+            }
+          },
+          "output_schema": {},
+          "risk": "low",
+          "reversible": false,
+          "requires_sandbox": true
+        }
+      ]
+    }
+  ],
+  "policies": [
+    {
+      "policy": "finance-agent-v1",
+      "priority": 100,
+      "agents": [
+        "finance-agent"
+      ],
+      "roles": [
+        "*"
+      ],
+      "requires_approval": [
+        "database.write",
+        "external.email",
+        "jira.write"
+      ],
+      "auto_approved": [],
+      "denied": []
+    }
+  ],
+  "firewall": {
+    "regex": true,
+    "llm_classifier": false
+  },
+  "feature_flags": {
+    "knowledge_watch": false,
+    "firewall_llm": false
+  },
+  "endpoints": [
+    {
+      "name": "gateway",
+      "url": "http://0.0.0.0:8089"
+    },
+    {
+      "name": "database",
+      "url": "postgresql+psycopg://kairos:***@localhost:5434/kairos"
+    },
+    {
+      "name": "redis",
+      "url": "redis://127.0.0.1:6380/0"
+    },
+    {
+      "name": "ollama",
+      "url": "http://localhost:11434"
+    },
+    {
+      "name": "jira",
+      "url": "http://localhost:8090"
+    }
+  ],
+  "paths": {
+    "okf_dir": "data/okf",
+    "policies_dir": "policies",
+    "manifests_dir": "agents/manifests",
+    "data_dir": ".data",
+    "models_config": "models/models.7b-only.yaml"
+  }
+}

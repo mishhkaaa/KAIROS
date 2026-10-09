@@ -1,0 +1,45 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "max_tokens": {
+      "default": 20000,
+      "title": "Max Tokens",
+      "type": "integer"
+    },
+    "max_tool_calls": {
+      "default": 20,
+      "title": "Max Tool Calls",
+      "type": "integer"
+    },
+    "max_wall_seconds": {
+      "default": 600,
+      "title": "Max Wall Seconds",
+      "type": "integer"
+    },
+    "max_children": {
+      "default": 8,
+      "title": "Max Children",
+      "type": "integer"
+    },
+    "cpu": {
+      "default": 1.0,
+      "title": "Cpu",
+      "type": "number"
+    },
+    "memory_mb": {
+      "default": 1024,
+      "title": "Memory Mb",
+      "type": "integer"
+    },
+    "gpu": {
+      "default": 0.0,
+      "description": "Fraction of the shared GPU",
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Gpu",
+      "type": "number"
+    }
+  },
+  "title": "ResourceQuota",
+  "type": "object"
+}

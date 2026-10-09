@@ -1,0 +1,28 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "created": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Created",
+      "type": "array"
+    },
+    "updated": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Updated",
+      "type": "array"
+    },
+    "errors": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Errors",
+      "type": "array"
+    }
+  },
+  "title": "ConnectorSyncResult",
+  "type": "object"
+}

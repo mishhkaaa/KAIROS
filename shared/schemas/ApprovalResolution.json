@@ -1,0 +1,20 @@
+{
+  "additionalProperties": false,
+  "description": "Body of POST /approvals/{id}/approve|reject.",
+  "properties": {
+    "comment": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Comment"
+    }
+  },
+  "title": "ApprovalResolution",
+  "type": "object"
+}

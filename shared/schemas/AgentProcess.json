@@ -1,0 +1,290 @@
+{
+  "$defs": {
+    "AgentState": {
+      "enum": [
+        "CREATED",
+        "INITIALIZING",
+        "READY",
+        "RUNNING",
+        "WAITING",
+        "PAUSED",
+        "CHECKPOINTING",
+        "COMPLETED",
+        "FAILED",
+        "RETRYING",
+        "TERMINATED"
+      ],
+      "title": "AgentState",
+      "type": "string"
+    },
+    "ErrorInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "description": "One of shared/catalogs/errors.yaml",
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "retriable": {
+          "default": false,
+          "title": "Retriable",
+          "type": "boolean"
+        },
+        "details": {
+          "additionalProperties": true,
+          "title": "Details",
+          "type": "object"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "ErrorInfo",
+      "type": "object"
+    },
+    "ResourceQuota": {
+      "additionalProperties": false,
+      "properties": {
+        "max_tokens": {
+          "default": 20000,
+          "title": "Max Tokens",
+          "type": "integer"
+        },
+        "max_tool_calls": {
+          "default": 20,
+          "title": "Max Tool Calls",
+          "type": "integer"
+        },
+        "max_wall_seconds": {
+          "default": 600,
+          "title": "Max Wall Seconds",
+          "type": "integer"
+        },
+        "max_children": {
+          "default": 8,
+          "title": "Max Children",
+          "type": "integer"
+        },
+        "cpu": {
+          "default": 1.0,
+          "title": "Cpu",
+          "type": "number"
+        },
+        "memory_mb": {
+          "default": 1024,
+          "title": "Memory Mb",
+          "type": "integer"
+        },
+        "gpu": {
+          "default": 0.0,
+          "description": "Fraction of the shared GPU",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Gpu",
+          "type": "number"
+        }
+      },
+      "title": "ResourceQuota",
+      "type": "object"
+    },
+    "ResourceUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "tokens_prompt": {
+          "default": 0,
+          "title": "Tokens Prompt",
+          "type": "integer"
+        },
+        "tokens_completion": {
+          "default": 0,
+          "title": "Tokens Completion",
+          "type": "integer"
+        },
+        "tool_calls": {
+          "default": 0,
+          "title": "Tool Calls",
+          "type": "integer"
+        },
+        "children_spawned": {
+          "default": 0,
+          "title": "Children Spawned",
+          "type": "integer"
+        },
+        "wall_seconds": {
+          "default": 0.0,
+          "title": "Wall Seconds",
+          "type": "number"
+        },
+        "gpu_seconds": {
+          "default": 0.0,
+          "title": "Gpu Seconds",
+          "type": "number"
+        }
+      },
+      "title": "ResourceUsage",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "pid": {
+      "minimum": 1,
+      "title": "Pid",
+      "type": "integer"
+    },
+    "ppid": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Ppid"
+    },
+    "task_id": {
+      "pattern": "^T-[A-Za-z0-9]+$",
+      "title": "Task Id",
+      "type": "string"
+    },
+    "owner": {
+      "description": "user_id the process acts on behalf of",
+      "title": "Owner",
+      "type": "string"
+    },
+    "agent": {
+      "description": "Manifest name, e.g. finance-agent",
+      "title": "Agent",
+      "type": "string"
+    },
+    "agent_version": {
+      "default": "0.1.0",
+      "title": "Agent Version",
+      "type": "string"
+    },
+    "state": {
+      "$ref": "#/$defs/AgentState",
+      "default": "CREATED"
+    },
+    "goal": {
+      "default": "",
+      "title": "Goal",
+      "type": "string"
+    },
+    "model": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Last model the router picked for this pid",
+      "title": "Model"
+    },
+    "memory_mounts": {
+      "items": {
+        "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+        "type": "string"
+      },
+      "title": "Memory Mounts",
+      "type": "array"
+    },
+    "capabilities": {
+      "items": {
+        "pattern": "^(\\*|[a-z][a-z0-9_]*(\\.([a-z][a-z0-9_]*|\\*))+)$",
+        "type": "string"
+      },
+      "title": "Capabilities",
+      "type": "array"
+    },
+    "quota": {
+      "$ref": "#/$defs/ResourceQuota"
+    },
+    "usage": {
+      "$ref": "#/$defs/ResourceUsage"
+    },
+    "workspace": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Host path of the ephemeral workspace",
+      "title": "Workspace"
+    },
+    "checkpoint_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Checkpoint Id"
+    },
+    "attempt_count": {
+      "default": 0,
+      "title": "Attempt Count",
+      "type": "integer"
+    },
+    "last_error": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ErrorInfo"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "waiting_on": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "e.g. \"approval:APR-882\", \"pid:103\", \"ipc\"",
+      "title": "Waiting On"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "pid",
+    "task_id",
+    "owner",
+    "agent"
+  ],
+  "title": "AgentProcess",
+  "type": "object"
+}

@@ -1,0 +1,266 @@
+{
+  "$defs": {
+    "AgentResultStatus": {
+      "enum": [
+        "completed",
+        "failed",
+        "cancelled"
+      ],
+      "title": "AgentResultStatus",
+      "type": "string"
+    },
+    "ErrorInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "description": "One of shared/catalogs/errors.yaml",
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "retriable": {
+          "default": false,
+          "title": "Retriable",
+          "type": "boolean"
+        },
+        "details": {
+          "additionalProperties": true,
+          "title": "Details",
+          "type": "object"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "ErrorInfo",
+      "type": "object"
+    },
+    "ResourceUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "tokens_prompt": {
+          "default": 0,
+          "title": "Tokens Prompt",
+          "type": "integer"
+        },
+        "tokens_completion": {
+          "default": 0,
+          "title": "Tokens Completion",
+          "type": "integer"
+        },
+        "tool_calls": {
+          "default": 0,
+          "title": "Tool Calls",
+          "type": "integer"
+        },
+        "children_spawned": {
+          "default": 0,
+          "title": "Children Spawned",
+          "type": "integer"
+        },
+        "wall_seconds": {
+          "default": 0.0,
+          "title": "Wall Seconds",
+          "type": "number"
+        },
+        "gpu_seconds": {
+          "default": 0.0,
+          "title": "Gpu Seconds",
+          "type": "number"
+        }
+      },
+      "title": "ResourceUsage",
+      "type": "object"
+    },
+    "Risk": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Risk",
+      "type": "string"
+    },
+    "SyscallRequest": {
+      "additionalProperties": false,
+      "description": "What an agent asks the kernel to do to the outside world (blueprint \u00a735).\n\n`capability` is what policy checks; `tool` + `operation` is what the executor runs.",
+      "properties": {
+        "syscall_id": {
+          "description": "\"SC-...\" \u2014 assigned by the caller via new_id(\"SC\")",
+          "title": "Syscall Id",
+          "type": "string"
+        },
+        "task_id": {
+          "pattern": "^T-[A-Za-z0-9]+$",
+          "title": "Task Id",
+          "type": "string"
+        },
+        "pid": {
+          "minimum": 1,
+          "title": "Pid",
+          "type": "integer"
+        },
+        "capability": {
+          "description": "e.g. jira.write",
+          "pattern": "^(\\*|[a-z][a-z0-9_]*(\\.([a-z][a-z0-9_]*|\\*))+)$",
+          "title": "Capability",
+          "type": "string"
+        },
+        "tool": {
+          "description": "Tool name from ToolExecutor.list_tools(), e.g. jira",
+          "title": "Tool",
+          "type": "string"
+        },
+        "operation": {
+          "description": "Operation on that tool, e.g. update_issue",
+          "title": "Operation",
+          "type": "string"
+        },
+        "resource": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "What is touched, e.g. project/APOLLO",
+          "title": "Resource"
+        },
+        "arguments": {
+          "additionalProperties": true,
+          "title": "Arguments",
+          "type": "object"
+        },
+        "arguments_ref": {
+          "anyOf": [
+            {
+              "pattern": "^artifact://[^/]+/.+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Arguments Ref"
+        },
+        "risk": {
+          "$ref": "#/$defs/Risk",
+          "default": "low"
+        },
+        "justification": {
+          "default": "",
+          "title": "Justification",
+          "type": "string"
+        },
+        "evidence": {
+          "description": "/org paths supporting the action",
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "idempotency_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Idempotency Key"
+        }
+      },
+      "required": [
+        "syscall_id",
+        "task_id",
+        "pid",
+        "capability",
+        "tool",
+        "operation"
+      ],
+      "title": "SyscallRequest",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "pid": {
+      "minimum": 1,
+      "title": "Pid",
+      "type": "integer"
+    },
+    "agent": {
+      "title": "Agent",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/AgentResultStatus"
+    },
+    "summary": {
+      "title": "Summary",
+      "type": "string"
+    },
+    "output": {
+      "additionalProperties": true,
+      "title": "Output",
+      "type": "object"
+    },
+    "artifacts": {
+      "items": {
+        "pattern": "^artifact://[^/]+/.+$",
+        "type": "string"
+      },
+      "title": "Artifacts",
+      "type": "array"
+    },
+    "evidence": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "actions": {
+      "description": "Syscalls this agent issued",
+      "items": {
+        "$ref": "#/$defs/SyscallRequest"
+      },
+      "title": "Actions",
+      "type": "array"
+    },
+    "usage": {
+      "$ref": "#/$defs/ResourceUsage"
+    },
+    "error": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ErrorInfo"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "pid",
+    "agent",
+    "status",
+    "summary"
+  ],
+  "title": "AgentResult",
+  "type": "object"
+}

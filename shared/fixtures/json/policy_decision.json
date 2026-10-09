@@ -1,0 +1,14 @@
+{
+  "decision": "REQUIRES_APPROVAL",
+  "policy": "project-updates-v1",
+  "reason": "Write operation on external system",
+  "approval_id": "APR-882",
+  "matched_rules": [
+    "approval.jira.write=required"
+  ],
+  "constraints": {
+    "network_allow": [
+      "jira.company.internal:443"
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "additionalProperties": false,
+  "description": "agent.thought: one short visible step of an agent. `pid` is set by the kernel, not the agent.",
+  "properties": {
+    "pid": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pid"
+    },
+    "step": {
+      "description": "Short step label, e.g. \"search\", \"plan\", \"synthesize\"",
+      "maxLength": 40,
+      "title": "Step",
+      "type": "string"
+    },
+    "text": {
+      "description": "One sentence",
+      "maxLength": 240,
+      "title": "Text",
+      "type": "string"
+    }
+  },
+  "required": [
+    "step",
+    "text"
+  ],
+  "title": "AgentThought",
+  "type": "object"
+}

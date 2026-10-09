@@ -1,0 +1,15 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "id_token": {
+      "description": "The credential from Google Identity Services",
+      "title": "Id Token",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id_token"
+  ],
+  "title": "GoogleLogin",
+  "type": "object"
+}

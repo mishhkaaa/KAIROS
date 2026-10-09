@@ -1,0 +1,50 @@
+{
+  "approval_id": "APR-882",
+  "task_id": "T-1842",
+  "pid": 105,
+  "agent": "action-agent",
+  "syscall": {
+    "syscall_id": "SC-77f1",
+    "task_id": "T-1842",
+    "pid": 105,
+    "capability": "jira.write",
+    "tool": "jira",
+    "operation": "update_issue",
+    "resource": "project/APOLLO",
+    "arguments": {
+      "key": "APOLLO-12",
+      "fields": {
+        "status": "At Risk"
+      },
+      "comment": "Root causes: migration backfill failure, dual-run cloud cost (ADR-042), vendor SDK block."
+    },
+    "arguments_ref": null,
+    "risk": "medium",
+    "justification": "Record root causes on the migration ticket",
+    "evidence": [
+      "/org/finance/apollo-budget",
+      "/org/engineering/apollo-status",
+      "/org/decisions/ADR-042"
+    ],
+    "idempotency_key": null
+  },
+  "decision": {
+    "decision": "REQUIRES_APPROVAL",
+    "policy": "project-updates-v1",
+    "reason": "Write operation on external system",
+    "approval_id": "APR-882",
+    "matched_rules": [
+      "approval.jira.write=required"
+    ],
+    "constraints": {
+      "network_allow": [
+        "jira.company.internal:443"
+      ]
+    }
+  },
+  "status": "pending",
+  "requested_at": "2026-09-27T10:00:40Z",
+  "resolved_at": null,
+  "resolved_by": null,
+  "comment": null
+}

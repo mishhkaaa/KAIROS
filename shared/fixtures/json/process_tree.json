@@ -1,0 +1,31 @@
+{
+  "pid": 101,
+  "agent": "planner-agent",
+  "state": "WAITING",
+  "children": [
+    {
+      "pid": 102,
+      "agent": "finance-agent",
+      "state": "COMPLETED",
+      "children": []
+    },
+    {
+      "pid": 103,
+      "agent": "engineering-agent",
+      "state": "COMPLETED",
+      "children": []
+    },
+    {
+      "pid": 104,
+      "agent": "research-agent",
+      "state": "COMPLETED",
+      "children": []
+    },
+    {
+      "pid": 105,
+      "agent": "action-agent",
+      "state": "WAITING",
+      "children": []
+    }
+  ]
+}

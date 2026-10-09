@@ -1,0 +1,133 @@
+{
+  "$defs": {
+    "MessageType": {
+      "enum": [
+        "request",
+        "response",
+        "evidence",
+        "clarification",
+        "result",
+        "cancel"
+      ],
+      "title": "MessageType",
+      "type": "string"
+    },
+    "TrustLevel": {
+      "enum": [
+        "verified",
+        "trusted",
+        "unverified",
+        "untrusted"
+      ],
+      "title": "TrustLevel",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "message_id": {
+      "description": "\"MSG-...\"",
+      "title": "Message Id",
+      "type": "string"
+    },
+    "task_id": {
+      "pattern": "^T-[A-Za-z0-9]+$",
+      "title": "Task Id",
+      "type": "string"
+    },
+    "sender_pid": {
+      "minimum": 1,
+      "title": "Sender Pid",
+      "type": "integer"
+    },
+    "receiver_pid": {
+      "minimum": 1,
+      "title": "Receiver Pid",
+      "type": "integer"
+    },
+    "sender": {
+      "description": "Agent name",
+      "title": "Sender",
+      "type": "string"
+    },
+    "receiver": {
+      "description": "Agent name",
+      "title": "Receiver",
+      "type": "string"
+    },
+    "type": {
+      "$ref": "#/$defs/MessageType"
+    },
+    "content": {
+      "default": "",
+      "description": "Short human-readable text; keep under ~2k chars",
+      "title": "Content",
+      "type": "string"
+    },
+    "payload": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Payload"
+    },
+    "payload_ref": {
+      "anyOf": [
+        {
+          "pattern": "^artifact://[^/]+/.+$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Payload Ref"
+    },
+    "provenance": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Provenance",
+      "type": "array"
+    },
+    "trust": {
+      "$ref": "#/$defs/TrustLevel",
+      "default": "unverified"
+    },
+    "in_reply_to": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "In Reply To"
+    },
+    "sent_at": {
+      "format": "date-time",
+      "title": "Sent At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "message_id",
+    "task_id",
+    "sender_pid",
+    "receiver_pid",
+    "sender",
+    "receiver",
+    "type"
+  ],
+  "title": "A2AMessage",
+  "type": "object"
+}

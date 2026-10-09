@@ -1,0 +1,129 @@
+{
+  "$defs": {
+    "AllowDeny": {
+      "additionalProperties": false,
+      "properties": {
+        "allow": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Allow",
+          "type": "array"
+        },
+        "deny": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Deny",
+          "type": "array"
+        }
+      },
+      "title": "AllowDeny",
+      "type": "object"
+    },
+    "ApprovalMode": {
+      "enum": [
+        "required",
+        "auto",
+        "never"
+      ],
+      "title": "ApprovalMode",
+      "type": "string"
+    },
+    "FilesystemRules": {
+      "additionalProperties": false,
+      "properties": {
+        "read": {
+          "items": {
+            "pattern": "^/(org|workspace)(/.*)?$",
+            "type": "string"
+          },
+          "title": "Read",
+          "type": "array"
+        },
+        "write": {
+          "items": {
+            "pattern": "^/(org|workspace)(/.*)?$",
+            "type": "string"
+          },
+          "title": "Write",
+          "type": "array"
+        }
+      },
+      "title": "FilesystemRules",
+      "type": "object"
+    },
+    "PolicyAppliesTo": {
+      "additionalProperties": false,
+      "properties": {
+        "agents": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Agents",
+          "type": "array"
+        },
+        "roles": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Roles",
+          "type": "array"
+        }
+      },
+      "title": "PolicyAppliesTo",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "policy": {
+      "description": "Unique id, e.g. finance-agent-v1",
+      "title": "Policy",
+      "type": "string"
+    },
+    "description": {
+      "default": "",
+      "title": "Description",
+      "type": "string"
+    },
+    "priority": {
+      "default": 100,
+      "description": "Lower number wins when several policies match",
+      "title": "Priority",
+      "type": "integer"
+    },
+    "applies_to": {
+      "$ref": "#/$defs/PolicyAppliesTo"
+    },
+    "knowledge": {
+      "$ref": "#/$defs/AllowDeny",
+      "description": "PathGlobs over /org"
+    },
+    "filesystem": {
+      "$ref": "#/$defs/FilesystemRules"
+    },
+    "network": {
+      "$ref": "#/$defs/AllowDeny",
+      "description": "host:port entries"
+    },
+    "tools": {
+      "$ref": "#/$defs/AllowDeny",
+      "description": "Capability globs"
+    },
+    "approval": {
+      "patternProperties": {
+        "^(\\*|[a-z][a-z0-9_]*(\\.([a-z][a-z0-9_]*|\\*))+)$": {
+          "$ref": "#/$defs/ApprovalMode"
+        }
+      },
+      "title": "Approval",
+      "type": "object"
+    }
+  },
+  "required": [
+    "policy"
+  ],
+  "title": "PolicyDocument",
+  "type": "object"
+}

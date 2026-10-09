@@ -1,0 +1,16 @@
+{
+  "ts": "2026-09-27T10:00:41Z",
+  "cpu_percent": 37.5,
+  "ram_used_mb": 11240,
+  "ram_total_mb": 32768,
+  "gpu": {
+    "name": "NVIDIA RTX 4070 Laptop",
+    "utilization": 0.31,
+    "memory_used_mb": 5120,
+    "memory_total_mb": 8188
+  },
+  "running_processes": 2,
+  "queued_tasks": 0,
+  "active_sandboxes": 1,
+  "tokens_last_minute": 4200
+}

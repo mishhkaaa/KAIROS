@@ -1,0 +1,91 @@
+{
+  "$defs": {
+    "MemoryKind": {
+      "enum": [
+        "working",
+        "episodic",
+        "semantic"
+      ],
+      "title": "MemoryKind",
+      "type": "string"
+    },
+    "MemoryScope": {
+      "enum": [
+        "task",
+        "agent",
+        "user",
+        "org"
+      ],
+      "title": "MemoryScope",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "text": {
+      "title": "Text",
+      "type": "string"
+    },
+    "org_id": {
+      "title": "Org Id",
+      "type": "string"
+    },
+    "kinds": {
+      "items": {
+        "$ref": "#/$defs/MemoryKind"
+      },
+      "title": "Kinds",
+      "type": "array"
+    },
+    "scopes": {
+      "items": {
+        "$ref": "#/$defs/MemoryScope"
+      },
+      "title": "Scopes",
+      "type": "array"
+    },
+    "owner": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Owner"
+    },
+    "task_id": {
+      "anyOf": [
+        {
+          "pattern": "^T-[A-Za-z0-9]+$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Task Id"
+    },
+    "include_stale": {
+      "default": false,
+      "title": "Include Stale",
+      "type": "boolean"
+    },
+    "top_k": {
+      "default": 5,
+      "maximum": 50,
+      "minimum": 1,
+      "title": "Top K",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "text",
+    "org_id"
+  ],
+  "title": "MemoryQuery",
+  "type": "object"
+}

@@ -1,0 +1,12 @@
+{
+  "goal": "Investigate why Project Apollo is over budget and six weeks behind schedule. Identify root causes, update the tracker, and prepare a recovery plan.",
+  "session_id": "S-alice-1",
+  "priority": "high",
+  "privacy": "internal",
+  "data_scope": [
+    "/org/**"
+  ],
+  "approval_policy": "default",
+  "quota": null,
+  "metadata": {}
+}

@@ -1,0 +1,30 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "model": {
+      "title": "Model",
+      "type": "string"
+    },
+    "dim": {
+      "title": "Dim",
+      "type": "integer"
+    },
+    "vectors": {
+      "items": {
+        "items": {
+          "type": "number"
+        },
+        "type": "array"
+      },
+      "title": "Vectors",
+      "type": "array"
+    }
+  },
+  "required": [
+    "model",
+    "dim",
+    "vectors"
+  ],
+  "title": "EmbedResponse",
+  "type": "object"
+}

@@ -1,0 +1,71 @@
+{
+  "$defs": {
+    "WorkingSetItem": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "description": "/org path, MEM id, artifact ref or 'inline'",
+          "title": "Ref",
+          "type": "string"
+        },
+        "source": {
+          "description": "evidence | memory | tool_output | plan | message",
+          "title": "Source",
+          "type": "string"
+        },
+        "content": {
+          "title": "Content",
+          "type": "string"
+        },
+        "tokens": {
+          "title": "Tokens",
+          "type": "integer"
+        },
+        "pinned": {
+          "default": false,
+          "title": "Pinned",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "ref",
+        "source",
+        "content",
+        "tokens"
+      ],
+      "title": "WorkingSetItem",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "What actually goes into the model's context for a pid. LOAD/EVICT operate on this.",
+  "properties": {
+    "pid": {
+      "minimum": 1,
+      "title": "Pid",
+      "type": "integer"
+    },
+    "token_budget": {
+      "title": "Token Budget",
+      "type": "integer"
+    },
+    "tokens_used": {
+      "default": 0,
+      "title": "Tokens Used",
+      "type": "integer"
+    },
+    "items": {
+      "items": {
+        "$ref": "#/$defs/WorkingSetItem"
+      },
+      "title": "Items",
+      "type": "array"
+    }
+  },
+  "required": [
+    "pid",
+    "token_budget"
+  ],
+  "title": "WorkingSet",
+  "type": "object"
+}

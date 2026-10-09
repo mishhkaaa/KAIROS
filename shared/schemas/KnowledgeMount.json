@@ -1,0 +1,60 @@
+{
+  "additionalProperties": false,
+  "description": "A folder of this computer mirrored into /org/mnt/<name>: its documents are converted, indexed and watched.",
+  "properties": {
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "host_path": {
+      "title": "Host Path",
+      "type": "string"
+    },
+    "org_path": {
+      "title": "Org Path",
+      "type": "string"
+    },
+    "files": {
+      "default": 0,
+      "title": "Files",
+      "type": "integer"
+    },
+    "skipped": {
+      "default": 0,
+      "title": "Skipped",
+      "type": "integer"
+    },
+    "watching": {
+      "default": false,
+      "title": "Watching",
+      "type": "boolean"
+    },
+    "synced_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Synced At"
+    },
+    "errors": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Errors",
+      "type": "array"
+    }
+  },
+  "required": [
+    "name",
+    "host_path",
+    "org_path"
+  ],
+  "title": "KnowledgeMount",
+  "type": "object"
+}

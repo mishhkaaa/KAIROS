@@ -1,0 +1,14 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "role": {
+      "title": "Role",
+      "type": "string"
+    }
+  },
+  "required": [
+    "role"
+  ],
+  "title": "MemberUpdate",
+  "type": "object"
+}

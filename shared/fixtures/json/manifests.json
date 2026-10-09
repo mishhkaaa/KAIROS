@@ -1,0 +1,267 @@
+[
+  {
+    "name": "action-agent",
+    "version": "0.1.0",
+    "description": "Turns an approved plan into concrete tool actions (tracker updates, reports) through governed syscalls.",
+    "handles": [
+      "action",
+      "update tracker",
+      "jira",
+      "write report"
+    ],
+    "runtime": {
+      "framework": "custom",
+      "entrypoint": "kairos_agents.library.action:ActionAgent",
+      "model_policy": "local-preferred",
+      "model_hint": null
+    },
+    "memory": {
+      "mounts": [
+        "/org/projects"
+      ]
+    },
+    "capabilities": {
+      "knowledge": [
+        "read",
+        "search"
+      ],
+      "tools": [
+        "jira.read",
+        "jira.write",
+        "fs.write"
+      ],
+      "agents": []
+    },
+    "resources": {
+      "cpu": 1.0,
+      "memory": "1Gi",
+      "gpu": 0.0,
+      "max_tokens_per_task": 8000,
+      "max_tool_calls": 10
+    },
+    "network": {
+      "allow": [
+        "jira.company.internal:443"
+      ]
+    },
+    "approval": {
+      "required": [
+        "jira.write"
+      ]
+    },
+    "system_prompt": null,
+    "template": null,
+    "generated": false,
+    "task_id": null
+  },
+  {
+    "name": "engineering-agent",
+    "version": "0.1.0",
+    "description": "Identifies engineering blockers, schedule slips and technical root causes.",
+    "handles": [
+      "engineering",
+      "schedule",
+      "delay",
+      "blocker",
+      "migration",
+      "deployment"
+    ],
+    "runtime": {
+      "framework": "custom",
+      "entrypoint": "kairos_agents.library.engineering:EngineeringAgent",
+      "model_policy": "local-preferred",
+      "model_hint": null
+    },
+    "memory": {
+      "mounts": [
+        "/org/engineering",
+        "/org/projects",
+        "/org/systems",
+        "/org/decisions"
+      ]
+    },
+    "capabilities": {
+      "knowledge": [
+        "read",
+        "search"
+      ],
+      "tools": [
+        "jira.read"
+      ],
+      "agents": []
+    },
+    "resources": {
+      "cpu": 1.0,
+      "memory": "1Gi",
+      "gpu": 0.0,
+      "max_tokens_per_task": 12000,
+      "max_tool_calls": 5
+    },
+    "network": {
+      "allow": []
+    },
+    "approval": {
+      "required": []
+    },
+    "system_prompt": null,
+    "template": null,
+    "generated": false,
+    "task_id": null
+  },
+  {
+    "name": "finance-agent",
+    "version": "0.1.0",
+    "description": "Analyzes budgets, costs and variance using permitted finance and project knowledge.",
+    "handles": [
+      "finance",
+      "budget",
+      "cost",
+      "variance",
+      "spend",
+      "overrun"
+    ],
+    "runtime": {
+      "framework": "nooa",
+      "entrypoint": "kairos_agents.library.finance:FinanceAgent",
+      "model_policy": "local-only",
+      "model_hint": null
+    },
+    "memory": {
+      "mounts": [
+        "/org/finance",
+        "/org/projects"
+      ]
+    },
+    "capabilities": {
+      "knowledge": [
+        "read",
+        "search"
+      ],
+      "tools": [
+        "jira.read"
+      ],
+      "agents": []
+    },
+    "resources": {
+      "cpu": 1.0,
+      "memory": "1Gi",
+      "gpu": 0.0,
+      "max_tokens_per_task": 12000,
+      "max_tool_calls": 5
+    },
+    "network": {
+      "allow": []
+    },
+    "approval": {
+      "required": []
+    },
+    "system_prompt": null,
+    "template": null,
+    "generated": false,
+    "task_id": null
+  },
+  {
+    "name": "planner-agent",
+    "version": "0.1.0",
+    "description": "Decomposes a user goal into subtasks, delegates to specialist agents and synthesizes the final answer.",
+    "handles": [
+      "planning",
+      "decomposition",
+      "synthesis",
+      "recovery plan"
+    ],
+    "runtime": {
+      "framework": "custom",
+      "entrypoint": "kairos_agents.library.planner:PlannerAgent",
+      "model_policy": "local-preferred",
+      "model_hint": null
+    },
+    "memory": {
+      "mounts": [
+        "/org"
+      ]
+    },
+    "capabilities": {
+      "knowledge": [
+        "read",
+        "search"
+      ],
+      "tools": [],
+      "agents": [
+        "finance-agent",
+        "engineering-agent",
+        "research-agent",
+        "action-agent"
+      ]
+    },
+    "resources": {
+      "cpu": 1.0,
+      "memory": "1Gi",
+      "gpu": 0.0,
+      "max_tokens_per_task": 16000,
+      "max_tool_calls": 0
+    },
+    "network": {
+      "allow": []
+    },
+    "approval": {
+      "required": []
+    },
+    "system_prompt": null,
+    "template": null,
+    "generated": false,
+    "task_id": null
+  },
+  {
+    "name": "research-agent",
+    "version": "0.1.0",
+    "description": "Gathers supporting evidence from the knowledge base and (sandboxed) web pages.",
+    "handles": [
+      "research",
+      "evidence",
+      "vendor",
+      "background",
+      "web"
+    ],
+    "runtime": {
+      "framework": "custom",
+      "entrypoint": "kairos_agents.library.research:ResearchAgent",
+      "model_policy": "local-preferred",
+      "model_hint": null
+    },
+    "memory": {
+      "mounts": [
+        "/org"
+      ]
+    },
+    "capabilities": {
+      "knowledge": [
+        "read",
+        "search"
+      ],
+      "tools": [
+        "browser.open"
+      ],
+      "agents": []
+    },
+    "resources": {
+      "cpu": 1.0,
+      "memory": "1Gi",
+      "gpu": 0.0,
+      "max_tokens_per_task": 12000,
+      "max_tool_calls": 5
+    },
+    "network": {
+      "allow": [
+        "vendor-docs:80"
+      ]
+    },
+    "approval": {
+      "required": []
+    },
+    "system_prompt": null,
+    "template": null,
+    "generated": false,
+    "task_id": null
+  }
+]

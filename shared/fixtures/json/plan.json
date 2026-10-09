@@ -1,0 +1,38 @@
+{
+  "task_id": "T-1842",
+  "rationale": "Budget and schedule questions need finance + engineering evidence; vendor context from research; tracker update via the action agent.",
+  "steps": [
+    {
+      "step_id": "s1",
+      "agent": "finance-agent",
+      "goal": "Explain the Apollo budget variance",
+      "depends_on": [],
+      "inputs": {}
+    },
+    {
+      "step_id": "s2",
+      "agent": "engineering-agent",
+      "goal": "Identify engineering causes of the 6-week slip",
+      "depends_on": [],
+      "inputs": {}
+    },
+    {
+      "step_id": "s3",
+      "agent": "research-agent",
+      "goal": "Collect vendor SDK context",
+      "depends_on": [],
+      "inputs": {}
+    },
+    {
+      "step_id": "s4",
+      "agent": "action-agent",
+      "goal": "Update APOLLO-12 with root causes",
+      "depends_on": [
+        "s1",
+        "s2",
+        "s3"
+      ],
+      "inputs": {}
+    }
+  ]
+}

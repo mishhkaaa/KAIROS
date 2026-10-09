@@ -1,0 +1,54 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "provider": {
+      "title": "Provider",
+      "type": "string"
+    },
+    "local": {
+      "default": true,
+      "title": "Local",
+      "type": "boolean"
+    },
+    "context_window": {
+      "default": 8192,
+      "title": "Context Window",
+      "type": "integer"
+    },
+    "capabilities": {
+      "description": "chat | embed | vision | json | tools",
+      "items": {
+        "type": "string"
+      },
+      "title": "Capabilities",
+      "type": "array"
+    },
+    "embedding_dim": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Embedding Dim"
+    },
+    "available": {
+      "default": true,
+      "title": "Available",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "name",
+    "provider"
+  ],
+  "title": "ModelInfo",
+  "type": "object"
+}

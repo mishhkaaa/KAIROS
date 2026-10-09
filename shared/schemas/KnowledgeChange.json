@@ -1,0 +1,55 @@
+{
+  "$defs": {
+    "ChangeKind": {
+      "enum": [
+        "created",
+        "updated",
+        "deleted"
+      ],
+      "title": "ChangeKind",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Payload of the knowledge.changed event.",
+  "properties": {
+    "path": {
+      "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+      "title": "Path",
+      "type": "string"
+    },
+    "change": {
+      "$ref": "#/$defs/ChangeKind"
+    },
+    "old_hash": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Old Hash"
+    },
+    "new_hash": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "New Hash"
+    }
+  },
+  "required": [
+    "path",
+    "change"
+  ],
+  "title": "KnowledgeChange",
+  "type": "object"
+}

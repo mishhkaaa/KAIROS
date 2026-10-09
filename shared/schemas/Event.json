@@ -1,0 +1,87 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "event_id": {
+      "title": "Event Id",
+      "type": "string"
+    },
+    "type": {
+      "description": "An EventType value; custom types must be namespaced x.<owner>.<name>",
+      "title": "Type",
+      "type": "string"
+    },
+    "ts": {
+      "format": "date-time",
+      "title": "Ts",
+      "type": "string"
+    },
+    "source": {
+      "description": "Component or \"pid:<n>\", e.g. \"kernel.scheduler\", \"knowledge.indexer\"",
+      "title": "Source",
+      "type": "string"
+    },
+    "org_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Org Id"
+    },
+    "task_id": {
+      "anyOf": [
+        {
+          "pattern": "^T-[A-Za-z0-9]+$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Task Id"
+    },
+    "pid": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pid"
+    },
+    "correlation_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "e.g. syscall_id or approval_id",
+      "title": "Correlation Id"
+    },
+    "payload": {
+      "additionalProperties": true,
+      "description": "See events.yaml for the payload model per type",
+      "title": "Payload",
+      "type": "object"
+    }
+  },
+  "required": [
+    "type",
+    "source"
+  ],
+  "title": "Event",
+  "type": "object"
+}

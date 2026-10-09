@@ -1,0 +1,132 @@
+{
+  "$defs": {
+    "Priority": {
+      "enum": [
+        "high",
+        "normal",
+        "background"
+      ],
+      "title": "Priority",
+      "type": "string"
+    },
+    "PrivacyLevel": {
+      "description": "Ordered from least to most sensitive. `restricted` must never leave the box.",
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "restricted"
+      ],
+      "title": "PrivacyLevel",
+      "type": "string"
+    },
+    "ResourceQuota": {
+      "additionalProperties": false,
+      "properties": {
+        "max_tokens": {
+          "default": 20000,
+          "title": "Max Tokens",
+          "type": "integer"
+        },
+        "max_tool_calls": {
+          "default": 20,
+          "title": "Max Tool Calls",
+          "type": "integer"
+        },
+        "max_wall_seconds": {
+          "default": 600,
+          "title": "Max Wall Seconds",
+          "type": "integer"
+        },
+        "max_children": {
+          "default": 8,
+          "title": "Max Children",
+          "type": "integer"
+        },
+        "cpu": {
+          "default": 1.0,
+          "title": "Cpu",
+          "type": "number"
+        },
+        "memory_mb": {
+          "default": 1024,
+          "title": "Memory Mb",
+          "type": "integer"
+        },
+        "gpu": {
+          "default": 0.0,
+          "description": "Fraction of the shared GPU",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Gpu",
+          "type": "number"
+        }
+      },
+      "title": "ResourceQuota",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Body of POST /tasks. org_id/user_id come from the auth headers, not the body.",
+  "properties": {
+    "goal": {
+      "minLength": 1,
+      "title": "Goal",
+      "type": "string"
+    },
+    "session_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Session Id"
+    },
+    "priority": {
+      "$ref": "#/$defs/Priority",
+      "default": "normal"
+    },
+    "privacy": {
+      "$ref": "#/$defs/PrivacyLevel",
+      "default": "internal"
+    },
+    "data_scope": {
+      "items": {
+        "pattern": "^/(org|workspace)(/.*)?$",
+        "type": "string"
+      },
+      "title": "Data Scope",
+      "type": "array"
+    },
+    "approval_policy": {
+      "default": "default",
+      "title": "Approval Policy",
+      "type": "string"
+    },
+    "quota": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ResourceQuota"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "metadata": {
+      "additionalProperties": true,
+      "title": "Metadata",
+      "type": "object"
+    }
+  },
+  "required": [
+    "goal"
+  ],
+  "title": "TaskCreate",
+  "type": "object"
+}

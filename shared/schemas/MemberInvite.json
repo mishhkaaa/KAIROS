@@ -1,0 +1,20 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "email": {
+      "minLength": 3,
+      "title": "Email",
+      "type": "string"
+    },
+    "role": {
+      "default": "member",
+      "title": "Role",
+      "type": "string"
+    }
+  },
+  "required": [
+    "email"
+  ],
+  "title": "MemberInvite",
+  "type": "object"
+}

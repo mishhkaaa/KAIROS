@@ -1,0 +1,70 @@
+{
+  "$defs": {
+    "ComponentHealth": {
+      "additionalProperties": false,
+      "properties": {
+        "component": {
+          "description": "kernel | knowledge | memory | models | agents | tools | sandbox | db | redis | ollama",
+          "title": "Component",
+          "type": "string"
+        },
+        "ok": {
+          "title": "Ok",
+          "type": "boolean"
+        },
+        "mode": {
+          "default": "real",
+          "description": "real | fake \u2014 which implementation is wired in",
+          "title": "Mode",
+          "type": "string"
+        },
+        "detail": {
+          "default": "",
+          "title": "Detail",
+          "type": "string"
+        }
+      },
+      "required": [
+        "component",
+        "ok"
+      ],
+      "title": "ComponentHealth",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "ready": {
+      "title": "Ready",
+      "type": "boolean"
+    },
+    "version": {
+      "title": "Version",
+      "type": "string"
+    },
+    "contract_version": {
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "uptime_s": {
+      "title": "Uptime S",
+      "type": "number"
+    },
+    "components": {
+      "items": {
+        "$ref": "#/$defs/ComponentHealth"
+      },
+      "title": "Components",
+      "type": "array"
+    }
+  },
+  "required": [
+    "ready",
+    "version",
+    "contract_version",
+    "uptime_s",
+    "components"
+  ],
+  "title": "SystemStatus",
+  "type": "object"
+}

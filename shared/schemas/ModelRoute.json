@@ -1,0 +1,43 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "task_class": {
+      "description": "planning | reasoning | ... | default | latency_critical | embedding",
+      "title": "Task Class",
+      "type": "string"
+    },
+    "model": {
+      "title": "Model",
+      "type": "string"
+    },
+    "local": {
+      "default": true,
+      "title": "Local",
+      "type": "boolean"
+    },
+    "available": {
+      "description": "The model is present in the runtime (ollama list)",
+      "title": "Available",
+      "type": "boolean"
+    },
+    "context_window": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Context Window"
+    }
+  },
+  "required": [
+    "task_class",
+    "model",
+    "available"
+  ],
+  "title": "ModelRoute",
+  "type": "object"
+}

@@ -1,0 +1,60 @@
+{
+  "$defs": {
+    "Decision": {
+      "enum": [
+        "ALLOW",
+        "DENY",
+        "REQUIRES_APPROVAL"
+      ],
+      "title": "Decision",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "decision": {
+      "$ref": "#/$defs/Decision"
+    },
+    "policy": {
+      "description": "Id of the policy document that decided",
+      "title": "Policy",
+      "type": "string"
+    },
+    "reason": {
+      "title": "Reason",
+      "type": "string"
+    },
+    "approval_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Approval Id"
+    },
+    "matched_rules": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Matched Rules",
+      "type": "array"
+    },
+    "constraints": {
+      "additionalProperties": true,
+      "description": "Extra limits for the executor, e.g. {\"network_allow\": [...]}",
+      "title": "Constraints",
+      "type": "object"
+    }
+  },
+  "required": [
+    "decision",
+    "policy",
+    "reason"
+  ],
+  "title": "PolicyDecision",
+  "type": "object"
+}

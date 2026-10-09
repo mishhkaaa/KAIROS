@@ -1,0 +1,51 @@
+{
+  "additionalProperties": false,
+  "description": "task.data: a table of results to show. At most MAX_DATA_ROWS rows; use TaskData.capped() to truncate.",
+  "properties": {
+    "columns": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Columns",
+      "type": "array"
+    },
+    "rows": {
+      "items": {
+        "items": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": "array"
+      },
+      "maxItems": 200,
+      "title": "Rows",
+      "type": "array"
+    },
+    "source": {
+      "description": "Where the rows came from, e.g. \"db.query\" or \"/org/finance/apollo-budget\"",
+      "title": "Source",
+      "type": "string"
+    }
+  },
+  "required": [
+    "columns",
+    "source"
+  ],
+  "title": "TaskData",
+  "type": "object"
+}

@@ -1,0 +1,110 @@
+{
+  "$defs": {
+    "GraphEdge": {
+      "additionalProperties": false,
+      "properties": {
+        "src": {
+          "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+          "title": "Src",
+          "type": "string"
+        },
+        "dst": {
+          "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+          "title": "Dst",
+          "type": "string"
+        },
+        "relation": {
+          "description": "links_to | depends_on | owned_by | decided_in | part_of | ...",
+          "title": "Relation",
+          "type": "string"
+        },
+        "weight": {
+          "default": 1.0,
+          "title": "Weight",
+          "type": "number"
+        }
+      },
+      "required": [
+        "src",
+        "dst",
+        "relation"
+      ],
+      "title": "GraphEdge",
+      "type": "object"
+    },
+    "KnowledgeEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+          "title": "Path",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "type": {
+          "title": "Type",
+          "type": "string"
+        },
+        "is_dir": {
+          "default": false,
+          "title": "Is Dir",
+          "type": "boolean"
+        },
+        "privacy": {
+          "$ref": "#/$defs/PrivacyLevel",
+          "default": "internal"
+        }
+      },
+      "required": [
+        "path",
+        "title",
+        "type"
+      ],
+      "title": "KnowledgeEntry",
+      "type": "object"
+    },
+    "PrivacyLevel": {
+      "description": "Ordered from least to most sensitive. `restricted` must never leave the box.",
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "restricted"
+      ],
+      "title": "PrivacyLevel",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "root": {
+      "pattern": "^/org(/[A-Za-z0-9._\\-]+)*/?$",
+      "title": "Root",
+      "type": "string"
+    },
+    "nodes": {
+      "items": {
+        "$ref": "#/$defs/KnowledgeEntry"
+      },
+      "title": "Nodes",
+      "type": "array"
+    },
+    "edges": {
+      "items": {
+        "$ref": "#/$defs/GraphEdge"
+      },
+      "title": "Edges",
+      "type": "array"
+    }
+  },
+  "required": [
+    "root",
+    "nodes",
+    "edges"
+  ],
+  "title": "GraphResult",
+  "type": "object"
+}

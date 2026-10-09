@@ -1,0 +1,143 @@
+{
+  "$defs": {
+    "ModelInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "local": {
+          "default": true,
+          "title": "Local",
+          "type": "boolean"
+        },
+        "context_window": {
+          "default": 8192,
+          "title": "Context Window",
+          "type": "integer"
+        },
+        "capabilities": {
+          "description": "chat | embed | vision | json | tools",
+          "items": {
+            "type": "string"
+          },
+          "title": "Capabilities",
+          "type": "array"
+        },
+        "embedding_dim": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Embedding Dim"
+        },
+        "available": {
+          "default": true,
+          "title": "Available",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "provider"
+      ],
+      "title": "ModelInfo",
+      "type": "object"
+    },
+    "ModelRoute": {
+      "additionalProperties": false,
+      "properties": {
+        "task_class": {
+          "description": "planning | reasoning | ... | default | latency_critical | embedding",
+          "title": "Task Class",
+          "type": "string"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "local": {
+          "default": true,
+          "title": "Local",
+          "type": "boolean"
+        },
+        "available": {
+          "description": "The model is present in the runtime (ollama list)",
+          "title": "Available",
+          "type": "boolean"
+        },
+        "context_window": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Context Window"
+        }
+      },
+      "required": [
+        "task_class",
+        "model",
+        "available"
+      ],
+      "title": "ModelRoute",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "config_file": {
+      "description": "Routing file in use, relative to the repo, e.g. models/models.7b-only.yaml",
+      "title": "Config File",
+      "type": "string"
+    },
+    "default": {
+      "type": "string",
+      "title": "Default"
+    },
+    "embedding": {
+      "title": "Embedding",
+      "type": "string"
+    },
+    "remote_enabled": {
+      "default": false,
+      "title": "Remote Enabled",
+      "type": "boolean"
+    },
+    "routes": {
+      "items": {
+        "$ref": "#/$defs/ModelRoute"
+      },
+      "title": "Routes",
+      "type": "array"
+    },
+    "models": {
+      "items": {
+        "$ref": "#/$defs/ModelInfo"
+      },
+      "title": "Models",
+      "type": "array"
+    }
+  },
+  "required": [
+    "config_file",
+    "default",
+    "embedding"
+  ],
+  "title": "ModelsConfig",
+  "type": "object"
+}

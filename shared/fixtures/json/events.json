@@ -1,0 +1,835 @@
+[
+  {
+    "event_id": "EV-00000",
+    "type": "task.created",
+    "ts": "2026-09-27T10:00:00Z",
+    "source": "kernel",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": null,
+    "correlation_id": null,
+    "payload": {
+      "goal": "Investigate why Project Apollo is over budget and six weeks behind schedule. Identify root causes, update the tracker, and prepare a recovery plan.",
+      "user_id": "alice"
+    }
+  },
+  {
+    "event_id": "EV-00020",
+    "type": "process.spawned",
+    "ts": "2026-09-27T10:00:00.200000Z",
+    "source": "pid:101",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 101,
+    "correlation_id": null,
+    "payload": {
+      "agent": "planner-agent",
+      "ppid": null
+    }
+  },
+  {
+    "event_id": "EV-00030",
+    "type": "process.state_changed",
+    "ts": "2026-09-27T10:00:00.300000Z",
+    "source": "pid:101",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 101,
+    "correlation_id": null,
+    "payload": {
+      "old": "CREATED",
+      "new": "RUNNING"
+    }
+  },
+  {
+    "event_id": "EV-00050",
+    "type": "agent.thought",
+    "ts": "2026-09-27T10:00:00.500000Z",
+    "source": "pid:101",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 101,
+    "correlation_id": null,
+    "payload": {
+      "pid": 101,
+      "step": "search",
+      "text": "Searching /org for evidence on Project Apollo."
+    }
+  },
+  {
+    "event_id": "EV-00200",
+    "type": "agent.log",
+    "ts": "2026-09-27T10:00:02Z",
+    "source": "pid:101",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 101,
+    "correlation_id": null,
+    "payload": {
+      "level": "info",
+      "message": "Decomposing goal into 4 subtasks"
+    }
+  },
+  {
+    "event_id": "EV-00300",
+    "type": "model.invoked",
+    "ts": "2026-09-27T10:00:03Z",
+    "source": "pid:101",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 101,
+    "correlation_id": null,
+    "payload": {
+      "model": "qwen2.5:7b-instruct",
+      "provider": "ollama",
+      "local": true,
+      "tokens": 812
+    }
+  },
+  {
+    "event_id": "EV-00310",
+    "type": "task.understood",
+    "ts": "2026-09-27T10:00:03.100000Z",
+    "source": "pid:101",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 101,
+    "correlation_id": null,
+    "payload": {
+      "intent": "Find why Project Apollo is over budget and late, then fix the plan",
+      "entities": [
+        "Project Apollo",
+        "APOLLO-12"
+      ],
+      "capabilities_needed": [
+        "knowledge.search",
+        "jira.read",
+        "browser.open",
+        "jira.write"
+      ],
+      "plan_summary": "Finance, engineering and research investigate in parallel; the action agent records the root causes on APOLLO-12."
+    }
+  },
+  {
+    "event_id": "EV-00320",
+    "type": "agent.planned",
+    "ts": "2026-09-27T10:00:03.200000Z",
+    "source": "pid:101",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 101,
+    "correlation_id": null,
+    "payload": {
+      "role": "finance-agent",
+      "why": "The goal is a budget overrun: explain the variance with evidence",
+      "scope": [
+        "/org/finance",
+        "/org/projects",
+        "/org/policies"
+      ],
+      "capabilities": [
+        "knowledge.read",
+        "knowledge.search",
+        "jira.read"
+      ]
+    }
+  },
+  {
+    "event_id": "EV-00330",
+    "type": "agent.planned",
+    "ts": "2026-09-27T10:00:03.300000Z",
+    "source": "pid:101",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 101,
+    "correlation_id": null,
+    "payload": {
+      "role": "engineering-agent",
+      "why": "The project is six weeks late: find the engineering causes",
+      "scope": [
+        "/org/engineering",
+        "/org/projects",
+        "/org/systems",
+        "/org/decisions"
+      ],
+      "capabilities": [
+        "knowledge.read",
+        "knowledge.search",
+        "jira.read"
+      ]
+    }
+  },
+  {
+    "event_id": "EV-00340",
+    "type": "agent.planned",
+    "ts": "2026-09-27T10:00:03.400000Z",
+    "source": "pid:101",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 101,
+    "correlation_id": null,
+    "payload": {
+      "role": "research-agent",
+      "why": "Vendor context may explain both the cost and the delay",
+      "scope": [
+        "/org"
+      ],
+      "capabilities": [
+        "knowledge.read",
+        "knowledge.search",
+        "browser.open"
+      ]
+    }
+  },
+  {
+    "event_id": "EV-00350",
+    "type": "agent.planned",
+    "ts": "2026-09-27T10:00:03.500000Z",
+    "source": "pid:101",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 101,
+    "correlation_id": null,
+    "payload": {
+      "role": "action-agent",
+      "why": "The goal asks to update the tracker once the causes are known",
+      "scope": [
+        "/org/projects"
+      ],
+      "capabilities": [
+        "knowledge.read",
+        "knowledge.search",
+        "jira.read",
+        "jira.write",
+        "fs.write"
+      ]
+    }
+  },
+  {
+    "event_id": "EV-00400",
+    "type": "process.spawned",
+    "ts": "2026-09-27T10:00:04Z",
+    "source": "pid:102",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 102,
+    "correlation_id": null,
+    "payload": {
+      "agent": "finance-agent",
+      "ppid": 101
+    }
+  },
+  {
+    "event_id": "EV-00405",
+    "type": "agent.created",
+    "ts": "2026-09-27T10:00:04.050000Z",
+    "source": "pid:102",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 102,
+    "correlation_id": null,
+    "payload": {
+      "pid": 102,
+      "manifest_name": "finance-agent",
+      "template": "finance-agent",
+      "generated": false
+    }
+  },
+  {
+    "event_id": "EV-00420",
+    "type": "process.spawned",
+    "ts": "2026-09-27T10:00:04.200000Z",
+    "source": "pid:103",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 103,
+    "correlation_id": null,
+    "payload": {
+      "agent": "engineering-agent",
+      "ppid": 101
+    }
+  },
+  {
+    "event_id": "EV-00425",
+    "type": "agent.created",
+    "ts": "2026-09-27T10:00:04.250000Z",
+    "source": "pid:103",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 103,
+    "correlation_id": null,
+    "payload": {
+      "pid": 103,
+      "manifest_name": "engineering-agent",
+      "template": "engineering-agent",
+      "generated": false
+    }
+  },
+  {
+    "event_id": "EV-00440",
+    "type": "process.spawned",
+    "ts": "2026-09-27T10:00:04.400000Z",
+    "source": "pid:104",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 104,
+    "correlation_id": null,
+    "payload": {
+      "agent": "research-agent",
+      "ppid": 101
+    }
+  },
+  {
+    "event_id": "EV-00445",
+    "type": "agent.created",
+    "ts": "2026-09-27T10:00:04.450000Z",
+    "source": "pid:104",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 104,
+    "correlation_id": null,
+    "payload": {
+      "pid": 104,
+      "manifest_name": "research-agent",
+      "template": "research-agent",
+      "generated": false
+    }
+  },
+  {
+    "event_id": "EV-00500",
+    "type": "agent.thought",
+    "ts": "2026-09-27T10:00:05Z",
+    "source": "pid:102",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 102,
+    "correlation_id": null,
+    "payload": {
+      "pid": 102,
+      "step": "search",
+      "text": "Searching finance records for the budget variance."
+    }
+  },
+  {
+    "event_id": "EV-00510",
+    "type": "agent.thought",
+    "ts": "2026-09-27T10:00:05.100000Z",
+    "source": "pid:103",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 103,
+    "correlation_id": null,
+    "payload": {
+      "pid": 103,
+      "step": "search",
+      "text": "Reading engineering status reports for blockers."
+    }
+  },
+  {
+    "event_id": "EV-00520",
+    "type": "agent.thought",
+    "ts": "2026-09-27T10:00:05.200000Z",
+    "source": "pid:104",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 104,
+    "correlation_id": null,
+    "payload": {
+      "pid": 104,
+      "step": "search",
+      "text": "Looking for vendor context on the SDK upgrade."
+    }
+  },
+  {
+    "event_id": "EV-00600",
+    "type": "knowledge.retrieved",
+    "ts": "2026-09-27T10:00:06Z",
+    "source": "pid:102",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 102,
+    "correlation_id": null,
+    "payload": {
+      "query": "Apollo budget overrun cloud cost",
+      "hits": 3,
+      "filtered_by_policy": 1,
+      "paths": [
+        "/org/finance/apollo-budget",
+        "/org/decisions/ADR-042",
+        "/org/inbox/vendor-email-2026-09-12"
+      ],
+      "flagged": [
+        "/org/inbox/vendor-email-2026-09-12"
+      ]
+    }
+  },
+  {
+    "event_id": "EV-00610",
+    "type": "agent.log",
+    "ts": "2026-09-27T10:00:06.100000Z",
+    "source": "pid:102",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 102,
+    "correlation_id": null,
+    "payload": {
+      "level": "warning",
+      "message": "Context firewall flagged /org/inbox/vendor-email-2026-09-12 (instruction_like) \u2014 treated as data"
+    }
+  },
+  {
+    "event_id": "EV-00620",
+    "type": "agent.thought",
+    "ts": "2026-09-27T10:00:06.200000Z",
+    "source": "pid:102",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 102,
+    "correlation_id": null,
+    "payload": {
+      "pid": 102,
+      "step": "firewall",
+      "text": "Treating 1 flagged document as data, not instructions."
+    }
+  },
+  {
+    "event_id": "EV-00800",
+    "type": "tool.query",
+    "ts": "2026-09-27T10:00:08Z",
+    "source": "pid:103",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 103,
+    "correlation_id": "SC-3b21",
+    "payload": {
+      "pid": 103,
+      "tool": "jira.search_issues",
+      "query": "project=APOLLO",
+      "rows": 3,
+      "ms": 41
+    }
+  },
+  {
+    "event_id": "EV-00810",
+    "type": "task.data",
+    "ts": "2026-09-27T10:00:08.100000Z",
+    "source": "pid:103",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 103,
+    "correlation_id": "SC-3b21",
+    "payload": {
+      "columns": [
+        "key",
+        "status",
+        "summary"
+      ],
+      "rows": [
+        [
+          "APOLLO-12",
+          "In Progress",
+          "Payments DB migration"
+        ],
+        [
+          "APOLLO-31",
+          "Blocked",
+          "Vendor SDK upgrade"
+        ],
+        [
+          "APOLLO-7",
+          "Done",
+          "Reconciliation service"
+        ]
+      ],
+      "source": "jira.search_issues"
+    }
+  },
+  {
+    "event_id": "EV-01150",
+    "type": "agent.thought",
+    "ts": "2026-09-27T10:00:11.500000Z",
+    "source": "pid:104",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 104,
+    "correlation_id": null,
+    "payload": {
+      "pid": 104,
+      "step": "browse",
+      "text": "Opening the vendor SDK docs in a sandboxed browser."
+    }
+  },
+  {
+    "event_id": "EV-01200",
+    "type": "sandbox.started",
+    "ts": "2026-09-27T10:00:12Z",
+    "source": "pid:104",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 104,
+    "correlation_id": null,
+    "payload": {
+      "sandbox_id": "SB-4c2",
+      "image": "kairos/sandbox-base:latest"
+    }
+  },
+  {
+    "event_id": "EV-01500",
+    "type": "tool.completed",
+    "ts": "2026-09-27T10:00:15Z",
+    "source": "pid:104",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 104,
+    "correlation_id": null,
+    "payload": {
+      "tool": "browser",
+      "operation": "open",
+      "status": "success"
+    }
+  },
+  {
+    "event_id": "EV-02000",
+    "type": "agent.thought",
+    "ts": "2026-09-27T10:00:20Z",
+    "source": "pid:102",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 102,
+    "correlation_id": null,
+    "payload": {
+      "pid": 102,
+      "step": "analyze",
+      "text": "Found 3 cost drivers, each citing a finance document."
+    }
+  },
+  {
+    "event_id": "EV-02200",
+    "type": "process.state_changed",
+    "ts": "2026-09-27T10:00:22Z",
+    "source": "pid:102",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 102,
+    "correlation_id": null,
+    "payload": {
+      "old": "RUNNING",
+      "new": "COMPLETED"
+    }
+  },
+  {
+    "event_id": "EV-02700",
+    "type": "agent.thought",
+    "ts": "2026-09-27T10:00:27Z",
+    "source": "pid:103",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 103,
+    "correlation_id": null,
+    "payload": {
+      "pid": 103,
+      "step": "analyze",
+      "text": "Found 2 blockers behind a 6-week slip."
+    }
+  },
+  {
+    "event_id": "EV-02800",
+    "type": "ipc.message",
+    "ts": "2026-09-27T10:00:28Z",
+    "source": "pid:103",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 103,
+    "correlation_id": null,
+    "payload": {
+      "message_id": "MSG-3a",
+      "sender": "engineering-agent",
+      "receiver": "planner-agent",
+      "type": "evidence"
+    }
+  },
+  {
+    "event_id": "EV-02900",
+    "type": "process.state_changed",
+    "ts": "2026-09-27T10:00:29Z",
+    "source": "pid:103",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 103,
+    "correlation_id": null,
+    "payload": {
+      "old": "RUNNING",
+      "new": "COMPLETED"
+    }
+  },
+  {
+    "event_id": "EV-03100",
+    "type": "process.state_changed",
+    "ts": "2026-09-27T10:00:31Z",
+    "source": "pid:104",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 104,
+    "correlation_id": null,
+    "payload": {
+      "old": "RUNNING",
+      "new": "COMPLETED"
+    }
+  },
+  {
+    "event_id": "EV-03200",
+    "type": "sandbox.destroyed",
+    "ts": "2026-09-27T10:00:32Z",
+    "source": "pid:104",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 104,
+    "correlation_id": null,
+    "payload": {
+      "sandbox_id": "SB-4c2"
+    }
+  },
+  {
+    "event_id": "EV-03500",
+    "type": "process.spawned",
+    "ts": "2026-09-27T10:00:35Z",
+    "source": "pid:105",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 105,
+    "correlation_id": null,
+    "payload": {
+      "agent": "action-agent",
+      "ppid": 101
+    }
+  },
+  {
+    "event_id": "EV-03505",
+    "type": "agent.created",
+    "ts": "2026-09-27T10:00:35.050000Z",
+    "source": "pid:105",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 105,
+    "correlation_id": null,
+    "payload": {
+      "pid": 105,
+      "manifest_name": "action-agent",
+      "template": "action-agent",
+      "generated": false
+    }
+  },
+  {
+    "event_id": "EV-03600",
+    "type": "agent.thought",
+    "ts": "2026-09-27T10:00:36Z",
+    "source": "pid:105",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 105,
+    "correlation_id": null,
+    "payload": {
+      "pid": 105,
+      "step": "act",
+      "text": "Asking for approval to record the root causes on APOLLO-12."
+    }
+  },
+  {
+    "event_id": "EV-03900",
+    "type": "syscall.requested",
+    "ts": "2026-09-27T10:00:39Z",
+    "source": "pid:105",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 105,
+    "correlation_id": "SC-77f1",
+    "payload": {
+      "capability": "jira.write",
+      "tool": "jira",
+      "operation": "update_issue",
+      "risk": "medium"
+    }
+  },
+  {
+    "event_id": "EV-03910",
+    "type": "syscall.decided",
+    "ts": "2026-09-27T10:00:39.100000Z",
+    "source": "pid:105",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 105,
+    "correlation_id": "SC-77f1",
+    "payload": {
+      "decision": "REQUIRES_APPROVAL",
+      "policy": "project-updates-v1"
+    }
+  },
+  {
+    "event_id": "EV-04000",
+    "type": "approval.requested",
+    "ts": "2026-09-27T10:00:40Z",
+    "source": "pid:105",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 105,
+    "correlation_id": "APR-882",
+    "payload": {
+      "approval_id": "APR-882",
+      "capability": "jira.write"
+    }
+  },
+  {
+    "event_id": "EV-04010",
+    "type": "process.state_changed",
+    "ts": "2026-09-27T10:00:40.100000Z",
+    "source": "pid:105",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 105,
+    "correlation_id": null,
+    "payload": {
+      "old": "RUNNING",
+      "new": "WAITING"
+    }
+  },
+  {
+    "event_id": "EV-04020",
+    "type": "task.status_changed",
+    "ts": "2026-09-27T10:00:40.200000Z",
+    "source": "kernel",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": null,
+    "correlation_id": null,
+    "payload": {
+      "old": "running",
+      "new": "waiting_approval"
+    }
+  },
+  {
+    "event_id": "EV-05200",
+    "type": "approval.resolved",
+    "ts": "2026-09-27T10:00:52Z",
+    "source": "pid:105",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 105,
+    "correlation_id": "APR-882",
+    "payload": {
+      "approval_id": "APR-882",
+      "status": "approved",
+      "resolved_by": "alice"
+    }
+  },
+  {
+    "event_id": "EV-05300",
+    "type": "tool.started",
+    "ts": "2026-09-27T10:00:53Z",
+    "source": "pid:105",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 105,
+    "correlation_id": "SC-77f1",
+    "payload": {
+      "tool": "jira",
+      "operation": "update_issue"
+    }
+  },
+  {
+    "event_id": "EV-05400",
+    "type": "tool.completed",
+    "ts": "2026-09-27T10:00:54Z",
+    "source": "pid:105",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 105,
+    "correlation_id": "SC-77f1",
+    "payload": {
+      "tool": "jira",
+      "operation": "update_issue",
+      "status": "success"
+    }
+  },
+  {
+    "event_id": "EV-05450",
+    "type": "transaction.committed",
+    "ts": "2026-09-27T10:00:54.500000Z",
+    "source": "pid:105",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 105,
+    "correlation_id": "SC-77f1",
+    "payload": {
+      "verified": true
+    }
+  },
+  {
+    "event_id": "EV-05500",
+    "type": "process.state_changed",
+    "ts": "2026-09-27T10:00:55Z",
+    "source": "pid:105",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 105,
+    "correlation_id": null,
+    "payload": {
+      "old": "WAITING",
+      "new": "COMPLETED"
+    }
+  },
+  {
+    "event_id": "EV-05600",
+    "type": "agent.thought",
+    "ts": "2026-09-27T10:00:56Z",
+    "source": "pid:101",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 101,
+    "correlation_id": null,
+    "payload": {
+      "pid": 101,
+      "step": "synthesize",
+      "text": "Combined the findings into 3 cited root causes and a recovery plan."
+    }
+  },
+  {
+    "event_id": "EV-05800",
+    "type": "memory.consolidated",
+    "ts": "2026-09-27T10:00:58Z",
+    "source": "kernel",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": null,
+    "correlation_id": null,
+    "payload": {
+      "created": 2
+    }
+  },
+  {
+    "event_id": "EV-06000",
+    "type": "process.state_changed",
+    "ts": "2026-09-27T10:01:00Z",
+    "source": "pid:101",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": 101,
+    "correlation_id": null,
+    "payload": {
+      "old": "RUNNING",
+      "new": "COMPLETED"
+    }
+  },
+  {
+    "event_id": "EV-06010",
+    "type": "task.completed",
+    "ts": "2026-09-27T10:01:00.100000Z",
+    "source": "kernel",
+    "org_id": "acme",
+    "task_id": "T-1842",
+    "pid": null,
+    "correlation_id": null,
+    "payload": {
+      "summary": "Root causes identified; APOLLO-12 updated; recovery plan attached."
+    }
+  }
+]

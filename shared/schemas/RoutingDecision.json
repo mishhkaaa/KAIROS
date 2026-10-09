@@ -1,0 +1,29 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "model": {
+      "title": "Model",
+      "type": "string"
+    },
+    "provider": {
+      "title": "Provider",
+      "type": "string"
+    },
+    "local": {
+      "title": "Local",
+      "type": "boolean"
+    },
+    "reason": {
+      "title": "Reason",
+      "type": "string"
+    }
+  },
+  "required": [
+    "model",
+    "provider",
+    "local",
+    "reason"
+  ],
+  "title": "RoutingDecision",
+  "type": "object"
+}

@@ -1,0 +1,273 @@
+{
+  "$defs": {
+    "ApprovalStatus": {
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "expired"
+      ],
+      "title": "ApprovalStatus",
+      "type": "string"
+    },
+    "Decision": {
+      "enum": [
+        "ALLOW",
+        "DENY",
+        "REQUIRES_APPROVAL"
+      ],
+      "title": "Decision",
+      "type": "string"
+    },
+    "PolicyDecision": {
+      "additionalProperties": false,
+      "properties": {
+        "decision": {
+          "$ref": "#/$defs/Decision"
+        },
+        "policy": {
+          "description": "Id of the policy document that decided",
+          "title": "Policy",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "approval_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Approval Id"
+        },
+        "matched_rules": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Matched Rules",
+          "type": "array"
+        },
+        "constraints": {
+          "additionalProperties": true,
+          "description": "Extra limits for the executor, e.g. {\"network_allow\": [...]}",
+          "title": "Constraints",
+          "type": "object"
+        }
+      },
+      "required": [
+        "decision",
+        "policy",
+        "reason"
+      ],
+      "title": "PolicyDecision",
+      "type": "object"
+    },
+    "Risk": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Risk",
+      "type": "string"
+    },
+    "SyscallRequest": {
+      "additionalProperties": false,
+      "description": "What an agent asks the kernel to do to the outside world (blueprint \u00a735).\n\n`capability` is what policy checks; `tool` + `operation` is what the executor runs.",
+      "properties": {
+        "syscall_id": {
+          "description": "\"SC-...\" \u2014 assigned by the caller via new_id(\"SC\")",
+          "title": "Syscall Id",
+          "type": "string"
+        },
+        "task_id": {
+          "pattern": "^T-[A-Za-z0-9]+$",
+          "title": "Task Id",
+          "type": "string"
+        },
+        "pid": {
+          "minimum": 1,
+          "title": "Pid",
+          "type": "integer"
+        },
+        "capability": {
+          "description": "e.g. jira.write",
+          "pattern": "^(\\*|[a-z][a-z0-9_]*(\\.([a-z][a-z0-9_]*|\\*))+)$",
+          "title": "Capability",
+          "type": "string"
+        },
+        "tool": {
+          "description": "Tool name from ToolExecutor.list_tools(), e.g. jira",
+          "title": "Tool",
+          "type": "string"
+        },
+        "operation": {
+          "description": "Operation on that tool, e.g. update_issue",
+          "title": "Operation",
+          "type": "string"
+        },
+        "resource": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "What is touched, e.g. project/APOLLO",
+          "title": "Resource"
+        },
+        "arguments": {
+          "additionalProperties": true,
+          "title": "Arguments",
+          "type": "object"
+        },
+        "arguments_ref": {
+          "anyOf": [
+            {
+              "pattern": "^artifact://[^/]+/.+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Arguments Ref"
+        },
+        "risk": {
+          "$ref": "#/$defs/Risk",
+          "default": "low"
+        },
+        "justification": {
+          "default": "",
+          "title": "Justification",
+          "type": "string"
+        },
+        "evidence": {
+          "description": "/org paths supporting the action",
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "idempotency_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Idempotency Key"
+        }
+      },
+      "required": [
+        "syscall_id",
+        "task_id",
+        "pid",
+        "capability",
+        "tool",
+        "operation"
+      ],
+      "title": "SyscallRequest",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "approval_id": {
+      "description": "\"APR-...\"",
+      "title": "Approval Id",
+      "type": "string"
+    },
+    "task_id": {
+      "pattern": "^T-[A-Za-z0-9]+$",
+      "title": "Task Id",
+      "type": "string"
+    },
+    "pid": {
+      "minimum": 1,
+      "title": "Pid",
+      "type": "integer"
+    },
+    "agent": {
+      "title": "Agent",
+      "type": "string"
+    },
+    "syscall": {
+      "$ref": "#/$defs/SyscallRequest"
+    },
+    "decision": {
+      "$ref": "#/$defs/PolicyDecision"
+    },
+    "status": {
+      "$ref": "#/$defs/ApprovalStatus",
+      "default": "pending"
+    },
+    "requested_at": {
+      "format": "date-time",
+      "title": "Requested At",
+      "type": "string"
+    },
+    "resolved_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Resolved At"
+    },
+    "resolved_by": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Resolved By"
+    },
+    "comment": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Comment"
+    }
+  },
+  "required": [
+    "approval_id",
+    "task_id",
+    "pid",
+    "agent",
+    "syscall",
+    "decision"
+  ],
+  "title": "Approval",
+  "type": "object"
+}

@@ -1,0 +1,195 @@
+{
+  "task_id": "T-1842",
+  "goal": "Investigate why Project Apollo is over budget and six weeks behind schedule. Identify root causes, update the tracker, and prepare a recovery plan.",
+  "entries": [
+    {
+      "seq": 1,
+      "entry_id": "AU-001",
+      "ts": "2026-09-27T10:00:00Z",
+      "task_id": "T-1842",
+      "pid": null,
+      "actor": "user:alice",
+      "kind": "task",
+      "summary": "Task created",
+      "data": {
+        "goal": "Investigate why Project Apollo is over budget and six weeks behind schedule. Identify root causes, update the tracker, and prepare a recovery plan."
+      },
+      "refs": [],
+      "prev_hash": null,
+      "hash": null
+    },
+    {
+      "seq": 2,
+      "entry_id": "AU-002",
+      "ts": "2026-09-27T10:00:00.200000Z",
+      "task_id": "T-1842",
+      "pid": 101,
+      "actor": "kernel.lifecycle",
+      "kind": "spawn",
+      "summary": "Spawned planner-agent",
+      "data": {},
+      "refs": [],
+      "prev_hash": null,
+      "hash": null
+    },
+    {
+      "seq": 3,
+      "entry_id": "AU-003",
+      "ts": "2026-09-27T10:00:03Z",
+      "task_id": "T-1842",
+      "pid": 101,
+      "actor": "agent:planner-agent#101",
+      "kind": "model",
+      "summary": "Planned 4 steps",
+      "data": {
+        "model": "qwen2.5:7b-instruct"
+      },
+      "refs": [],
+      "prev_hash": null,
+      "hash": null
+    },
+    {
+      "seq": 4,
+      "entry_id": "AU-004",
+      "ts": "2026-09-27T10:00:04Z",
+      "task_id": "T-1842",
+      "pid": 102,
+      "actor": "agent:planner-agent#101",
+      "kind": "spawn",
+      "summary": "Spawned finance-agent",
+      "data": {},
+      "refs": [],
+      "prev_hash": null,
+      "hash": null
+    },
+    {
+      "seq": 5,
+      "entry_id": "AU-005",
+      "ts": "2026-09-27T10:00:06Z",
+      "task_id": "T-1842",
+      "pid": 102,
+      "actor": "agent:finance-agent#102",
+      "kind": "knowledge",
+      "summary": "Retrieved 3 objects (1 filtered by policy)",
+      "data": {},
+      "refs": [
+        "/org/finance/apollo-budget",
+        "/org/decisions/ADR-042"
+      ],
+      "prev_hash": null,
+      "hash": null
+    },
+    {
+      "seq": 6,
+      "entry_id": "AU-006",
+      "ts": "2026-09-27T10:00:28Z",
+      "task_id": "T-1842",
+      "pid": 103,
+      "actor": "agent:engineering-agent#103",
+      "kind": "ipc",
+      "summary": "Evidence \u2192 planner-agent",
+      "data": {},
+      "refs": [
+        "MSG-3a"
+      ],
+      "prev_hash": null,
+      "hash": null
+    },
+    {
+      "seq": 7,
+      "entry_id": "AU-007",
+      "ts": "2026-09-27T10:00:39.100000Z",
+      "task_id": "T-1842",
+      "pid": 105,
+      "actor": "kernel.policy",
+      "kind": "policy",
+      "summary": "jira.write requires approval",
+      "data": {
+        "decision": "REQUIRES_APPROVAL",
+        "policy": "project-updates-v1"
+      },
+      "refs": [
+        "SC-77f1"
+      ],
+      "prev_hash": null,
+      "hash": null
+    },
+    {
+      "seq": 8,
+      "entry_id": "AU-008",
+      "ts": "2026-09-27T10:00:52Z",
+      "task_id": "T-1842",
+      "pid": 105,
+      "actor": "user:alice",
+      "kind": "approval",
+      "summary": "Approved APR-882",
+      "data": {},
+      "refs": [
+        "APR-882"
+      ],
+      "prev_hash": null,
+      "hash": null
+    },
+    {
+      "seq": 9,
+      "entry_id": "AU-009",
+      "ts": "2026-09-27T10:00:54Z",
+      "task_id": "T-1842",
+      "pid": 105,
+      "actor": "kernel.syscall",
+      "kind": "tool",
+      "summary": "jira.update_issue APOLLO-12",
+      "data": {},
+      "refs": [
+        "SC-77f1"
+      ],
+      "prev_hash": null,
+      "hash": null
+    },
+    {
+      "seq": 10,
+      "entry_id": "AU-010",
+      "ts": "2026-09-27T10:00:54.400000Z",
+      "task_id": "T-1842",
+      "pid": 105,
+      "actor": "kernel.transactions",
+      "kind": "verify",
+      "summary": "Post-condition passed",
+      "data": {},
+      "refs": [
+        "SC-77f1"
+      ],
+      "prev_hash": null,
+      "hash": null
+    },
+    {
+      "seq": 11,
+      "entry_id": "AU-011",
+      "ts": "2026-09-27T10:00:54.500000Z",
+      "task_id": "T-1842",
+      "pid": 105,
+      "actor": "kernel.transactions",
+      "kind": "commit",
+      "summary": "Committed SC-77f1",
+      "data": {},
+      "refs": [
+        "SC-77f1"
+      ],
+      "prev_hash": null,
+      "hash": null
+    }
+  ],
+  "stats": {
+    "agents": 5,
+    "models": [
+      "qwen2.5:7b-instruct"
+    ],
+    "knowledge_objects": 17,
+    "ipc_messages": 3,
+    "tool_calls": 4,
+    "privileged_syscalls": 1,
+    "approvals": 1,
+    "rollbacks": 0
+  },
+  "chain_verified": null
+}

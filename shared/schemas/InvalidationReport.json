@@ -1,0 +1,36 @@
+{
+  "additionalProperties": false,
+  "description": "Payload of the memory.invalidated event.",
+  "properties": {
+    "source": {
+      "description": "The /org path or MEM id that changed",
+      "title": "Source",
+      "type": "string"
+    },
+    "invalidated": {
+      "description": "MEM ids marked stale",
+      "items": {
+        "type": "string"
+      },
+      "title": "Invalidated",
+      "type": "array"
+    },
+    "affected_agents": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Affected Agents",
+      "type": "array"
+    },
+    "reconsolidation_queued": {
+      "default": false,
+      "title": "Reconsolidation Queued",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "source"
+  ],
+  "title": "InvalidationReport",
+  "type": "object"
+}

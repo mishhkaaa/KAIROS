@@ -1,0 +1,22 @@
+{
+  "additionalProperties": false,
+  "description": "Signs the same person in on another device: shown in the console, typed into the phone. One use, minutes long.",
+  "properties": {
+    "code": {
+      "description": "Eight characters, e.g. K7QM-4ZPD; case and the dash are ignored",
+      "title": "Code",
+      "type": "string"
+    },
+    "expires_at": {
+      "format": "date-time",
+      "title": "Expires At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "code",
+    "expires_at"
+  ],
+  "title": "PairCode",
+  "type": "object"
+}

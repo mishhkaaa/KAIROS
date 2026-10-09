@@ -1,0 +1,32 @@
+# Capability catalog. Format <namespace>.<verb>; globs allowed in grants (jira.*). Matching: kairos_contracts.util.capability_matches
+# - Agents get capabilities from their manifest (AgentManifest.all_capabilities), narrowed by the parent and by policy.
+# - `risk` + `approval` are DEFAULTS; policies/*.yaml can tighten them. risk >= high always needs approval.
+# - Every tool operation (ToolSpec.operations[].capability) MUST use a capability listed here. P1 adds rows; all review.
+
+knowledge.read:   {owner: P2, risk: low,    approval: never,    desc: "Read /org objects (scope + privacy filtered)"}
+knowledge.search: {owner: P2, risk: low,    approval: never,    desc: "Hybrid search over /org"}
+knowledge.write:  {owner: P2, risk: medium, approval: required, desc: "Create/update OKF objects (ingest, agent-written notes)"}
+memory.write:     {owner: P2, risk: low,    approval: never,    desc: "Store episodic/semantic memories"}
+
+agent.spawn:      {owner: P1, risk: low,    approval: never,    desc: "Spawn child agents listed in manifest.capabilities.agents"}
+agent.message:    {owner: P1, risk: low,    approval: never,    desc: "A2A/IPC messages within the same task"}
+agent.retry:      {owner: P1, risk: high,   approval: required, desc: "Kernel-internal: human escalation to retry a process whose retries are exhausted"}
+
+jira.read:        {owner: P1, risk: low,    approval: never,    desc: "Read issues (mock-jira in the demo)"}
+jira.write:       {owner: P1, risk: medium, approval: required, desc: "Update issues / add comments (reversible)"}
+github.read:      {owner: P1, risk: low,    approval: never,    desc: "Read repositories, issues, pull requests and files (a connected GitHub, or the built-in mock)"}
+github.write:     {owner: P1, risk: medium, approval: required, desc: "Create issues and comments (comments are reversible)"}
+calendar.read:    {owner: P1, risk: low,    approval: never,    desc: "Read events and free/busy (a connected Google Calendar, or the built-in mock)"}
+calendar.write:   {owner: P1, risk: medium, approval: required, desc: "Create events, optionally with a Meet link (reversible)"}
+fs.read:          {owner: P1, risk: low,    approval: never,    desc: "Read files in the task workspace"}
+fs.write:         {owner: P1, risk: low,    approval: auto,     desc: "Write files in the task workspace (reversible)"}
+browser.open:     {owner: "P1 executor + P4 driver", risk: medium, approval: auto,     desc: "Open a URL in the isolated sandbox browser"}
+browser.click:    {owner: "P1 executor + P4 driver", risk: medium, approval: required, desc: "Computer-use click in sandbox browser"}
+browser.type:     {owner: "P1 executor + P4 driver", risk: medium, approval: required, desc: "Computer-use typing in sandbox browser"}
+sandbox.exec:     {owner: P1, risk: high,   approval: required, desc: "Run a command in a task sandbox"}
+postgres.read:    {owner: P1, risk: low,    approval: never,    desc: "Read-only SQL via connector"}
+db.query:         {owner: P1, risk: low,    approval: auto,     desc: "One read-only SELECT on the demo data database (kernel-checked: one statement, no DDL, LIMIT <= 200) (0.12.0)"}
+db.write:         {owner: P1, risk: high,   approval: required, desc: "One INSERT/UPDATE/DELETE on the demo data database (kernel-checked, no DDL) (0.12.0)"}
+database.write:   {owner: P1, risk: high,   approval: required, desc: "Any DB mutation"}
+external.email:   {owner: P1, risk: high,   approval: required, desc: "Send mail outside the org"}
+mcp.call:         {owner: P1, risk: medium, approval: required, desc: "Generic MCP tool call (prefer a specific capability)"}

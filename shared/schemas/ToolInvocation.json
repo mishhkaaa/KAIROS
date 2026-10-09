@@ -1,0 +1,76 @@
+{
+  "additionalProperties": false,
+  "description": "Built by the kernel from an ALLOWED/approved SyscallRequest. Agents never create these.",
+  "properties": {
+    "invocation_id": {
+      "title": "Invocation Id",
+      "type": "string"
+    },
+    "syscall_id": {
+      "title": "Syscall Id",
+      "type": "string"
+    },
+    "task_id": {
+      "pattern": "^T-[A-Za-z0-9]+$",
+      "title": "Task Id",
+      "type": "string"
+    },
+    "pid": {
+      "minimum": 1,
+      "title": "Pid",
+      "type": "integer"
+    },
+    "tool": {
+      "title": "Tool",
+      "type": "string"
+    },
+    "operation": {
+      "title": "Operation",
+      "type": "string"
+    },
+    "arguments": {
+      "additionalProperties": true,
+      "title": "Arguments",
+      "type": "object"
+    },
+    "arguments_ref": {
+      "anyOf": [
+        {
+          "pattern": "^artifact://[^/]+/.+$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Arguments Ref"
+    },
+    "constraints": {
+      "additionalProperties": true,
+      "description": "From PolicyDecision.constraints",
+      "title": "Constraints",
+      "type": "object"
+    },
+    "timeout_s": {
+      "default": 120,
+      "title": "Timeout S",
+      "type": "integer"
+    },
+    "dry_run": {
+      "default": false,
+      "title": "Dry Run",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "invocation_id",
+    "syscall_id",
+    "task_id",
+    "pid",
+    "tool",
+    "operation"
+  ],
+  "title": "ToolInvocation",
+  "type": "object"
+}

@@ -1,0 +1,8 @@
+{"issues": [
+  {"key": "APOLLO-12", "fields": {"summary": "Payments DB migration", "status": {"name": "In Progress"},
+   "labels": ["migration"], "assignee": {"displayName": "Priya"}, "duedate": "2026-08-01",
+   "description": "Ledger schema change needs full backfill. First attempt failed on duplicate reconciliation ids."}},
+  {"key": "APOLLO-31", "fields": {"summary": "Vendor SDK upgrade", "status": {"name": "Blocked"},
+   "labels": ["vendor"], "assignee": {"displayName": "Marco"}, "duedate": "2026-08-20",
+   "description": "Blocked on vendor certification. Support ticket open."}}
+]}

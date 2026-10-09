@@ -1,0 +1,5 @@
+[
+  {"user": "priya", "ts": "1757667600.000100", "text": "Backfill attempt #2 failed again on dup recon ids :(", "thread_ts": "1757667600.000100"},
+  {"user": "marco", "ts": "1757667900.000200", "text": "Vendor says SDK v5 slips to October.", "thread_ts": "1757667600.000100"},
+  {"user": "priya", "ts": "1757668200.000300", "text": "So dual-run continues another month, cloud bill keeps doubling.", "thread_ts": "1757667600.000100"}
+]

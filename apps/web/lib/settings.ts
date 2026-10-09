@@ -17,7 +17,7 @@ export const SECTIONS: { id: SectionId; title: string }[] = [
 export const LAYERS: { title: string; components: string[] }[] = [
   { title: "Kernel", components: ["kernel", "event_bus", "policy", "audit"] },
   { title: "Knowledge & memory", components: ["knowledge", "firewall", "memory", "converters"] },
-  { title: "Agents & models", components: ["agent_registry", "agent_runtime", "models"] },
+  { title: "Agents & models", components: ["agent_router", "agent_registry", "agent_runtime", "models"] },
   { title: "Execution", components: ["tools", "sandbox", "browser", "artifacts"] },
   { title: "Platform", components: ["probe"] },
 ];

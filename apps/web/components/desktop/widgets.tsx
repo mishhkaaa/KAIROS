@@ -33,14 +33,19 @@ export function Hero({ onAsk, compact }: { onAsk: () => void; compact: boolean }
   const models = useModels().data ?? [];
   const docs = useAllDocs().data ?? [];
   const gpu = useResources().data?.gpu;
-  // The local chat model that does the reasoning: skip vision-only models (llava) and prefer the larger instruct model.
-  const chatModels = models.filter((m) => m.local !== false && m.available !== false && m.capabilities?.includes("chat") && !m.capabilities?.includes("vision"));
-  const chat = (chatModels.find((m) => /instruct/.test(m.name)) ?? chatModels[0])?.name?.replace(/:.*$/, "");
+  const config = useQuery({ queryKey: ["system-config"], queryFn: () => client.systemConfig(), enabled: can("config.read"), staleTime: 60_000 });
+  // The model that does the reasoning: the routing file's default (Gemma 4) when it is pulled; otherwise the larger
+  // local instruct model, skipping vision-only ones (llava).
+  const chatModels = models.filter((m) => m.local !== false && m.available !== false && m.capabilities?.includes("chat") && !/llava/.test(m.name));
+  const configured = config.data?.models.default;
+  const chat = (chatModels.find((m) => configured && m.name === configured) ?? chatModels.find((m) => /instruct/.test(m.name)) ?? chatModels[0])?.name?.replace(/:.*$/, "");
+  const router = config.data?.feature_flags?.jev_router ? "Jev router" : null;
   const facts = [
     status.data ? (status.data.ready ? "kernel ready" : "kernel starting") : "kernel …",
     `${docs.length} documents at /org`,
     `${agents.data?.length ?? "…"} agents`,
     chat ? `${chat} local` : null,
+    router,
     gpu ? gpu.name.replace(/^NVIDIA GeForce /, "") : null,
   ].filter(Boolean);
   return (
